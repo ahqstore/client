@@ -90,8 +90,12 @@ pub async fn launch() {
           if admin {
             return (true, true, true);
           }
-          
-          let Prefs { launch_app, install_apps, .. } = get_prefs();
+
+          let Prefs {
+            launch_app,
+            install_apps,
+            ..
+          } = get_prefs();
 
           (admin, launch_app, install_apps)
         })());
@@ -102,7 +106,7 @@ pub async fn launch() {
           //let mut buf: Box<[u8]>;
 
           ext += 1;
-          if ext >= 50 {
+          if ext >= 10 {
             ext = 0;
             let (auth, _) = authenticate_process(process_id as usize, false);
             if !auth {
@@ -145,6 +149,7 @@ pub async fn launch() {
               e => {
                 let err = format!("{e:?}");
 
+                println!("{}", &err);
                 write_log(&err);
                 if &err != "Uncategorized" {
                   let _ = pipe.disconnect();
