@@ -480,7 +480,7 @@ jobs:
   #         asset_content_type: application/octet-stream
 
   undraft-release:
-    needs: [create-release, publish-tauri, make-setup]
+    needs: [create-release, publish-tauri, make-setup, publish-android]
     name: Publish Release
     runs-on: ubuntu-latest
 
