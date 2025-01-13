@@ -2,6 +2,8 @@ name: Greetings
 
 on: [pull_request_target, issues]
 
+permissions: write-all
+
 jobs:
   greeting:
     runs-on: ubuntu-latest

@@ -50,10 +50,10 @@
     ],
     "fileAssociations": [
       {
-        "ext": ["ahqstore", "astore"],
-        "description": "AHQ Store Offline Installer",
+        "ext": ["ahqstore", "astore", "astorepkg"],
+        "description": "AHQ Store Package",
         "mimeType": "application/octet-stream",
-        "name": "AHQ Store Offline Installer",
+        "name": "AHQ Store Package",
         "role": "Editor"
       }
     ]

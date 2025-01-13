@@ -1,7 +1,7 @@
 [package]
 name = "tauri-plugin-ahqstore"
 version = "0.1.0"
-authors = [ "You" ]
+authors = ["You"]
 description = ""
 edition = "2021"
 rust-version = "1.77.2"
@@ -9,9 +9,9 @@ exclude = ["/examples", "/dist-js", "/guest-js", "/node_modules"]
 links = "tauri-plugin-ahqstore"
 
 [dependencies]
-tauri = { version = "2.2.1" }
+tauri = { version = "2" }
 serde = "1.0"
 thiserror = "2"
 
 [build-dependencies]
-tauri-plugin = { version = "2.0.3", features = ["build"] }
+tauri-plugin = { version = "2", features = ["build"] }

@@ -18,6 +18,8 @@ on:
   schedule:
     - cron: "5 * * * *"
 
+permissions: write-all
+
 jobs:
   rust-clippy-analyze:
     name: Run rust-clippy analyzing
