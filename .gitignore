@@ -25,3 +25,4 @@ dist-ssr
 
 .keys
 function_to_encrypt.cjs
+keystore.properties

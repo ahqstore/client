@@ -2,7 +2,7 @@ name: "Build & Release App, Service, Scripts"
 on:
   push:
     branches:
-      - dev
+      - main
       - release
 
 permissions: write-all
@@ -250,9 +250,43 @@ jobs:
           asset_name: install.sh
           asset_content_type: application/octet-stream
 
+  publish-android:
+    needs: create-release
+    runs-on: ubuntu-latest
+    name: Build Tauri App (universal-linux-android)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        run: npm i -g pnpm
+
+      - name: Install Rust Nightly
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+
+      - name: setup Android signing
+        run: |
+          cd src-tauri/gen/android
+          echo "keyAlias=upload" > keystore.properties
+          echo "password=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore.properties
+          base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
+          echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
+
+      - name: Build Tauri App
+        run: pnpm tauri android build
+        working-directory: src-tauri
+
   publish-tauri:
     needs: create-release
-    name: Build Tauri App & Service (x86_64)
+    name: Build Tauri App (${{ matrix.target }})
 
     strategy:
       fail-fast: false
@@ -305,53 +339,6 @@ jobs:
         run: pnpm install; pnpm build
         env:
           CI: "false"
-
-      - name: Decrypt Key / Load Encryption Key
-        run: node encryptor.cjs
-        env:
-          KEY: ${{ secrets.SSL_ENCRYPT_DATA }}
-
-      - name: Build Service
-        run: cargo build --release
-        working-directory: src-service
-
-      - name: Upload Service (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: ahqstore/upload-release-assets@v60
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./src-service/target/release/ahqstore_service.exe
-          asset_name: ahqstore_service_${{ matrix.arch }}.exe
-          asset_content_type: application/vnd.microsoft.portable-executable
-
-      - name: Build User Daemon (Windows)
-        if: matrix.os == 'windows-latest'
-        run: cargo build --release
-        working-directory: src-exe-installer
-
-      - name: Upload User Daemon (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: ahqstore/upload-release-assets@v60
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./src-exe-installer/target/release/ahqstore-user-daemon.exe
-          asset_name: ahqstore_user_daemon_${{ matrix.arch }}.exe
-          asset_content_type: application/vnd.microsoft.portable-executable
-
-      - name: Upload Service (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        uses: ahqstore/upload-release-assets@v60
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./src-service/target/release/ahqstore_service
-          asset_name: ahqstore_service_${{ matrix.arch }}
-          asset_content_type: application/octet-stream
 
       - name: Build Tauri App
         id: tauri-app
