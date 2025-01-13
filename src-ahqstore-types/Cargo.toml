@@ -1,0 +1,42 @@
+[package]
+name = "ahqstore-types"
+description = "Standard types used by AHQ Store"
+version = "3.10.4"
+edition = "2021"
+license-file = "../LICENSE.md"
+repository = "https://github.com/ahqstore/client"
+homepage = "https://ahqstore.github.io/"
+readme = "README.md"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+reqwest = { version = "0.12", features = [
+  "json",
+  "rustls-tls",
+], default-features = false, optional = true }
+serde = { version = "1", features = ["derive"] }
+serde-wasm-bindgen = { version = "0.6", optional = true }
+serde_json = "1"
+tsify = { version = "0.4", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+kfghdfghdfkgh_js_macros = { version = "1", optional = true }
+fuse-rust = { version = "0.4", features = ["async"], optional = true }
+anyhow = "1"
+
+[features]
+default = ["internet", "search"]
+internet = ["dep:reqwest"]
+# Implements search traits
+search = ["dep:fuse-rust"]
+apps_repo = []
+js = [
+  "dep:wasm-bindgen",
+  "dep:wasm-bindgen-futures",
+  "dep:serde-wasm-bindgen",
+  "dep:tsify",
+  "dep:kfghdfghdfkgh_js_macros",
+]
+all_platforms = []

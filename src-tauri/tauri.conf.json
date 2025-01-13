@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "AHQ Store",
+  "version": "../package.json",
+  "identifier": "com.ahqstore.app",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "center": true,
+        "height": 760,
+        "resizable": true,
+        "title": "AHQ Store",
+        "label": "main",
+        "width": 1240,
+        "minHeight": 700,
+        "minWidth": 1200,
+        "visible": false,
+        "decorations": false,
+        "transparent": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlCNUQyRTdGQUVFN0FDQTQKUldTa3JPZXVmeTVkbTBUL0JjSnNjLytQOHlyYkRnakJ2Q3dnYW51WTJIRVVCL1psWFNLT0pLSkgK",
+      "endpoints": [
+        "https://github.com/ahqstore/client/releases/latest/download/latest.json"
+      ]
+    }
+  },
+  "bundle": {
+    "createUpdaterArtifacts": true,
+    "active": true,
+    "targets": ["appimage", "deb", "msi", "rpm"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "fileAssociations": [
+      {
+        "ext": ["ahqstore", "astore"],
+        "description": "AHQ Store Offline Installer",
+        "mimeType": "application/octet-stream",
+        "name": "AHQ Store Offline Installer",
+        "role": "Editor"
+      }
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+[package]
+name = "ahqstore_setup_amd64"
+version = "2.1.0"
+edition = "2021"
+repository = "https://github.com/ahqsoftwares/tauri-ahq-store"
+homepage = "https://ahqstore.github.io/"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dirs = "5"
+i-slint-backend-winit = "1.8.0"
+lazy_static = "1"
+open = "5"
+reqwest = { version = "0.12.5", features = ["json", "rustls-tls"] }
+serde = { version = "1.0.206", features = ["derive"] }
+slint = "1"
+tokio = { version = "1", features = ["rt"] }
+
+[target.'cfg(unix)'.dependencies]
+notify-rust = "4"
+
+[target.'cfg(all(unix, any(target_arch = "aarch64", target_arch = "arm")))'.dependencies]
+openssl = { version = "*", features = ["vendored"] }
+openssl-sys = { version = "*", features = ["vendored"] }
+
+[target.'cfg(windows)'.dependencies]
+check_elevation = "0.2.4"
+winreg = "0.52.0"
+
+[target.'cfg(windows)'.build-dependencies]
+tauri-winres = "0.1"
+
+[build-dependencies]
+slint-build = "1"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
+
+[package.metadata.tauri-winres]
+LegalCopyright = "© AHQ Softwares | Non Profit Organization"
+OriginalFilename = "ahqstore_setup_amd64.exe"
