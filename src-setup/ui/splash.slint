@@ -1,0 +1,77 @@
+
+import { AboutSlint, VerticalBox, HorizontalBox, ProgressIndicator, GridBox, GroupBox, Palette } from "std-widgets.slint";
+
+
+export component Splash inherits Window {
+    always-on-top: true;
+    max-height: 375px;
+    min-height: 375px;
+    min-width: 600px;
+    max-width: 600px;
+    no-frame: true;
+    background: transparent;
+    icon: @image-url("logo.png");
+
+    VerticalBox {
+        alignment: LayoutAlignment.start;
+        Rectangle {
+            background: Palette.background;
+            border-radius: 10px;
+            VerticalBox {
+                alignment: LayoutAlignment.center;
+
+                HorizontalBox {
+                    alignment: LayoutAlignment.center;
+                    Image {
+                        accessible-role: AccessibleRole.none;
+                        height: 100px;
+                        horizontal-alignment: ImageHorizontalAlignment.center;
+                        image-fit: ImageFit.contain;
+                        image-rendering: ImageRendering.pixelated;
+                        source: @image-url("icon.png");
+                        vertical-tiling: ImageTiling.none;
+                        vertical-alignment: ImageVerticalAlignment.center;
+                        width: 100px;
+                    }
+
+                    VerticalBox {
+                        alignment: center;
+                        Text {
+                            text: "AHQ Store";
+                            font-size: 60px;
+                        }
+                    }
+                }
+
+                spacing: 35px;
+
+                VerticalBox {
+                    Text {
+                        text: "Brought to you by";
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                    }
+
+                    HorizontalBox {
+                        alignment: LayoutAlignment.center;
+                        Image {
+                            accessible-role: AccessibleRole.none;
+                            height: 30px;
+                            width: 30px;
+
+                            horizontal-alignment: ImageHorizontalAlignment.center;
+                            image-fit: ImageFit.contain;
+                            source: Palette.color-scheme == ColorScheme.dark ? @image-url("ahq.png") : @image-url("ahq1.png");
+                            vertical-tiling: ImageTiling.none;
+                            vertical-alignment: ImageVerticalAlignment.center;
+                        }
+
+                        Text {
+                            text: "AHQ Softwares";
+                            font-size: 23px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
