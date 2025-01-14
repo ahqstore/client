@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    ahqstore_new_lib::run()
+  ahqstore_new_lib::run()
 }

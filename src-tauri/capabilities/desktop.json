@@ -1,15 +1,11 @@
 {
+  "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "desktop-capability",
-  "platforms": [
-    "macOS",
-    "windows",
-    "linux"
-  ],
-  "windows": [
-    "main"
-  ],
+  "platforms": ["macOS", "windows", "linux"],
+  "windows": ["main"],
   "permissions": [
     "updater:default",
+    "core:window:allow-set-decorations",
     "autostart:allow-enable",
     "autostart:allow-disable",
     "autostart:allow-is-enabled",
