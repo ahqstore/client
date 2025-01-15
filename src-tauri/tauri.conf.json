@@ -2,9 +2,9 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "AHQ Store Neo",
   "version": "../package.json",
-  "identifier": "com.ahqstore.neo",
+  "identifier": "com.ahqstore.app",
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "pnpm build",
     "frontendDist": "../dist"
@@ -15,11 +15,11 @@
         "center": true,
         "height": 760,
         "resizable": true,
-        "title": "AHQ Store",
+        "title": "AHQ Store Neo",
         "label": "main",
-        "width": 1240,
+        "width": 1200,
         "minHeight": 700,
-        "minWidth": 1200,
+        "minWidth": 348,
         "visible": false,
         "decorations": false,
         "transparent": true
