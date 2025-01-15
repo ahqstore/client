@@ -1,4 +1,4 @@
-import React, { useContext, type HTMLProps } from "react"
+import { useContext, type HTMLProps } from "react"
 import { Button } from "@controls/components/button"
 import { Icons } from "@controls/components/icons"
 import TauriAppWindowContext from "@controls/contexts/plugin-window"

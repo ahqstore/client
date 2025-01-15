@@ -281,6 +281,12 @@ jobs:
           base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
           echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
+      - name: Build ahqstore-types locally
+        run: |
+          npm i -g wasm-pack
+          wasm-pack build --release -- --features js
+        working-directory: src-ahqstore-types
+
       - name: Build Tauri App
         run: |
           export JAVA_HOME="$JAVA_HOME_21_X64"
@@ -288,6 +294,8 @@ jobs:
 
           pnpm install
           pnpm tauri android build
+        env:
+          CI: "false"
 
   publish-tauri:
     needs: create-release
