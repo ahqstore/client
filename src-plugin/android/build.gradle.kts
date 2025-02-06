@@ -33,10 +33,15 @@ android {
 }
 
 dependencies {
+    val ackpineVersion = "0.10.1"
+
+    implementation("ru.solrudev.ackpine:ackpine-core:$ackpineVersion")
+    implementation("ru.solrudev.ackpine:ackpine-ktx:$ackpineVersion")
+
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
+    testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     implementation(project(":tauri-android"))
