@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShowCodeRequest {
-  pub value: Option<String>,
+  pub value: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
