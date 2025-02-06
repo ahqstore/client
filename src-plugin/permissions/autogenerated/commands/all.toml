@@ -1,4 +1,9 @@
-const COMMANDS: &[&str] = &[
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-all"
+description = "Enables all the commands"
+commands.allow = [
   "get_windows",
   "get_linux_distro",
   "is_windows_11",
@@ -17,11 +22,5 @@ const COMMANDS: &[&str] = &[
   "get_app_asset",
   "get_devs_apps",
   "get_arch",
-  "set_scale"
-];
-
-fn main() {
-  tauri_plugin::Builder::new(COMMANDS)
-    .android_path("android")
-    .build();
-}
+  "set_scale",
+]

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-refresh-commit"
+description = "Enables the refresh_commit command without any pre-configured scope."
+commands.allow = ["refresh_commit"]
+
+[[permission]]
+identifier = "deny-refresh-commit"
+description = "Denies the refresh_commit command without any pre-configured scope."
+commands.deny = ["refresh_commit"]

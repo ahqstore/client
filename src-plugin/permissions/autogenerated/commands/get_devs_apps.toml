@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-get-devs-apps"
+description = "Enables the get_devs_apps command without any pre-configured scope."
+commands.allow = ["get_devs_apps"]
+
+[[permission]]
+identifier = "deny-get-devs-apps"
+description = "Denies the get_devs_apps command without any pre-configured scope."
+commands.deny = ["get_devs_apps"]

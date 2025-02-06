@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-to-hash-uid"
+description = "Enables the to_hash_uid command without any pre-configured scope."
+commands.allow = ["to_hash_uid"]
+
+[[permission]]
+identifier = "deny-to-hash-uid"
+description = "Denies the to_hash_uid command without any pre-configured scope."
+commands.deny = ["to_hash_uid"]

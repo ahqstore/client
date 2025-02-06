@@ -26,6 +26,9 @@ importers:
       '@tauri-apps/plugin-updater':
         specifier: ~2
         version: 2.3.1
+      ahqstore-types:
+        specifier: link:src-ahqstore-types\pkg
+        version: link:src-ahqstore-types/pkg
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

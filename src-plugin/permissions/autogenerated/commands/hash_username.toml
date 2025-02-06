@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-hash-username"
+description = "Enables the hash_username command without any pre-configured scope."
+commands.allow = ["hash_username"]
+
+[[permission]]
+identifier = "deny-hash-username"
+description = "Denies the hash_username command without any pre-configured scope."
+commands.deny = ["hash_username"]

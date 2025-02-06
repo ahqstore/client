@@ -295,14 +295,199 @@
       "type": "string",
       "oneOf": [
         {
-          "description": "Enables the ping command without any pre-configured scope.",
+          "description": "Enables all the commands",
           "type": "string",
-          "const": "allow-ping"
+          "const": "allow-all"
         },
         {
-          "description": "Denies the ping command without any pre-configured scope.",
+          "description": "Enables the get_all_search command without any pre-configured scope.",
           "type": "string",
-          "const": "deny-ping"
+          "const": "allow-get-all-search"
+        },
+        {
+          "description": "Denies the get_all_search command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-all-search"
+        },
+        {
+          "description": "Enables the get_app command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-app"
+        },
+        {
+          "description": "Denies the get_app command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-app"
+        },
+        {
+          "description": "Enables the get_app_asset command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-app-asset"
+        },
+        {
+          "description": "Denies the get_app_asset command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-app-asset"
+        },
+        {
+          "description": "Enables the get_arch command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-arch"
+        },
+        {
+          "description": "Denies the get_arch command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-arch"
+        },
+        {
+          "description": "Enables the get_dev_data command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-dev-data"
+        },
+        {
+          "description": "Denies the get_dev_data command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-dev-data"
+        },
+        {
+          "description": "Enables the get_devs_apps command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-devs-apps"
+        },
+        {
+          "description": "Denies the get_devs_apps command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-devs-apps"
+        },
+        {
+          "description": "Enables the get_home command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-home"
+        },
+        {
+          "description": "Denies the get_home command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-home"
+        },
+        {
+          "description": "Enables the get_linux_distro command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-linux-distro"
+        },
+        {
+          "description": "Denies the get_linux_distro command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-linux-distro"
+        },
+        {
+          "description": "Enables the get_windows command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-windows"
+        },
+        {
+          "description": "Denies the get_windows command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-windows"
+        },
+        {
+          "description": "Enables the hash_username command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-hash-username"
+        },
+        {
+          "description": "Denies the hash_username command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-hash-username"
+        },
+        {
+          "description": "Enables the is_development command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-is-development"
+        },
+        {
+          "description": "Denies the is_development command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-is-development"
+        },
+        {
+          "description": "Enables the is_windows_11 command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-is-windows-11"
+        },
+        {
+          "description": "Denies the is_windows_11 command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-is-windows-11"
+        },
+        {
+          "description": "Enables the open command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-open"
+        },
+        {
+          "description": "Denies the open command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-open"
+        },
+        {
+          "description": "Enables the refresh_commit command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-refresh-commit"
+        },
+        {
+          "description": "Denies the refresh_commit command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-refresh-commit"
+        },
+        {
+          "description": "Enables the rem_code command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-rem-code"
+        },
+        {
+          "description": "Denies the rem_code command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-rem-code"
+        },
+        {
+          "description": "Enables the set_progress command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-set-progress"
+        },
+        {
+          "description": "Denies the set_progress command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-set-progress"
+        },
+        {
+          "description": "Enables the set_scale command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-set-scale"
+        },
+        {
+          "description": "Denies the set_scale command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-set-scale"
+        },
+        {
+          "description": "Enables the show_code command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-show-code"
+        },
+        {
+          "description": "Denies the show_code command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-show-code"
+        },
+        {
+          "description": "Enables the to_hash_uid command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-to-hash-uid"
+        },
+        {
+          "description": "Denies the to_hash_uid command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-to-hash-uid"
         },
         {
           "description": "Default permissions for the plugin",

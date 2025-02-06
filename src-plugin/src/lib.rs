@@ -5,23 +5,17 @@ use tauri::{
 
 pub use models::*;
 
-#[cfg(desktop)]
-mod desktop;
-
-#[cfg(mobile)]
-mod mobile;
+mod structs;
 
 mod commands;
+use commands::*;
+
 mod error;
 mod models;
 
 pub use error::{Error, Result};
 
-#[cfg(desktop)]
-use desktop::Ahqstore;
-
-#[cfg(mobile)]
-use mobile::Ahqstore;
+use structs::Ahqstore;
 
 /// Extensions to [`tauri::App`], [`tauri::AppHandle`] and [`tauri::Window`] to access the ahqstore APIs.
 pub trait AhqstoreExt<R: Runtime> {
@@ -35,15 +29,36 @@ impl<R: Runtime, T: Manager<R>> crate::AhqstoreExt<R> for T {
 }
 
 /// Initializes the plugin.
-pub fn init<R: Runtime>() -> TauriPlugin<R> {
+pub fn init() -> TauriPlugin<tauri::Wry> {
   Builder::new("ahqstore")
-    .invoke_handler(tauri::generate_handler![commands::ping])
-    .setup(|app, api| {
-      #[cfg(mobile)]
-      let ahqstore = mobile::init(app, api)?;
-
+    .invoke_handler(tauri::generate_handler![
       #[cfg(desktop)]
-      let ahqstore = desktop::init(app, api)?;
+      get_windows,
+      #[cfg(desktop)]
+      get_linux_distro,
+      
+      #[cfg(windows)]
+      is_windows_11,
+      // to_hash_uid,
+      open,
+      set_progress,
+      is_development,
+      show_code,
+      rem_code,
+      hash_username,
+      refresh_commit,
+
+      get_all_search,
+      get_home,
+      get_app,
+      get_dev_data,
+      get_app_asset,
+      get_devs_apps,
+      get_arch,
+    ])
+    .setup(|app, api| {
+      let ahqstore = structs::init(app, api)?;
+      
       app.manage(ahqstore);
       
       Ok(())

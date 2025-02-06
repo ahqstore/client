@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-rem-code"
+description = "Enables the rem_code command without any pre-configured scope."
+commands.allow = ["rem_code"]
+
+[[permission]]
+identifier = "deny-rem-code"
+description = "Denies the rem_code command without any pre-configured scope."
+commands.deny = ["rem_code"]
