@@ -181,7 +181,7 @@ pub(crate) fn get_linux_distro() -> Option<String> {
   return None;
 
   #[cfg(unix)]
-  return Some(identify()?.name().into());
+  return Some(whatadistro::identify()?.name().into());
 }
 
 #[command(async)]
