@@ -35,7 +35,7 @@ pub(crate) async fn set_scale(window: tauri::WebviewWindow, scale: f64) {
   let _ = window.set_zoom(scale);
 
   #[cfg(mobile)]
-  let _ = window.app_handle().ahqstore().zoom(scale);
+  let _ = window.app_handle().ahqstore().zoom(scale as f32);
 }
 
 #[tauri::command]
