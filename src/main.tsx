@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 
 import { getCurrentWindow } from "@tauri-apps/api/window"
-import { ThemeProvider } from "./theme";
+import { ThemeProvider } from "./lib";
 
 export const window = getCurrentWindow();
 (async () => {

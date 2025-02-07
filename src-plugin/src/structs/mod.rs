@@ -23,7 +23,7 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
     #[cfg(desktop)]
     handle: app.clone(),    
     #[cfg(mobile)]
-    handle: _api.register_android_plugin("", "AHQStore")?,
+    handle: _api.register_android_plugin("com.plugin.ahqstore", "AHQStorePlugin")?,
     commits
   })
 }

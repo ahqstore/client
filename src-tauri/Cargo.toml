@@ -28,3 +28,6 @@ windows = { version = "=0.58", features = ["Win32_Graphics_Dwm"] }
 tauri-plugin-autostart = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-updater = "2"
+
+[patch.crates-io]
+wry = { git = "https://github.com/ahqsoftwares/wry.git", branch = "patch-2" }

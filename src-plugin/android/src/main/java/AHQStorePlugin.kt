@@ -12,17 +12,16 @@ import app.tauri.plugin.Invoke
 
 @InvokeArg
 class ShowCodeRequest {
-  var value: String
+  var value: String = ""
 }
 
 @InvokeArg
 class ZoomRequest {
-  var zoom: Float
+  var zoom: Float = 100.0F
 }
 
 @TauriPlugin
-class AHQStore(private val activity: Activity): Plugin(activity) {
-    private val implementation = Example()
+class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
     private var webview: WebView? = null
 
     override fun load(webView: WebView) {
