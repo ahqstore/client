@@ -26,7 +26,8 @@
     "react-dom": "^19.0.0",
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "tauri-plugin-ahqstore-api": "link:src-plugin"
   },
   "devDependencies": {
     "@fluentui/react-components": "^9.58.3",

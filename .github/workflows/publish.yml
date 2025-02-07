@@ -285,6 +285,11 @@ jobs:
         run: |
           npm i -g wasm-pack
           wasm-pack build --release -- --features js
+
+          cd ../src-plugin
+          npm i -g pnpm
+          pnpm install
+          pnpm build
         working-directory: src-ahqstore-types
 
       - name: Build Tauri App
@@ -357,6 +362,11 @@ jobs:
         run: |
           npm i -g wasm-pack
           wasm-pack build --release -- --features js
+
+          cd ../src-plugin
+          npm i -g pnpm
+          pnpm install
+          pnpm build
         working-directory: src-ahqstore-types
 
       - name: install Vite dependencies and Build React App
