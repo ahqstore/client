@@ -49,7 +49,9 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
   let handle = app.handle().clone();
 
   tauri::async_runtime::spawn(async move {
-    update(handle).await.unwrap();
+    if let Err(_) = update(handle).await {
+      println!("Couldn't check update");
+    }
   });
 
   if !should_be_hidden() {
