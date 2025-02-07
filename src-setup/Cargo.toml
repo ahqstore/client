@@ -2,14 +2,14 @@
 name = "ahqstore_setup_amd64"
 version = "2.1.0"
 edition = "2021"
-repository = "https://github.com/ahqsoftwares/tauri-ahq-store"
+repository = "https://github.com/ahqstore/client"
 homepage = "https://ahqstore.github.io/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dirs = "5"
-i-slint-backend-winit = "1.8.0"
+dirs = "6"
+i-slint-backend-winit = "1.9"
 lazy_static = "1"
 open = "5"
 reqwest = { version = "0.12.5", features = ["json", "rustls-tls"] }
@@ -26,10 +26,10 @@ openssl-sys = { version = "*", features = ["vendored"] }
 
 [target.'cfg(windows)'.dependencies]
 check_elevation = "0.2.4"
-winreg = "0.52.0"
+winreg = "0.55"
 
 [target.'cfg(windows)'.build-dependencies]
-tauri-winres = "0.1"
+tauri-winres = "0.3"
 
 [build-dependencies]
 slint-build = "1"
