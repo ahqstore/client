@@ -389,7 +389,7 @@ jobs:
           args: --verbose --target ${{ matrix.target }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
           includeRelease: true
-          includeUpdaterJson: false
+          includeUpdaterJson: true
 
   undraft-release:
     needs: [create-release, publish-tauri, make-setup, publish-android]
