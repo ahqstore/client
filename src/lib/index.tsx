@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, use, useEffect, useState } from "react";
 import { teamsDarkTheme, teamsLightTheme, FluentProvider } from "@fluentui/react-components"
 import { type } from "@tauri-apps/plugin-os";
 
@@ -13,6 +13,14 @@ export default function fnTheme() {
 
 const ThemeContext = createContext(false);
 export let setUITheme = (_: boolean) => { };
+
+export const useUITheme = () => {
+  if (use(ThemeContext)) {
+    return teamsDarkTheme;
+  } else {
+    return teamsLightTheme;
+  }
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   fnTheme();

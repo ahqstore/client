@@ -10,6 +10,7 @@ export function WindowControls({
   justify = false,
   hide = false,
   hideMethod = "display",
+  right,
   // linuxDesktop = "gnome",
   className,
   ...props
@@ -51,16 +52,17 @@ export function WindowControls({
         return (
           <Windows
             className={cn(customClass, justify && "ml-auto")}
+            children={right}
             {...props}
           />
         )
       case "macos":
         return (
-          <MacOS className={cn(customClass, justify && "ml-0")} {...props} />
+          <MacOS children={right} className={cn(customClass, justify && "ml-0")} {...props} />
         )
       case "gnome":
         return (
-          <Gnome className={cn(customClass, justify && "ml-auto")} {...props} />
+          <Gnome children={right} className={cn(customClass, justify && "ml-auto")} {...props} />
         )
       default:
         return (

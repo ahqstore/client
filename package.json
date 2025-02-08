@@ -4,19 +4,23 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri"
   },
   "dependencies": {
+    "@fluentui/react-icons": "^2.0.274",
+    "@radix-ui/react-popover": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@tailwindcss/postcss": "^4.0.4",
     "@tauri-apps/api": "^2.2.0",
     "@tauri-apps/plugin-autostart": "~2.2.0",
     "@tauri-apps/plugin-deep-link": "~2.2.0",
+    "@tauri-apps/plugin-http": "~2",
     "@tauri-apps/plugin-os": "~2.2.0",
     "@tauri-apps/plugin-updater": "~2.5.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "ahqstore-types": "link:src-ahqstore-types\\pkg",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -27,7 +31,8 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "tauri-plugin-ahqstore-api": "link:src-plugin"
+    "tauri-plugin-ahqstore-api": "link:src-plugin",
+    "vite": "^6.1.0"
   },
   "devDependencies": {
     "@fluentui/react-components": "^9.58.3",
@@ -35,12 +40,10 @@
     "@types/node": "^22.13.1",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
-    "@vitejs/plugin-react": "^4.3.4",
     "daisyui": "5.0.0-beta.7",
     "postcss": "^8.5.1",
     "tailwindcss": "^4.0.4",
-    "typescript": "~5.7.3",
-    "vite": "^6.1.0"
+    "typescript": "~5.7.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

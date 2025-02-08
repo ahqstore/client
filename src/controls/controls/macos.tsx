@@ -4,7 +4,7 @@ import { cn } from "@controls/libs/utils"
 import { Button } from "../components/button"
 import TauriAppWindowContext from "../contexts/plugin-window"
 
-export function MacOS({ className, ...props }: HTMLProps<HTMLDivElement>) {
+export function MacOS({ className, children, ...props }: HTMLProps<HTMLDivElement>) {
   const { minimizeWindow, maximizeWindow, fullscreenWindow, closeWindow } =
     useContext(TauriAppWindowContext)
 
@@ -47,6 +47,7 @@ export function MacOS({ className, ...props }: HTMLProps<HTMLDivElement>) {
       onMouseLeave={handleMouseLeave}
       {...props}
     >
+      {children}
       <Button
         onClick={closeWindow}
         className="aspect-square h-3 w-3 cursor-default content-center items-center justify-center self-center rounded-full border border-black/[.12] bg-[#ff544d] text-center text-black/60 hover:bg-[#ff544d] active:bg-[#bf403a] active:text-black/60 dark:border-none"

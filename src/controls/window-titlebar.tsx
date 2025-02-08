@@ -9,6 +9,7 @@ export function WindowTitlebar({
   children,
   controlsOrder = "system",
   className,
+  right,
   windowControlsProps,
   ...props
 }: WindowTitlebarProps) {
@@ -54,11 +55,12 @@ export function WindowTitlebar({
         <>
           <WindowControls {...customProps("ml-0")} />
           {children}
+          {right}
         </>
       ) : (
         <>
           {children}
-          <WindowControls {...customProps("ml-auto")} />
+          <WindowControls right={right} {...customProps("ml-auto")} />
         </>
       )}
     </div>

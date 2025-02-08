@@ -3,5 +3,28 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "ahqstore:allow-all"]
+  "permissions": [
+    "core:default",
+    "ahqstore:allow-all",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://github.com/ahqsoftwares/ahq-store-data/*"
+        },
+        {
+          "url": "https://github.com/ahqsoftwares/tauri-ahq-store/releases/*"
+        },
+        {
+          "url": "https://api.github.com/*"
+        },
+        {
+          "url": "https://rawcdn.githack.com/*"
+        },
+        {
+          "url": "https://github.com/login/*"
+        }
+      ]
+    }
+  ]
 }

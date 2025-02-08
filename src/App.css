@@ -171,14 +171,20 @@
 }
 
 @layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
 
   html,
   body {
-    @apply bg-transparent;
-  }
-
-  .fxugw4r {
-    @apply bg-inherit;
+    background: transparent !important;
   }
 
   .not-win body {
@@ -191,6 +197,15 @@
 
   .fui-FluentProvider,
   .content {
-    @apply h-full w-full flex flex-col;
+    @apply h-full w-full flex flex-col bg-transparent;
+  }
+}
+
+html:not(.not-win) {
+
+  body,
+  #root,
+  .fxugw4r {
+    background: transparent !important;
   }
 }

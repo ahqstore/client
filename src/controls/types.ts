@@ -1,4 +1,4 @@
-import type { HTMLProps } from "react"
+import type { HTMLProps, ReactNode } from "react"
 
 /**
  * Interface for window controls.
@@ -6,6 +6,8 @@ import type { HTMLProps } from "react"
  * the operating system the app is running on and display the appropriate elements.
  */
 export interface WindowControlsProps extends HTMLProps<HTMLDivElement> {
+  right?: ReactNode
+
   /**
    * Specifies which platform's window controls to display.
    * It can be one of "windows", "macos", or "gnome".
@@ -56,6 +58,8 @@ export interface WindowControlsProps extends HTMLProps<HTMLDivElement> {
  * Interface for titlebar
  */
 export interface WindowTitlebarProps extends HTMLProps<HTMLDivElement> {
+  right?: ReactNode
+
   /**
    * The `controlsOrder` property is an optional property used in the `WindowControls` interface.
    * It allows you to specify the order in which the window controls should be rendered relative to the children.

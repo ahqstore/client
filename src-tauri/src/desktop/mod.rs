@@ -15,11 +15,14 @@ use tauri_plugin_updater::UpdaterExt;
 #[cfg(windows)]
 use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWINDOWATTRIBUTE};
 
-
 pub fn setup(app: &mut App) -> tauri::Result<()> {
   #[cfg(windows)]
   {
-    let hwnd = app.get_webview_window("main").expect("Impossible error").hwnd().unwrap();
+    let hwnd = app
+      .get_webview_window("main")
+      .expect("Impossible error")
+      .hwnd()
+      .unwrap();
 
     unsafe {
       //2: Mica, 3: Acrylic, 4: Mica Alt
