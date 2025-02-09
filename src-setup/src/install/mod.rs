@@ -45,82 +45,15 @@ pub fn start_install(win: AppWindow, install: InstallMode) {
   });
 }
 
-#[cfg(not(windows))]
-async fn plt_install(win: &AppWindow, client: &mut Client, files: &ReleaseData) {
-  use std::process;
-
-  use crate::{
-    install::deb::{exit, get_sudo, install_daemon, install_deb},
-    utils::{get_service_dir, get_temp_service_dir},
-  };
-
-  if &files.deb == "" {
-    Notification::new()
-      .summary("Uh Oh!")
-      .body("We were unable to find the linux build files, try toggling the Pre-Release Option")
-      .show()
-      .unwrap();
-
-    win.set_counter(-1.0);
-    win.set_msg("Install".into());
-    return;
-  }
-
-  win.set_msg("Downloading...".into());
-
-  let installer = get_install();
-  let temp_service = get_temp_service_dir();
-
-  let _ = fs::remove_file(&installer);
-
-  download(client, &files.deb, &installer, |perc| {
-    win.set_counter(perc);
-  })
-  .await;
-
-  thread::sleep(Duration::from_secs(1));
-  win.set_counter(0.0);
-  thread::sleep(Duration::from_secs(3));
-
-  download(client, &files.linux_daemon, &temp_service, |perc| {
-    win.set_counter(perc);
-  })
-  .await;
-
-  thread::sleep(Duration::from_secs(2));
-  win.set_indet(true);
-
-  win.set_msg("Installing...".into());
-
-  let mut sudo = get_sudo();
-  install_deb(&mut sudo, &installer);
-  install_daemon(&mut sudo, temp_service);
-  exit(sudo);
-
-  thread::sleep(Duration::from_secs(1));
-
-  let _ = fs::remove_file(&installer);
-  win.set_msg("Installed 🎉".into());
-  win.set_indet(false);
-
-  thread::sleep(Duration::from_secs(5));
-  process::exit(0);
-}
-
 #[cfg(windows)]
 async fn plt_install(win: &AppWindow, client: &mut Client, files: &ReleaseData) {
   use std::{env::current_exe, process};
 
-  use crate::{
-    install::msi::{install_msi, install_service},
-    utils::{get_daemon, get_service_dir, kill_daemon, run_daemon},
-  };
+  use crate::install::msi::install_msi;
 
   win.set_msg("Downloading...".into());
 
   let installer = get_install();
-  let service = get_service_dir();
-  let daemon = get_daemon();
 
   let _ = fs::remove_file(&installer);
 
@@ -133,58 +66,26 @@ async fn plt_install(win: &AppWindow, client: &mut Client, files: &ReleaseData) 
 
   win.set_counter(0.0);
 
-  thread::sleep(Duration::from_secs(3));
-
-  download(client, &files.service, &service, |perc| {
-    win.set_counter(perc);
-  })
-  .await;
-
-  win.set_counter(1.0);
-
-  thread::sleep(Duration::from_millis(100));
-
-  win.set_counter(0.0);
-
-  thread::sleep(Duration::from_millis(100));
-
-  kill_daemon();
-
-  if &files.windows_user_runner != "" {
-    download(client, &files.windows_user_runner, daemon, |perc| {
-      win.set_counter(perc);
-    })
-    .await;
-
-    win.set_counter(1.0);
-
-    thread::sleep(Duration::from_millis(100));
-  }
+  thread::sleep(Duration::from_secs(1));
 
   win.set_indet(true);
 
   win.set_msg("Installing...".into());
 
-  regedit::create_association();
+  //regedit::create_association();
 
   thread::sleep(Duration::from_secs(2));
 
   install_msi(&installer);
 
-  run_daemon(daemon);
-
   regedit::custom_uninstall();
-
-  thread::sleep(Duration::from_secs(3));
-
-  install_service(&service);
 
   thread::sleep(Duration::from_secs(1));
 
   let _ = fs::remove_file(&installer);
 
   let _ = fs::write(
-    r"C:\Program Files\AHQ Store\uninstall.exe",
+    r"C:\Program Files\AHQ Store NEO\uninstall.exe",
     fs::read(current_exe().unwrap()).unwrap(),
   );
 
@@ -194,3 +95,66 @@ async fn plt_install(win: &AppWindow, client: &mut Client, files: &ReleaseData) 
   thread::sleep(Duration::from_secs(5));
   process::exit(0);
 }
+
+
+// #[cfg(not(windows))]
+// async fn plt_install(win: &AppWindow, client: &mut Client, files: &ReleaseData) {
+//   use std::process;
+
+//   use crate::{
+//     install::deb::{exit, get_sudo, install_daemon, install_deb},
+//     utils::{get_service_dir, get_temp_service_dir},
+//   };
+
+//   if &files.deb == "" {
+//     Notification::new()
+//       .summary("Uh Oh!")
+//       .body("We were unable to find the linux build files, try toggling the Pre-Release Option")
+//       .show()
+//       .unwrap();
+
+//     win.set_counter(-1.0);
+//     win.set_msg("Install".into());
+//     return;
+//   }
+
+//   win.set_msg("Downloading...".into());
+
+//   let installer = get_install();
+//   let temp_service = get_temp_service_dir();
+
+//   let _ = fs::remove_file(&installer);
+
+//   download(client, &files.deb, &installer, |perc| {
+//     win.set_counter(perc);
+//   })
+//   .await;
+
+//   thread::sleep(Duration::from_secs(1));
+//   win.set_counter(0.0);
+//   thread::sleep(Duration::from_secs(3));
+
+//   download(client, &files.linux_daemon, &temp_service, |perc| {
+//     win.set_counter(perc);
+//   })
+//   .await;
+
+//   thread::sleep(Duration::from_secs(2));
+//   win.set_indet(true);
+
+//   win.set_msg("Installing...".into());
+
+//   let mut sudo = get_sudo();
+//   install_deb(&mut sudo, &installer);
+//   install_daemon(&mut sudo, temp_service);
+//   exit(sudo);
+
+//   thread::sleep(Duration::from_secs(1));
+
+//   let _ = fs::remove_file(&installer);
+//   win.set_msg("Installed 🎉".into());
+//   win.set_indet(false);
+
+//   thread::sleep(Duration::from_secs(5));
+//   process::exit(0);
+// }

@@ -10,7 +10,7 @@ pub fn create_association() -> Option<()> {
 
   let (icon, _) = key.create_subkey("DefaultIcon").ok()?;
   icon
-    .set_value("", &r"C:\Program Files\AHQ Store\ahq-store-app.exe,0")
+    .set_value("", &r"C:\Program Files\AHQ Store NEO\ahqstore-new.exe,0")
     .ok()?;
 
   let (shell, _) = key.create_subkey("shell").ok()?;
@@ -19,7 +19,7 @@ pub fn create_association() -> Option<()> {
   shell
     .set_value(
       "",
-      &r#""C:\Program Files\AHQ Store\ahq-store-app.exe" protocol %1"#,
+      &r#""C:\Program Files\AHQ Store NEO\ahqstore-new.exe" protocol %1"#,
     )
     .ok()?;
 
@@ -42,7 +42,7 @@ pub fn custom_uninstall() -> Option<()> {
 
   let mut uninstall_str = String::default();
 
-  let unst = r#""C:\Program Files\AHQ Store\uninstall.exe" uninstall"#;
+  let unst = r#""C:\Program Files\AHQ Store NEO\uninstall.exe" uninstall"#;
 
   key.enum_keys().for_each(|x| {
     if let Ok(x) = x {
@@ -53,12 +53,12 @@ pub fn custom_uninstall() -> Option<()> {
         let uninstall = key.get_value::<String, &str>("UninstallString");
 
         if let (Ok(x), Ok(y)) = (name, uninstall) {
-          if &x == "AHQ Store" {
+          if &x == "AHQ Store Neo" {
             println!("id {debug_data} Name {x}");
             key
               .set_value(
                 "DisplayIcon",
-                &r"C:\Program Files\AHQ Store\ahq-store-app.exe,0",
+                &r"C:\Program Files\AHQ Store NEO\ahqstore-new.exe,0",
               )
               .unwrap();
             key.set_value("WindowsInstaller", &0u32).unwrap();
@@ -78,7 +78,7 @@ pub fn custom_uninstall() -> Option<()> {
   let uninstall_str = uninstall_str.to_lowercase();
   let uninstall_str = uninstall_str.replace("msiexec.exe /x", "");
 
-  fs::write(r"C:\Program Files\AHQ Store\unst", uninstall_str).ok()
+  fs::write(r"C:\Program Files\AHQ Store NEO\unst", uninstall_str).ok()
 }
 
 pub fn rem_reg(path: &str) -> Option<()> {

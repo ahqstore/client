@@ -17,28 +17,3 @@ pub fn install_msi(path: &str) {
     .wait()
     .unwrap();
 }
-
-pub fn install_service(path: &str) {
-  Command::new("sc.exe")
-    .creation_flags(0x08000000)
-    .args([
-      "create",
-      "AHQ Store Service",
-      "start=",
-      "auto",
-      "binpath=",
-      path,
-    ])
-    .spawn()
-    .unwrap()
-    .wait()
-    .unwrap();
-
-  Command::new("sc.exe")
-    .creation_flags(0x08000000)
-    .args(["start", "AHQ Store Service"])
-    .spawn()
-    .unwrap()
-    .wait()
-    .unwrap();
-}

@@ -37,7 +37,7 @@ pub fn uninstall(win: AppWindow) {
 
     win.set_msg(SharedString::from("Uninstalling..."));
 
-    let id = fs::read_to_string(r"C:\Program Files\AHQ Store\unst").unwrap();
+    let id = fs::read_to_string(r"C:\Program Files\AHQ Store NEO\unst").unwrap();
 
     let success = Command::new("msiexec.exe")
       .arg("/qb+")
@@ -48,13 +48,7 @@ pub fn uninstall(win: AppWindow) {
       .unwrap()
       .success();
 
-    utils::kill_daemon();
-
-    fs::remove_dir_all(r"C:\Program Files\AHQ Store");
-    let rem = fs::remove_file(
-      r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\ahqstore_user_daemon.exe",
-    );
-    println!("Err {:?}", rem.err());
+    fs::remove_dir_all(r"C:\Program Files NEO\AHQ Store");
 
     println!("Success: {success}");
     regedit::rem_reg(&id);
