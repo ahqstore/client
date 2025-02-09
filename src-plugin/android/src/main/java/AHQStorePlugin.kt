@@ -40,7 +40,8 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
     fun zoom(invoke: Invoke) {
       val args = invoke.parseArgs(ZoomRequest::class.java)
 
-      webview!!.zoomBy(args.zoom)
+      val currentZoom = webview!!.getScale()
+      webview!!.zoomBy(args.zoom / currentZoom)
       
       val ret = JSObject()
       invoke.resolve(ret)

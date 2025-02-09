@@ -10,6 +10,7 @@ const COMMANDS: &[&str] = &[
   "rem_code",
   "hash_username",
   "refresh_commit",
+  "get_commit",
   "get_all_search",
   "get_home",
   "get_app",
@@ -17,7 +18,10 @@ const COMMANDS: &[&str] = &[
   "get_app_asset",
   "get_devs_apps",
   "get_arch",
-  "set_scale"
+  "set_scale",
+  "encrypt",
+  "decrypt",
+  "download"
 ];
 
 fn main() {

@@ -3,31 +3,42 @@
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use ahqstore_types::{AHQStoreApplication, DevData, Commits};
+use ahqstore_types::{AHQStoreApplication, Commits, DevData};
 
 use anyhow::Context;
 
-use tauri::ipc::Response;
+use tauri::ipc::{IpcResponse, Response};
 use tauri::{command, AppHandle, Manager, Runtime};
 
 use crate::models::*;
 use crate::AhqstoreExt;
 
-use ahqstore_types::{
-    internet,
-    search,
-    search::RespSearchEntry
-};
+use ahqstore_types::{internet, search, search::RespSearchEntry};
 
 #[cfg(desktop)]
 use tauri::{
-    WebviewWindowBuilder,
-    window::{ProgressBarState, ProgressBarStatus}
+  window::{ProgressBarState, ProgressBarStatus},
+  WebviewWindowBuilder,
 };
 
 use crate::error::Result;
 
 use open as open_2;
+
+mod encrypt;
+mod download;
+
+pub use download::*;
+pub use encrypt::*;
+
+#[command(async)]
+pub(crate) async fn get_commit<R: Runtime>(app: tauri::AppHandle<R>) -> Response {
+  Response::new(
+    serde_json::to_string(&*app.ahqstore().commits.lock().await)
+      .unwrap()
+      .into_bytes(),
+  )
+}
 
 #[command(async)]
 pub(crate) async fn set_scale(window: tauri::WebviewWindow, scale: f64) {
@@ -65,7 +76,9 @@ pub(crate) async fn get_app(appl: AppHandle, app: &str) -> Result<AHQStoreApplic
 
 #[command(async)]
 pub(crate) async fn get_app_asset(appl: AppHandle, app: &str, asset: &str) -> Result<Response> {
-  let bytes = internet::get_app_asset(&*appl.ahqstore().commits.lock().await, app, asset).await.context("")?;
+  let bytes = internet::get_app_asset(&*appl.ahqstore().commits.lock().await, app, asset)
+    .await
+    .context("")?;
 
   Ok(Response::new(bytes))
 }
@@ -94,21 +107,25 @@ pub(crate) fn show_code<R: Runtime>(app: AppHandle<R>, code: String) {
 #[command(async)]
 #[cfg(desktop)]
 pub(crate) fn show_code<R: Runtime>(app: AppHandle<R>, code: String) {
-  WebviewWindowBuilder::new(&app, "code", tauri::WebviewUrl::App(PathBuf::from(&format!("/{code}"))))
-    .skip_taskbar(true)
-    .title("Login to GitHub")
-    .inner_size(400.0, 150.0)
-    .max_inner_size(400.0, 150.0)
-    .min_inner_size(400.0, 150.0)
-    .decorations(false)
-    .always_on_top(true)
-    .fullscreen(false)
-    .content_protected(true)
-    .maximizable(false)
-    .minimizable(false)
-    .closable(true)
-    .focused(true)
-    .build();
+  WebviewWindowBuilder::new(
+    &app,
+    "code",
+    tauri::WebviewUrl::App(PathBuf::from(&format!("/{code}"))),
+  )
+  .skip_taskbar(true)
+  .title("Login to GitHub")
+  .inner_size(400.0, 150.0)
+  .max_inner_size(400.0, 150.0)
+  .min_inner_size(400.0, 150.0)
+  .decorations(false)
+  .always_on_top(true)
+  .fullscreen(false)
+  .content_protected(true)
+  .maximizable(false)
+  .minimizable(false)
+  .closable(true)
+  .focused(true)
+  .build();
 }
 
 #[command(async)]
@@ -118,10 +135,7 @@ pub(crate) fn rem_code() {}
 #[command(async)]
 #[cfg(desktop)]
 pub(crate) fn rem_code<R: Runtime>(app: tauri::AppHandle<R>) {
-  app.get_webview_window("code")
-    .unwrap()
-    .destroy()
-    .unwrap()
+  app.get_webview_window("code").unwrap().destroy().unwrap()
 }
 
 #[command(async)]
@@ -148,7 +162,7 @@ pub(crate) async fn now() -> u64 {
 
 #[command(async)]
 #[cfg(mobile)]
-pub(crate) fn set_progress(_: i32,_: Option<u64>,_: Option<u64>,) {}
+pub(crate) fn set_progress(_: i32, _: Option<u64>, _: Option<u64>) {}
 
 #[command(async)]
 #[cfg(desktop)]
@@ -208,8 +222,8 @@ pub(crate) fn get_arch() -> &'static str {
 #[cfg(windows)]
 #[command(async)]
 pub(crate) fn is_windows_11() -> bool {
-  use std::process::{Command, Stdio};
   use std::os::windows::process::CommandExt;
+  use std::process::{Command, Stdio};
 
   let version = Command::new("cmd")
     .creation_flags(0x08000000)

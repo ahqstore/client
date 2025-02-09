@@ -14,20 +14,15 @@ pub struct ZoomRequest {
 
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase", tag = "event", content = "data")]
-enum DownloadEvent<'a> {
+pub enum DownloadEvent {
   #[serde(rename_all = "camelCase")]
   Started {
-    url: &'a str,
-    download_id: usize,
-    content_length: usize,
+    length: u64,
   },
   #[serde(rename_all = "camelCase")]
   Progress {
-    download_id: usize,
-    chunk_length: usize,
+    progress: f64
   },
   #[serde(rename_all = "camelCase")]
-  Finished {
-    download_id: usize,
-  },
+  Finished {  },
 }

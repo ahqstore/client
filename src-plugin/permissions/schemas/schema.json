@@ -300,6 +300,36 @@
           "const": "allow-all"
         },
         {
+          "description": "Enables the decrypt command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-decrypt"
+        },
+        {
+          "description": "Denies the decrypt command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-decrypt"
+        },
+        {
+          "description": "Enables the download command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-download"
+        },
+        {
+          "description": "Denies the download command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-download"
+        },
+        {
+          "description": "Enables the encrypt command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-encrypt"
+        },
+        {
+          "description": "Denies the encrypt command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-encrypt"
+        },
+        {
           "description": "Enables the get_all_search command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-all-search"
@@ -338,6 +368,16 @@
           "description": "Denies the get_arch command without any pre-configured scope.",
           "type": "string",
           "const": "deny-get-arch"
+        },
+        {
+          "description": "Enables the get_commit command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-commit"
+        },
+        {
+          "description": "Denies the get_commit command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-commit"
         },
         {
           "description": "Enables the get_dev_data command without any pre-configured scope.",

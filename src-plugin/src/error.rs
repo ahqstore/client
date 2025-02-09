@@ -1,3 +1,5 @@
+use std::string::FromUtf8Error;
+
 use serde::{ser::Serializer, Serialize};
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -8,8 +10,11 @@ pub enum Error {
   Io(#[from] std::io::Error),
 
   #[error(transparent)]
+  String(#[from] FromUtf8Error),
+
+  #[error(transparent)]
   AHQStore(#[from] anyhow::Error),
-  
+
   #[cfg(mobile)]
   #[error(transparent)]
   PluginInvoke(#[from] tauri::plugin::mobile::PluginInvokeError),

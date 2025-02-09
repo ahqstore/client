@@ -1,5 +1,20 @@
-import { invoke } from '@tauri-apps/api/core'
-import { AHQStoreApplication, type SearchEntry } from "ahqstore-types"
+import { Channel, invoke } from '@tauri-apps/api/core'
+import { AHQStoreApplication, Commit, DevData, type SearchEntry } from "ahqstore-types"
+
+export type DownloadEvent = {
+  event: "started";
+  data: {
+    length: number
+  }
+} | {
+  event: "progress";
+  data: {
+    progress: number;
+  }
+} | {
+  event: "finished";
+  data: {}
+};
 
 export async function getWindows(): Promise<string> {
   return await invoke<string>('plugin:ahqstore|get_windows', {})
@@ -15,6 +30,28 @@ export async function isWindows11(): Promise<boolean> {
   return await invoke<boolean>('plugin:ahqstore|is_windows11', {})
     .catch((_) => false);
 }
+
+export async function download(
+  url: string,
+  name: string,
+  destDir: string,
+  progressUpdate: (event: DownloadEvent) => void
+) {
+
+  const channel = new Channel<DownloadEvent>();
+
+  channel.onmessage = (resp) => progressUpdate(resp);
+
+  return invoke<void>("plugin:ahqstore|download", {
+    url,
+    name,
+    path: destDir,
+    channel
+  });
+}
+
+export const encrypt = async (payload: string) => invoke<number[]>("plugin:ahqstore|encrypt", { payload });
+export const decrypt = async (encrypted: number[]) => invoke<string>("plugin:ahqstore|decrypt", { encrypted });
 
 export async function open(url: string) {
   return await invoke<void>('plugin:ahqstore|open', { url });
@@ -48,9 +85,16 @@ export async function refreshCommit() {
   return await invoke<void>("plugin:ahqstore|refresh_commit");
 }
 
+export const getCommit = async () => await invoke<Commit>("plugin:get_commit");
+
 export const search = async (query: string) => {
   return await invoke<SearchEntry[]>("plugin:get_all_search", { query });
 }
 
 export const getHome = async () => await invoke<[string, string[]][]>("plugin:get_home");
 export const getApp = async (app: string) => await invoke<AHQStoreApplication>("plugin:get_app", { app });
+export const getDevData = async (dev: string) => invoke<DevData>("plugin:ahqstore|get_dev_data", { dev });
+export const getAppAsset = async (app: string, asset: string) => invoke<Uint8Array>("plugin:ahqstore|get_app_asset", { app, asset });
+export const getDevsApps = async (dev: string) => invoke<string[]>("plugin:ahqstore|get_devs_apps", { dev });
+
+export const getArch = async () => invoke<string>("plugin:ahqstore|get_arch");
