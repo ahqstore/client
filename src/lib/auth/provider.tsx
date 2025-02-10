@@ -1,11 +1,11 @@
-import { createContext, ReactNode, use, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { genAuth, User } from ".";
 import { tryAutoLogin } from "./login";
 
 export const authObject = genAuth();
 
 const Auth = createContext(authObject.currentUser);
-export const useAuth = () => use(Auth);
+export const useAuth = () => useContext(Auth);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | undefined>();

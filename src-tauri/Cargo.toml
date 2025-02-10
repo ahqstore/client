@@ -29,3 +29,4 @@ windows = { version = "=0.58", features = ["Win32_Graphics_Dwm"] }
 tauri-plugin-autostart = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2"

@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 
@@ -8,6 +7,8 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { Secondary } from "./Secondary";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./lib/auth/provider";
+import { ExperimentProvider } from "./lib/experiment";
+import { HomeProvider } from "./lib/data";
 
 export const window = getCurrentWindow();
 (async () => {
@@ -18,21 +19,21 @@ export const window = getCurrentWindow();
 
 if (getCurrentWebviewWindow().label == "main") {
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <React.StrictMode>
-      <AuthProvider>
-        <ThemeProvider>
-          <App />
-          <Toaster />
-        </ThemeProvider>
-      </AuthProvider>
-    </React.StrictMode>,
+    <ExperimentProvider>
+      <HomeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <App />
+            <Toaster />
+          </ThemeProvider>
+        </AuthProvider>
+      </HomeProvider>
+    </ExperimentProvider>,
   );
 } else {
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <React.StrictMode>
-      <ThemeProvider>
-        <Secondary />
-      </ThemeProvider>
-    </React.StrictMode>,
+    <ThemeProvider>
+      <Secondary />
+    </ThemeProvider>,
   );
 }

@@ -18,6 +18,9 @@ pub fn run() {
       #[cfg(desktop)]
       desktop::setup(app)?;
 
+      #[cfg(desktop)]
+      app.handle().plugin(tauri_plugin_window_state::Builder::default().build())?;
+
       Ok(())
     })
     .invoke_handler(tauri::generate_handler![greet])

@@ -14,9 +14,14 @@ import { open } from "tauri-plugin-ahqstore-api";
 import { startLogin } from "./lib/auth/github";
 import { authObject, useAuth } from "./lib/auth/provider";
 import { logOut } from "./lib/auth";
+import { useExperiment } from "./lib/experiment";
+import { useHome } from "./lib/data";
+import { ApplicationView } from "./views/view";
+import { useMediaQuery } from "./hooks/use-media-query";
 
 function App() {
   const auth = useAuth();
+  const experiment = useExperiment();
 
   return (
     <>
@@ -63,7 +68,7 @@ function App() {
                   <MenuItem
                     icon={<BugArrowCounterclockwiseRegular />}
                     style={{ background: "transparent" }}
-                    subText="Disabled"
+                    subText={experiment ? "Enabled" : "Disabled"}
                   >
                     Experimental Features
                   </MenuItem>
@@ -92,17 +97,21 @@ function App() {
           </>
         }
       >
-        <img src="/icon.png" className="ml-1 my-1 w-6 h-6" />
-        <h1 className="my-auto ml-2 text-md font-sans">AHQ Store</h1>
-        {/* <h1 className="my-auto ml-1 text-neutral-content text-md font-sans italic font-bold">NEO</h1> */}
+        <img data-tauri-drag-region src="/icon.png" className="ml-1 my-1 w-6 h-6" />
+        <h1 data-tauri-drag-region className="my-auto ml-2 text-md font-sans">AHQ Store</h1>
+        {useMediaQuery("(min-width: 400px)") && <h1 data-tauri-drag-region className="my-auto ml-1 text-neutral-content text-md font-sans italic font-bold">NEO</h1>}
       </WindowTitlebar>}
 
-      <div className="content justify-center text-center items-center">
-        <img src="/icon.png" className="w-[128px] h-[128px] my-[20vh]" />
-        <ShowSpinner />
-      </div>
+      {useHome() == undefined ? <Loading /> : <ApplicationView />}
     </>
   );
+
+  function Loading() {
+    return <div className="content justify-center text-center items-center">
+      <img src="/icon.png" className="w-[128px] h-[128px] my-[20vh]" />
+      <ShowSpinner />
+    </div>;
+  }
 }
 
 export default App;

@@ -1,4 +1,4 @@
-import { createContext, ReactNode, use, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { teamsDarkTheme, teamsLightTheme, FluentProvider } from "@fluentui/react-components"
 import { type } from "@tauri-apps/plugin-os";
 
@@ -15,7 +15,7 @@ const ThemeContext = createContext(false);
 export let setUITheme = (_: boolean) => { };
 
 export const useUITheme = () => {
-  if (use(ThemeContext)) {
+  if (useContext(ThemeContext)) {
     return teamsDarkTheme;
   } else {
     return teamsLightTheme;

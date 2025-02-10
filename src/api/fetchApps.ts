@@ -110,7 +110,7 @@ async function resolveApps(apps: string[]): Promise<appData[]> {
                 verified: false,
                 resources: {},
                 version: "none"
-              } as ApplicationData;
+              } as unknown as ApplicationData;
             });
 
             const appData = {

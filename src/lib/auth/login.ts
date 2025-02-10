@@ -1,6 +1,6 @@
 import { fetch } from "@tauri-apps/plugin-http";
 import { Auth, User } from ".";
-import { invoke } from "@tauri-apps/api/core";
+import { decrypt, encrypt } from "tauri-plugin-ahqstore-api";
 
 //import { hashUsername as generateGHUserHash } from "tauri-plugin-ahqstore-api";
 //import { verifyDevExists } from "./hash";
@@ -10,13 +10,15 @@ export function onAuthChange(auth: Auth, callback: (auth?: User) => void) {
 }
 
 export async function tryAutoLogin(auth: Auth) {
-  const token = localStorage.getItem("token") as string;
+  try {
+    const rawToken = JSON.parse(localStorage.getItem("token") || "[]") as number[];
 
-  /*const auth_tok = await invoke<string>("decrypt", {
-    encrypted: token,
-  }).catch(() => "");*/
+    const token = await decrypt(rawToken);
 
-  await login(auth, token);
+    await login(auth, token);
+  } catch (_) {
+
+  }
 }
 
 export async function login(
@@ -38,10 +40,7 @@ export async function login(
     };
     auth.loggedIn = true;
 
-    /*invoke("encrypt", {
-      payload: auth_tok,
-    }).then((d) => */
-    localStorage.setItem("token", auth_tok);
+    localStorage.setItem("token", JSON.stringify(await encrypt(auth_tok)));
 
     auth.onAuthChange.forEach((cb) => cb(auth.currentUser));
   } else {
