@@ -1,0 +1,3 @@
+<resources>
+  <style name="Widget.Android.AppWidget.Container" parent="Theme.Material3.DynamicColors.Dark.NoActionBar" />
+</resources>

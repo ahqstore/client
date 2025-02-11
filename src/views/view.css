@@ -3,4 +3,17 @@
     @apply !bg-neutral/50 !shadow-xs !rounded-r-lg;
     backdrop-filter: blur(40px);
   }
+
+  .nav_item {
+    @apply bg-neutral/30 hover:bg-neutral/50 gap-1 transition-all;
+  }
+
+  .nav_item svg {
+    @apply size-6;
+  }
+
+  .act_nav_item {
+    @apply shadow-lg;
+    background: color-mix(in srgb, #ff0000 15%, transparent 100%) !important;
+  }
 }

@@ -1,0 +1,5 @@
+<resources>
+  <style name="Widget.Android.AppWidget.Container" parent="Theme.Material3.DynamicColors.Light.NoActionBar">
+    <item name="android:background">@color/white</item>
+  </style>
+</resources>

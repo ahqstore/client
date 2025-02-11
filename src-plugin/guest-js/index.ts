@@ -27,7 +27,7 @@ export async function getLinuxDistro(): Promise<string> {
 }
 
 export async function isWindows11(): Promise<boolean> {
-  return await invoke<boolean>('plugin:ahqstore|is_windows11', {})
+  return await invoke<boolean>('plugin:ahqstore|is_windows_11', {})
     .catch((_) => false);
 }
 

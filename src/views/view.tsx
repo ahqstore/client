@@ -1,17 +1,6 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import {
-  DrawerBody,
-  DrawerHeader,
-  DrawerHeaderTitle,
-  Drawer,
-  Button,
-  useRestoreFocusSource,
-} from "@fluentui/react-components";
-
-import {
-  Dismiss24Regular,
-
   AppsRegular,
   AppsFilled,
 
@@ -31,96 +20,65 @@ import { Library, LayoutGrid, Settings, User, LibraryBig } from "lucide-react";
 import { useState } from "react";
 import NavigationSidebar from "./nav";
 
-const items = [
-  {
-    name: "Apps",
-    id: 0,
-    icon: <AppsRegular className="size-[1.5em]" />,
-    iconFilled: <AppsFilled className="size-[1.5em]" />,
-    iconMobile: <LayoutGrid size="1.5em" />,
-    iconMobileFilled: <LayoutGrid fill="currentcolor" size="1.5em" />,
-  },
-  {
-    name: "Library",
-    id: 1,
-    icon: <AppsListRegular className="size-[1.5em]" />,
-    iconFilled: <AppsListFilled className="size-[1.5em]" />,
-    iconMobile: <Library size="1.5em" />,
-    iconMobileFilled: <LibraryBig size="1.5em" />,
-  },
-  {
-    name: "Profile",
-    id: 2,
-    icon: <PersonRegular className="size-[1.5em]" />,
-    iconFilled: <PersonFilled className="size-[1.5em]" />,
-    iconMobile: <User size="1.5em" />,
-    iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
-  },
-  {
-    name: "Settings",
-    id: 3,
-    icon: <SettingsRegular className="size-[1.5em]" />,
-    iconFilled: <SettingsFilled className="size-[1.5em]" />,
-    iconMobile: <Settings size="1.5em" />,
-    iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
-  }
-];
+export const items:
+  ({
+    name: string;
+    id: number;
+    icon: JSX.Element,
+    iconFilled: JSX.Element,
+    iconMobile: JSX.Element,
+    iconMobileFilled: JSX.Element,
+    hidden?: boolean
+  })[] = [
+    {
+      name: "Apps",
+      id: 0,
+      icon: <AppsRegular className="size-[1.5em]" />,
+      iconFilled: <AppsFilled className="size-[1.5em]" style={{ color: "#ff0000" }} />,
+      iconMobile: <LayoutGrid size="1.5em" />,
+      iconMobileFilled: <LayoutGrid fill="currentcolor" size="1.5em" />,
+    },
+    {
+      name: "Library",
+      id: 1,
+      icon: <AppsListRegular className="size-[1.5em]" />,
+      iconFilled: <AppsListFilled className="size-[1.5em]" style={{ color: "#ff0000" }} />,
+      iconMobile: <Library size="1.5em" />,
+      iconMobileFilled: <LibraryBig size="1.5em" />,
+    },
+    {
+      name: "Profile",
+      id: 2,
+      hidden: true,
+      icon: <PersonRegular className="size-[1.5em]" />,
+      iconFilled: <PersonFilled className="size-[1.5em]" style={{ color: "#ff0000" }} />,
+      iconMobile: <User size="1.5em" />,
+      iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
+    },
+    {
+      name: "Settings",
+      id: 3,
+      icon: <SettingsRegular className="size-[1.5em]" />,
+      iconFilled: <SettingsFilled className="size-[1.5em]" style={{ color: "#ff0000" }} />,
+      iconMobile: <Settings size="1.5em" />,
+      iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
+    }
+  ];
 
 export function ApplicationView() {
-  const [isOpen, setIsOpen] = useState(true);
-
   const [item, setItem] = useState(0);
 
-  const tablet = useMediaQuery("(min-width: 640px)");
-  const desktop = useMediaQuery("(min-width: 1024px)");
-
-  const restoreFocusSourceAttributes = useRestoreFocusSource();
+  const desktop = useMediaQuery("(min-width: 640px)");
 
   if (desktop) {
     return <div className="mt-2 w-full h-full flex">
-      <div className="h-full w-64 flex flex-col">
-        <NavigationSidebar />
+      <div className="h-full w-20 flex flex-col gap-2 px-2 pb-2 items-center text-center">
+        <NavigationSidebar item={item} setItem={setItem} />
       </div>
       <div className="w-full h-full rounded-tl-xl p-3 bg-neutral/50">
         <h1>Hello World</h1>
       </div>
     </div>;
-  }
-
-  if (tablet) {
-    return <>
-      <div className="h-full w-full bg-black flex">
-        <h1 onClick={() => setIsOpen(true)}>Drawer</h1>
-      </div>
-      <Drawer
-        {...restoreFocusSourceAttributes}
-        type={"overlay"}
-        separator
-        className="drawer-tablet"
-        open={isOpen}
-        onOpenChange={(_, { open }) => setIsOpen(open)}
-      >
-        <DrawerHeader>
-          <DrawerHeaderTitle
-            action={
-              <Button
-                appearance="subtle"
-                aria-label="Close"
-                icon={<Dismiss24Regular />}
-                onClick={() => setIsOpen(false)}
-              />
-            }
-          >
-
-            Navigation
-          </DrawerHeaderTitle>
-        </DrawerHeader>
-
-        <DrawerBody>
-          <NavigationSidebar />
-        </DrawerBody>
-      </Drawer>
-    </>;
   }
 
   return <div className="w-full h-full flex flex-col">

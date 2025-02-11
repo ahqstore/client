@@ -1,14 +1,19 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { teamsDarkTheme, teamsLightTheme, FluentProvider } from "@fluentui/react-components"
-import { type } from "@tauri-apps/plugin-os";
+import { isWindows11 } from "src-plugin/dist-js";
 
 const def = String(window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-export default function fnTheme() {
+export default function fnTheme(windows: boolean) {
   const dark = (localStorage.getItem("dark") || def) == "true";
 
   document.querySelector("html")?.classList.toggle("dark", dark);
-  document.querySelector("html")?.classList.toggle("not-win", type() != "windows");
+
+  if (windows) {
+    document.querySelector("html")?.classList.remove("not-win");
+  } else {
+    document.querySelector("html")?.classList.add("not-win");
+  }
 }
 
 const ThemeContext = createContext(false);
@@ -23,12 +28,15 @@ export const useUITheme = () => {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  fnTheme();
-
   const [dark, setDark] = useState(true);
   const [theme, setTheme] = useState(teamsDarkTheme);
+  const [windows, setWindows] = useState(false);
 
   setUITheme = (theme: boolean) => setDark(theme);
+
+  useEffect(() => {
+    isWindows11().then(setWindows).catch(console.error);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("dark", String(dark));
@@ -39,8 +47,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setTheme(teamsLightTheme);
     }
 
-    fnTheme();
-  }, [dark]);
+    fnTheme(windows);
+  }, [dark, windows]);
 
   return <ThemeContext.Provider value={dark} >
     <FluentProvider theme={theme}>
