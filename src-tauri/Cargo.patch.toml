@@ -20,6 +20,7 @@ serde_json = "1"
 tauri-plugin-ahqstore = { path = "../src-plugin" }
 tauri-plugin-deep-link = "2"
 tauri-plugin-os = "2"
+tauri-plugin-http = "2"
 
 [patch.crates-io]
 wry = { git = "https://github.com/ahqsoftwares/wry.git", branch = "patch-2" }
