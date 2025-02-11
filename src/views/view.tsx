@@ -117,7 +117,7 @@ export function ApplicationView() {
         </DrawerHeader>
 
         <DrawerBody>
-          <p>Drawer content</p>
+          <NavigationSidebar />
         </DrawerBody>
       </Drawer>
     </>;
