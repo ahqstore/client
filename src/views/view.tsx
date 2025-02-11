@@ -29,6 +29,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import { Library, LayoutGrid, Settings, User, LibraryBig } from "lucide-react";
 
 import { useState } from "react";
+import NavigationSidebar from "./nav";
 
 const items = [
   {
@@ -76,8 +77,13 @@ export function ApplicationView() {
   const restoreFocusSourceAttributes = useRestoreFocusSource();
 
   if (desktop) {
-    return <div className="w-full h-full flex">
-
+    return <div className="mt-2 w-full h-full flex">
+      <div className="h-full w-64 flex flex-col">
+        <NavigationSidebar />
+      </div>
+      <div className="w-full h-full rounded-tl-xl p-3 bg-neutral/50">
+        <h1>Hello World</h1>
+      </div>
     </div>;
   }
 

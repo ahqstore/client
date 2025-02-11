@@ -253,7 +253,34 @@ jobs:
   publish-android:
     needs: create-release
     runs-on: ubuntu-latest
-    name: Build Tauri App (universal-linux-android)
+    name: Build Tauri App (${{ matrix.target }})
+
+    strategy:
+      matrix:
+        include:
+          - target: universal-linux-android
+            suffix: universal
+            args:
+
+          - target: aarch64-linux-android
+            suffix: aarch64
+            args: -t aarch64
+
+          - target: armv7-linux-android
+            suffix: armv7
+            args: -t armv7
+
+          - target: i686-linux-android
+            suffix: i686
+            args: -t i686
+
+          - target: x86_64-linux-android
+            suffix: x86_64
+            args: -t x86_64
+
+          - target: arm-linux-android
+            suffix: universal
+            args: -t aarch64 armv7
 
     steps:
       - name: Checkout
@@ -302,9 +329,16 @@ jobs:
           export NDK_HOME="$ANDROID_NDK_HOME"
 
           pnpm install
-          pnpm tauri android build
+          pnpm tauri android build --apk ${{ matrix.args }}
         env:
           CI: "false"
+
+      - name: Upload Apk
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          asset_path: ./src-tauri/gen/android/build/outputs/apk/${{ matrix.suffix }}/release/app-universal-release.apk
+          asset_name: ahqstore_${{ matrix.target }}.apk
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
 
   publish-tauri:
     needs: create-release
