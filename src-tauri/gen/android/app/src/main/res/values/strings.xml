@@ -8,4 +8,5 @@
   
   <string name="app_widget_description">Checks if updates are available</string>
   <string name="app_logo">Logo</string>
+    <string name="up_to_date">You are up to date!</string>
 </resources>

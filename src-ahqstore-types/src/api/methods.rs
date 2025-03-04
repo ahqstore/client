@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::AHQStoreApplication;
 
-use super::{ahqstore::AHQSTORE_COMMIT_URL, winget::WINGET_COMMIT_URL, RepoHomeData, CLIENT};
+use super::{ahqstore::AHQSTORE_COMMIT_URL, fdroid::FDROID_COMMIT_URL, linux::LINUX_COMMIT_URL, winget::WINGET_COMMIT_URL, RepoHomeData, CLIENT};
 
 #[derive(Serialize, Deserialize)]
 #[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
@@ -21,14 +21,14 @@ pub struct GHRepoCommit {
   pub sha: String,
 }
 
+
 pub enum OfficialManifestSource {
   AHQStore,
 
   #[doc = "Third Party Manifest Repo Adapted for use"]
   WinGet,
-  #[doc = "Third Party API Used"]
-  FlatHub,
-  #[doc = "Third Party API Used"]
+  Linux,
+  #[doc = "Third Party Manifest Repo Adapted for use"]
   FDroid,
 }
 
@@ -36,10 +36,13 @@ pub type Store = OfficialManifestSource;
 
 pub type GHRepoCommits = Vec<GHRepoCommit>;
 
+#[allow(unreachable_patterns)]
 pub async fn get_commit(store: OfficialManifestSource, token: Option<&String>) -> Option<String> {
   let mut builder = CLIENT.get(match store {
     OfficialManifestSource::AHQStore => AHQSTORE_COMMIT_URL,
     OfficialManifestSource::WinGet => WINGET_COMMIT_URL,
+    OfficialManifestSource::FDroid => FDROID_COMMIT_URL,
+    OfficialManifestSource::Linux => LINUX_COMMIT_URL,
     _ => {
       return None;
     }

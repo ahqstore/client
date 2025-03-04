@@ -1,4 +1,4 @@
-use super::{flatpak, get_all_commits, get_all_search, Commits, SearchEntry};
+use super::{linux, get_all_commits, get_all_search, Commits, SearchEntry};
 use anyhow::{Context, Result};
 use fuse_rust::{Fuse, Fuseable};
 use serde::Serialize;
@@ -111,7 +111,7 @@ pub async fn get_search(commit: Option<&Commits>, query: &str) -> Result<Vec<Res
   }
 
   #[cfg(any(feature = "all_platforms", target_os = "linux"))]
-  for val in flatpak::search(query).await.context("")? {
+  for val in linux::search(query).await.context("")? {
     res.push(RespSearchEntry::Owned(val));
   }
 

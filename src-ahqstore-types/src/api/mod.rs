@@ -26,7 +26,7 @@ pub mod ahqstore;
 pub mod winget;
 
 #[cfg(feature = "internet")]
-pub mod flatpak;
+pub mod linux;
 
 #[cfg(feature = "internet")]
 pub mod fdroid;

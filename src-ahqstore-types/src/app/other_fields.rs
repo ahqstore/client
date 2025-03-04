@@ -28,19 +28,13 @@ pub enum InstallerFormat {
   #[doc = "🎯 Stable after v2\n\n"]
   WindowsInstallerExe,
 
-  #[doc = "🔬 Planned as of v3\n\n"]
+  #[doc = "🔬 Planned in AHQ Store NEO\n\n"]
   WindowsUWPMsix,
 
   #[doc = "🎯 Stable as of v2\n\n"]
   LinuxAppImage,
 
-  #[doc = "🔬 Planned\n\n"]
-  LinuxFlatpak,
-
-  #[doc = "🔬 Planned\nNot allowed to use in AHQ Store repo\n\n"]
-  LinuxFlathubFlatpak,
-
-  #[doc = "🔬 Planned\n\n"]
+  #[doc = "🔬 Planned in AHQ Store NEO\n\n"]
   AndroidApkZip,
 }
 
@@ -55,9 +49,6 @@ impl Display for InstallerFormat {
         InstallerFormat::WindowsInstallerMsi => "Windows Installer Msi",
         InstallerFormat::WindowsUWPMsix => "UWP Windows Msix Package",
         InstallerFormat::LinuxAppImage => "Linux App Image",
-        InstallerFormat::LinuxFlatpak => "Linux Flatpak",
-        InstallerFormat::LinuxFlathubFlatpak =>
-          "Linux Flatpak (Flathub, not allowed in ahq store repo)",
         InstallerFormat::AndroidApkZip => "Universal Android Apk Zip Package",
       }
     )

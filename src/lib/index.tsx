@@ -35,6 +35,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   setUITheme = (theme: boolean) => setDark(theme);
 
   useEffect(() => {
+    document.querySelector("html")!!.style.setProperty("--win32-accent", window.accent);
+
     isWindows11().then(setWindows).catch(console.error);
   }, []);
 

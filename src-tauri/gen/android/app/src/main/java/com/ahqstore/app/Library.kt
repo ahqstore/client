@@ -3,6 +3,9 @@ package com.ahqstore.app
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.view.View
 import android.widget.RemoteViews
 
 class Library : AppWidgetProvider() {
@@ -18,11 +21,11 @@ class Library : AppWidgetProvider() {
   }
 
   override fun onEnabled(context: Context) {
-    // Enter relevant functionality for when the first widget is created
+    
   }
 
   override fun onDisabled(context: Context) {
-    // Enter relevant functionality for when the last widget is disabled
+    
   }
 }
 
@@ -33,10 +36,23 @@ internal fun updateAppWidget(
 ) {
   val widgetText = context.getString(R.string.appwidget_text)
   
-  // Construct the RemoteViews object
-  val views = RemoteViews(context.packageName, R.layout.library)
-  //views.setTextViewText(R.id.appwidget_text, widgetText)
+  val intent = Intent(context, UpdateDataService::class.java).apply {
+    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+    data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+  }
 
-  // Instruct the widget manager to update the widget
+  val views = RemoteViews(context.packageName, R.layout.library).apply {
+    // Set up the RemoteViews object to use a RemoteViews adapter.
+    // This adapter connects to a RemoteViewsService through the
+    // specified intent.
+    // This is how you populate the data.
+    setRemoteAdapter(R.id.list, intent)
+
+    
+    setEmptyView(R.id.list, R.id.up_to_date)
+  }
+
+  // Do additional processing specific to this widget.
+
   appWidgetManager.updateAppWidget(appWidgetId, views)
 }

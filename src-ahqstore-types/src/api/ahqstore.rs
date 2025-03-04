@@ -1,12 +1,12 @@
 //! Declared URLS for:
-//! AHQ Store Community Repository Parsable Urls (ahqstore/apps)
+//! AHQ Store Community Repository Parsable Urls (ahqstore/repo_community)
 //!
-//! Repository Mirror : <https://github.com/ahqstore/apps>
+//! Repository : <https://github.com/ahqstore/repo_community>
 
 use std::sync::LazyLock;
 
-pub static AHQSTORE_COMMIT_URL: &'static str = "https://api.github.com/repos/ahqstore/apps/commits";
-pub static AHQSTORE_BASE_URL: &'static str = "https://rawcdn.githack.com/ahqstore/apps/{COMMIT}";
+pub static AHQSTORE_COMMIT_URL: &'static str = "https://api.github.com/repos/ahqstore/repo_community/commits";
+pub static AHQSTORE_BASE_URL: &'static str = "https://rawcdn.githack.com/ahqstore/repo_community/{COMMIT}";
 
 pub static AHQSTORE_APP_URL: LazyLock<String> =
   LazyLock::new(|| format!("{AHQSTORE_BASE_URL}/db/apps/{{APP_ID}}.json"));

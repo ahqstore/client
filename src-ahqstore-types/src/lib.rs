@@ -216,7 +216,7 @@ impl Clone for Commits {
   fn clone(&self) -> Self {
     Self {
       ahqstore: self.ahqstore.clone(),
-      winget: self.winget.clone(),
+      alt: self.alt.clone(),
     }
   }
 }

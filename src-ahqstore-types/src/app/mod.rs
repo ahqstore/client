@@ -266,8 +266,6 @@ impl AHQStoreApplication {
 
     match &url.installerType {
       InstallerFormat::LinuxAppImage => Some(&url),
-      InstallerFormat::LinuxFlatpak => Some(&url),
-      InstallerFormat::LinuxFlathubFlatpak => Some(&url),
       _ => None,
     }
   }
@@ -276,8 +274,6 @@ impl AHQStoreApplication {
   pub fn get_linux_extension(&self) -> Option<&'static str> {
     match self.get_linux_download()?.installerType {
       InstallerFormat::LinuxAppImage => Some(".AppImage"),
-      InstallerFormat::LinuxFlatpak => Some(".flatpak"),
-      InstallerFormat::LinuxFlathubFlatpak => Some(""),
       _ => None,
     }
   }

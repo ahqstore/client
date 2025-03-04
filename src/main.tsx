@@ -10,6 +10,12 @@ import { AuthProvider } from "./lib/auth/provider";
 import { ExperimentProvider } from "./lib/experiment";
 import { HomeProvider } from "./lib/data";
 
+declare global {
+  interface Window {
+    accent: string;
+  }
+}
+
 export const window = getCurrentWindow();
 (async () => {
   try {

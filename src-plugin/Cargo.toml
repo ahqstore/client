@@ -15,12 +15,12 @@ ahqstore-types = { path = "../src-ahqstore-types" }
 anyhow = "1"
 ahqstore_gh_hash = "1"
 open = "5"
-serde_json = "1.0.138"
-chacha20poly1305 = { version = "0.10.1", features = ["heapless"] }
-bcrypt = "0.17.0"
-lazy_static = "1.5.0"
-reqwest = { version = "0.12.12", default-features = false, features = ["rustls-tls"] }
-tokio = { version = "1.43.0", features = ["time", "sync"] }
+serde_json = "1"
+chacha20poly1305 = { version = "0.10", features = ["heapless"] }
+bcrypt = "0.17"
+lazy_static = "1"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+tokio = { version = "1", features = ["time", "sync"] }
 
 [target.'cfg(windows)'.dependencies]
 msi = "0.8"

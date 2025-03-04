@@ -57,9 +57,33 @@ pub struct InstallerOptionsWindows {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[doc = "🔬 Planned\n\n"]
 #[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+pub enum AndroidAbi {
+  Aarch64,
+  Armv7,
+  X86,
+  X64
+}
+
+impl AndroidAbi {
+  fn normalize(&self) -> &'static str {
+    match self {
+      &Self::Aarch64 => "android-aarch64",
+      &Self::Armv7 => "android-armv7",
+      &Self::X86 => "android-x86",
+      &Self::X64 => "android-x86_64"
+    }
+  }
+}
+
+#[allow(non_snake_case)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[doc = "🔬 Planned\n\n"]
+#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 pub struct InstallerOptionsAndroid {
   #[doc = "🎯 Introduced in v2\n\n"]
   pub assetId: u8,
+  pub min_sdk: u32,
+  pub abi: Vec<AndroidAbi>
 }
 
 #[allow(non_snake_case)]
@@ -101,7 +125,10 @@ impl InstallerOptions {
     push_install_arch!(arch -> self.linux, "linux-x86_64");
     push_install_arch!(arch -> self.linuxArm64, "linux-aarch64");
     push_install_arch!(arch -> self.linuxArm7, "linux-arm");
-    push_install_arch!(arch -> self.android, "android");
+
+    if let Some(x) = &self.android {
+      x.abi.iter().for_each(|x| arch.push(x.normalize()));
+    }
 
     arch
   }
