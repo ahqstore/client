@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen)]
+#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 pub struct InstallerOptions {
   #[doc = "🎯 Introduced in v1\n\n"]
   pub win32: Option<InstallerOptionsWindows>,
@@ -56,7 +56,7 @@ pub struct InstallerOptionsWindows {
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[doc = "🔬 Planned\n\n"]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+#[cfg_attr(feature = "js", wasm_bindgen)]
 pub enum AndroidAbi {
   Aarch64,
   Armv7,
