@@ -44,7 +44,7 @@ pub async fn get_all_commits(token: Option<String>) -> Result<Commits> {
     .context("http")?;
 
   #[cfg(target_os = "linux")]
-  let fdroid = methods::get_commit(Store::FDroid, token.as_ref())
+  let l = methods::get_commit(Store::FDroid, token.as_ref())
     .await
     .context("http")?;
 
@@ -57,7 +57,7 @@ pub async fn get_all_commits(token: Option<String>) -> Result<Commits> {
     #[cfg(target_os = "android")]
     alt: fdroid,
     #[cfg(target_os = "linux")]
-    alt: linux
+    alt: l
   })
 }
 
