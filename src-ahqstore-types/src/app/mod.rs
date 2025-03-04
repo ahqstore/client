@@ -139,15 +139,6 @@ impl AHQStoreApplication {
       resp.push_str("✅ Resources are valid\n");
     }
 
-    for (_, v) in self.downloadUrls.iter() {
-      match v.installerType {
-        InstallerFormat::LinuxFlathubFlatpak => {
-          resp.push_str("❌ LinuxFlathubFlatpak is not allowed in ahq store repository, you must use LinuxFlatpak\n");
-        }
-        _ => {}
-      }
-    }
-
     resp
   }
 
