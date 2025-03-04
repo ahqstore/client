@@ -5,8 +5,10 @@
 
 use std::sync::LazyLock;
 
-pub static AHQSTORE_COMMIT_URL: &'static str = "https://api.github.com/repos/ahqstore/repo_community/commits";
-pub static AHQSTORE_BASE_URL: &'static str = "https://rawcdn.githack.com/ahqstore/repo_community/{COMMIT}";
+pub static AHQSTORE_COMMIT_URL: &'static str =
+  "https://api.github.com/repos/ahqstore/repo_community/commits";
+pub static AHQSTORE_BASE_URL: &'static str =
+  "https://rawcdn.githack.com/ahqstore/repo_community/{COMMIT}";
 
 pub static AHQSTORE_APP_URL: LazyLock<String> =
   LazyLock::new(|| format!("{AHQSTORE_BASE_URL}/db/apps/{{APP_ID}}.json"));

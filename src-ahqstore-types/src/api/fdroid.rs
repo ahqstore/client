@@ -1,4 +1,3 @@
-
 //! Declared URLS for:
 //! AHQ Store F-Droid Repo (f-droid mirror)
 //!

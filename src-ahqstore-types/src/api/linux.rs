@@ -5,7 +5,8 @@
 
 use std::sync::LazyLock;
 
-pub static LINUX_COMMIT_URL: &'static str = "https://api.github.com/repos/ahqstore/repo_linux/commits";
+pub static LINUX_COMMIT_URL: &'static str =
+  "https://api.github.com/repos/ahqstore/repo_linux/commits";
 pub static LINUX_BASE_URL: &'static str = "https://rawcdn.githack.com/ahqstore/repo_linux/{COMMIT}";
 
 pub static LINUX_APP_URL: LazyLock<String> =
@@ -13,8 +14,7 @@ pub static LINUX_APP_URL: LazyLock<String> =
 pub static LINUX_APP_ASSET_URL: LazyLock<String> =
   LazyLock::new(|| format!("{LINUX_BASE_URL}/db/res/{{APP_ID}}/{{ASSET}}"));
 
-pub static LINUX_TOTAL: LazyLock<String> =
-  LazyLock::new(|| format!("{LINUX_BASE_URL}/db/total"));
+pub static LINUX_TOTAL: LazyLock<String> = LazyLock::new(|| format!("{LINUX_BASE_URL}/db/total"));
 pub static LINUX_HOME: LazyLock<String> =
   LazyLock::new(|| format!("{LINUX_BASE_URL}/db/home.json"));
 

@@ -1,4 +1,4 @@
-use super::{linux, get_all_commits, get_all_search, Commits, SearchEntry};
+use super::{get_all_commits, get_all_search, linux, Commits, SearchEntry};
 use anyhow::{Context, Result};
 use fuse_rust::{Fuse, Fuseable};
 use serde::Serialize;
@@ -55,7 +55,7 @@ impl Fuseable for RespSearchEntry {
     match self {
       RespSearchEntry::Owned(x) => x.lookup(key),
       RespSearchEntry::Static(x) => x.lookup(key),
-      RespSearchEntry::None => None
+      RespSearchEntry::None => None,
     }
   }
 
@@ -70,16 +70,16 @@ impl Fuseable for RespSearchEntry {
 
 impl Serialize for RespSearchEntry {
   fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-      where
-          S: serde::Serializer {
-      match self {
-        RespSearchEntry::Owned(x) => x.serialize(serializer),
-        RespSearchEntry::Static(x) => x.serialize(serializer),
-        RespSearchEntry::None => "".serialize(serializer)
-      }
+  where
+    S: serde::Serializer,
+  {
+    match self {
+      RespSearchEntry::Owned(x) => x.serialize(serializer),
+      RespSearchEntry::Static(x) => x.serialize(serializer),
+      RespSearchEntry::None => "".serialize(serializer),
+    }
   }
 }
-
 
 pub async fn get_search(commit: Option<&Commits>, query: &str) -> Result<Vec<RespSearchEntry>> {
   let search = get_search_inner();

@@ -1,4 +1,9 @@
-#![allow(dead_code, unused_imports, non_local_definitions, reason = "Conditional compilation")]
+#![allow(
+  dead_code,
+  unused_imports,
+  non_local_definitions,
+  reason = "Conditional compilation"
+)]
 
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, to_string, to_string_pretty};
@@ -109,7 +114,7 @@ pub enum Command {
 
   AddPkg(RefId, Package),
 
-  ExecutableRunStatus(RefId, Success)
+  ExecutableRunStatus(RefId, Success),
 }
 
 impl Command {
@@ -157,7 +162,7 @@ pub struct Library {
   pub progress: f64,
   pub max: u64,
   pub app: Option<AHQStoreApplication>,
-  pub user: String
+  pub user: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -223,7 +228,7 @@ impl Clone for Commits {
 
 impl From<&Commits> for Commits {
   fn from(value: &Commits) -> Self {
-      value.clone()
+    value.clone()
   }
 }
 
@@ -257,7 +262,7 @@ pub enum ResponseToSend {
   InstalledPkg(RefId),
 
   TerminateBlock(RefId),
-  RunExecutable(RefId, String)
+  RunExecutable(RefId, String),
 }
 
 #[cfg_attr(feature = "js", wasm_bindgen)]

@@ -13,14 +13,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::AHQStoreApplication;
 
-use super::{ahqstore::AHQSTORE_COMMIT_URL, fdroid::FDROID_COMMIT_URL, linux::LINUX_COMMIT_URL, winget::WINGET_COMMIT_URL, RepoHomeData, CLIENT};
+use super::{
+  ahqstore::AHQSTORE_COMMIT_URL, fdroid::FDROID_COMMIT_URL, linux::LINUX_COMMIT_URL,
+  winget::WINGET_COMMIT_URL, RepoHomeData, CLIENT,
+};
 
 #[derive(Serialize, Deserialize)]
 #[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 pub struct GHRepoCommit {
   pub sha: String,
 }
-
 
 pub enum OfficialManifestSource {
   AHQStore,
@@ -143,7 +145,7 @@ pub async fn get_full_search(
   let mut i = 1;
   while i <= total {
     let mut search_result = get_search(search, commit, &i.to_string()).await?;
-    
+
     result.append(&mut search_result);
     i += 1;
   }

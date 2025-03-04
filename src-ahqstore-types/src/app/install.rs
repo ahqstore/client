@@ -28,7 +28,7 @@ pub struct InstallerOptions {
 #[cfg_attr(feature = "js", wasm_bindgen)]
 pub enum WindowsInstallScope {
   User,
-  Machine
+  Machine,
 }
 
 #[allow(non_snake_case)]
@@ -61,7 +61,7 @@ pub enum AndroidAbi {
   Aarch64,
   Armv7,
   X86,
-  X64
+  X64,
 }
 
 impl AndroidAbi {
@@ -70,7 +70,7 @@ impl AndroidAbi {
       &Self::Aarch64 => "android-aarch64",
       &Self::Armv7 => "android-armv7",
       &Self::X86 => "android-x86",
-      &Self::X64 => "android-x86_64"
+      &Self::X64 => "android-x86_64",
     }
   }
 }
@@ -83,7 +83,7 @@ pub struct InstallerOptionsAndroid {
   #[doc = "🎯 Introduced in v2\n\n"]
   pub assetId: u8,
   pub min_sdk: u32,
-  pub abi: Vec<AndroidAbi>
+  pub abi: Vec<AndroidAbi>,
 }
 
 #[allow(non_snake_case)]

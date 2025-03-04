@@ -14,9 +14,21 @@ use super::{
   ahqstore::{
     AHQSTORE_APPS_DEV, AHQSTORE_APP_ASSET_URL, AHQSTORE_APP_URL, AHQSTORE_DEV_DATA, AHQSTORE_HOME,
     AHQSTORE_MAP, AHQSTORE_SEARCH, AHQSTORE_TOTAL,
-  }, fdroid::{FDROID_APP_ASSET_URL, FDROID_APP_URL, FDROID_SEARCH, FDROID_TOTAL}, linux::{self, LINUX_APP_ASSET_URL, LINUX_APP_URL, LINUX_SEARCH, LINUX_TOTAL}, methods::{self, OfficialManifestSource, Store}, winget::{
-    WINGET_APPS_DEV, WINGET_APP_ASSET_URL, WINGET_APP_URL, WINGET_MAP, WINGET_SEARCH, WINGET_TOTAL,
-  }, SearchEntry
+  },
+  fdroid::{
+    FDROID_APPS_DEV, FDROID_APP_ASSET_URL, FDROID_APP_URL, FDROID_DEV_DATA, FDROID_MAP,
+    FDROID_SEARCH, FDROID_TOTAL,
+  },
+  linux::{
+    self, LINUX_APPS_DEV, LINUX_APP_ASSET_URL, LINUX_APP_URL, LINUX_DEV_DATA, LINUX_MAP,
+    LINUX_SEARCH, LINUX_TOTAL,
+  },
+  methods::{self, OfficialManifestSource, Store},
+  winget::{
+    WINGET_APPS_DEV, WINGET_APP_ASSET_URL, WINGET_APP_URL, WINGET_DEV_DATA, WINGET_MAP,
+    WINGET_SEARCH, WINGET_TOTAL,
+  },
+  SearchEntry,
 };
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
@@ -26,7 +38,6 @@ pub struct Commits {
   pub ahqstore: String,
   pub alt: String,
 }
-
 
 pub async fn get_all_commits(token: Option<String>) -> Result<Commits> {
   let ahqstore = methods::get_commit(Store::AHQStore, token.as_ref())
@@ -48,16 +59,16 @@ pub async fn get_all_commits(token: Option<String>) -> Result<Commits> {
     .await
     .context("http")?;
 
-  Ok(Commits { 
-    ahqstore, 
-    #[cfg(feature="js")]
+  Ok(Commits {
+    ahqstore,
+    #[cfg(feature = "js")]
     alt: "".into(),
     #[cfg(windows)]
     alt: winget,
     #[cfg(target_os = "android")]
     alt: fdroid,
     #[cfg(target_os = "linux")]
-    alt: l
+    alt: l,
   })
 }
 
@@ -78,7 +89,6 @@ pub async fn get_total_maps_by_source(
   methods::get_total_maps(total, commit).await.context("")
 }
 
-
 pub async fn get_home(ahqstore_repo_commit: &str) -> Result<Vec<(String, Vec<String>)>> {
   let home = &*AHQSTORE_HOME;
 
@@ -86,7 +96,6 @@ pub async fn get_home(ahqstore_repo_commit: &str) -> Result<Vec<(String, Vec<Str
     .await
     .context("")
 }
-
 
 pub async fn get_search_by_source(
   source: OfficialManifestSource,
@@ -96,14 +105,12 @@ pub async fn get_search_by_source(
   let search = match source {
     OfficialManifestSource::AHQStore => &*AHQSTORE_SEARCH,
     OfficialManifestSource::WinGet => &*WINGET_SEARCH,
-    _ => {
-      return Err(anyhow!(""));
-    }
+    OfficialManifestSource::FDroid => &*FDROID_SEARCH,
+    OfficialManifestSource::Linux => &*LINUX_SEARCH,
   };
 
   methods::get_search(search, commit, id).await.context("")
 }
-
 
 pub async fn get_all_maps_by_source(
   source: OfficialManifestSource,
@@ -112,9 +119,8 @@ pub async fn get_all_maps_by_source(
   let (total, map) = match source {
     OfficialManifestSource::AHQStore => (&*AHQSTORE_TOTAL, &*AHQSTORE_MAP),
     OfficialManifestSource::WinGet => (&*WINGET_TOTAL, &*WINGET_MAP),
-    _ => {
-      return Err(anyhow!("source not supported"));
-    }
+    OfficialManifestSource::FDroid => (&*FDROID_TOTAL, &*FDROID_MAP),
+    OfficialManifestSource::Linux => (&*LINUX_TOTAL, &*LINUX_MAP),
   };
 
   let (total, map) = (total.as_str(), map.as_str());
@@ -122,12 +128,10 @@ pub async fn get_all_maps_by_source(
   methods::get_full_map(total, map, commit).await.context("")
 }
 
-
 pub async fn get_all_search(commit: &Commits) -> Result<Vec<SearchEntry>> {
   let total = &*AHQSTORE_TOTAL;
   let search = &*AHQSTORE_SEARCH;
 
-  #[allow(unused_mut)]
   let mut result: Vec<SearchEntry> = methods::get_full_search(total, search, &commit.ahqstore)
     .await
     .context("")?;
@@ -136,7 +140,7 @@ pub async fn get_all_search(commit: &Commits) -> Result<Vec<SearchEntry>> {
     "windows" => (&*WINGET_TOTAL, &*WINGET_SEARCH),
     "linux" => (&*LINUX_TOTAL, &*LINUX_SEARCH),
     "android" => (&*FDROID_TOTAL, &*FDROID_SEARCH),
-    _ => unreachable!()
+    _ => unreachable!(),
   };
 
   result.append(
@@ -150,7 +154,7 @@ pub async fn get_all_search(commit: &Commits) -> Result<Vec<SearchEntry>> {
 
 pub type RespMapData = super::MapData;
 
-
+#[allow(unreachable_patterns)]
 pub async fn get_map_by_source(
   source: OfficialManifestSource,
   commit: &str,
@@ -159,6 +163,8 @@ pub async fn get_map_by_source(
   let map = match source {
     OfficialManifestSource::AHQStore => &*AHQSTORE_MAP,
     OfficialManifestSource::WinGet => &*WINGET_MAP,
+    OfficialManifestSource::FDroid => &*FDROID_MAP,
+    OfficialManifestSource::Linux => &*LINUX_MAP,
     _ => {
       return Err(anyhow!("source not supported"));
     }
@@ -167,94 +173,76 @@ pub async fn get_map_by_source(
   methods::get_map(map, commit, id).await.context("")
 }
 
-
-pub async fn get_devs_apps(
-  commit: &Commits,
-  dev_id: &str,
-) -> Result<Vec<String>> {
-  match dev_id {
-    "linux" | "fdroid" => {
-      // Not worth it to make the api (yet)
-      return Ok(vec![]);
-    }
-    _ => {}
+pub async fn get_devs_apps(commit: &Commits, dev_id: &str) -> Result<Vec<String>> {
+  let (commit, apps_dev) = match &dev_id[0..2] {
+    "a:" => (&commit.ahqstore, &*AHQSTORE_APPS_DEV),
+    e => (
+      &commit.alt,
+      match e {
+        "w:" => &*WINGET_APPS_DEV,
+        "a:" => &*FDROID_APPS_DEV,
+        "l:" => &*LINUX_APPS_DEV,
+        _ => unreachable!(),
+      },
+    ),
   };
 
-  // TODO
-  let (commit, apps_dev) = if dev_id.starts_with("winget_") {
-    (&commit.alt, &*WINGET_APPS_DEV)
-  } else {
-    (&commit.ahqstore, &*AHQSTORE_APPS_DEV)
-  };
-
-  methods::get_devs_apps(apps_dev, commit, dev_id)
+  methods::get_devs_apps(apps_dev, commit, &dev_id[2..])
     .await
     .context("")
 }
 
-// TODO Make it better
-pub async fn get_dev_data(
-  commit: &Commits,
-  id: &str,
-) -> Result<super::DevData> {
-  let dev_data = match id {
-    "winget" => {
-      return Ok(super::DevData {
-        name: "WinGet".into(),
-        id: "winget".into(),
-        github: "https://github.com/microsoft/winget-pkgs".into(),
-        avatar_url: "https://github.com/microsoft/winget-cli/blob/master/.github/images/WindowsPackageManager_Assets/ICO/PNG/_64.png?raw=true".into(),
-      });
-    }
-    "linux" => {
-      return Ok(super::DevData {
-        name: "Redistributed".into(),
-        id: "ahqstore".into(),
-        github: "https://github.com/ahqstore/repo_linux".into(),
-        avatar_url: "https://avatars.githubusercontent.com/u/136903279?s=400&u=4da0cd84d9d5b73fb0a072f056ccbf50ef56caa9&v=4".into(),
-      });
-    }
-    "fdroid" => {
-      return Ok(super::DevData {
-        name: "F-Droid".into(),
-        id: "fdroid".into(),
-        avatar_url: "https://avatars.githubusercontent.com/u/8239603?s=200&v=4".into(),
-        github: "https://github.com/f-droid".into(),
-      })
-    }
-    _ => &*AHQSTORE_DEV_DATA,
+pub async fn get_dev_data(commit: &Commits, id: &str) -> Result<super::DevData> {
+  let (commit, dev_data) = match &id[0..2] {
+    "a:" => (&commit.ahqstore, &*AHQSTORE_DEV_DATA),
+    e => (
+      &commit.alt,
+      match e {
+        "w:" => &*WINGET_DEV_DATA,
+        "a:" => &*FDROID_DEV_DATA,
+        "l:" => &*LINUX_DEV_DATA,
+        _ => unreachable!(),
+      },
+    ),
   };
 
-  methods::get_dev_data(dev_data, &commit.ahqstore, id)
+  methods::get_dev_data(dev_data, commit, &id[2..])
     .await
     .context("")
 }
 
 pub async fn get_app_asset(commit: &Commits, app_id: &str, asset: &str) -> Option<Vec<u8>> {
-  let (commit, app_asset_url) = if app_id.starts_with("winget_app_") {
-    (&commit.alt, &*WINGET_APP_ASSET_URL)
-  } else if app_id.contains(".") {
-    (&commit.alt, &*FDROID_APP_ASSET_URL)
-  } else if app_id.contains("linux_") {
-    (&commit.alt, &*LINUX_APP_ASSET_URL)
-  } else {
-    (&commit.ahqstore, &*AHQSTORE_APP_ASSET_URL)
+  let (commit, app_asset_url) = match &app_id[0..2] {
+    "a:" => (&commit.ahqstore, &*AHQSTORE_APP_ASSET_URL),
+    e => (
+      &commit.alt,
+      match e {
+        "w:" => &*WINGET_APP_ASSET_URL,
+        "a:" => &*FDROID_APP_ASSET_URL,
+        "l:" => &*LINUX_APP_ASSET_URL,
+        _ => unreachable!(),
+      },
+    ),
   };
 
-  methods::get_app_asset(app_asset_url, commit, app_id, asset).await
+  methods::get_app_asset(app_asset_url, commit, &app_id[2..], asset).await
 }
 
-
 pub async fn get_app(commit: &Commits, app_id: &str) -> Result<AHQStoreApplication> {
-  let (commit, app_url) = if app_id.starts_with("winget_app_") {
-    (&commit.alt, &*WINGET_APP_URL)
-  } else if app_id.contains(".") {
-    (&commit.alt, &*FDROID_APP_URL)
-  } else if app_id.contains("linux_") {
-    (&commit.alt, &*LINUX_APP_URL)
-  } else {
-    (&commit.ahqstore, &*AHQSTORE_APP_URL)
+  let (commit, app_asset_url) = match &app_id[0..2] {
+    "a:" => (&commit.ahqstore, &*AHQSTORE_APP_URL),
+    e => (
+      &commit.alt,
+      match e {
+        "w:" => &*WINGET_APP_URL,
+        "a:" => &*FDROID_APP_URL,
+        "l:" => &*LINUX_APP_URL,
+        _ => unreachable!(),
+      },
+    ),
   };
 
-  methods::get_app(app_url, commit, app_id).await.context("")
+  methods::get_app(app_asset_url, commit, &app_id[2..])
+    .await
+    .context("HTTP Error")
 }
