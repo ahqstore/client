@@ -110,21 +110,10 @@ pub async fn get_search(commit: Option<&Commits>, query: &str) -> Result<Vec<Res
     res.push(RespSearchEntry::Static(&search[val.index]));
   }
 
-  #[cfg(any(feature = "all_platforms", target_os = "linux"))]
-  for val in linux::search(query).await.context("")? {
-    res.push(RespSearchEntry::Owned(val));
-  }
+  // #[cfg(any(feature = "all_platforms", target_os = "linux"))]
+  // for val in linux::search(query).await.context("")? {
+  //   res.push(RespSearchEntry::Owned(val));
+  // }
 
-  let mut final_res = vec![];
-  for val in FUSE.search_text_in_fuse_list(query, &res) {
-    let dummy = RespSearchEntry::None;
-
-    let resp = std::mem::replace(&mut res[val.index], dummy);
-
-    final_res.push(resp);
-  }
-
-  drop(res);
-
-  Ok(final_res)
+  Ok(res)
 }
