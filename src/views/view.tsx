@@ -1,8 +1,8 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import {
-  AppsRegular,
-  AppsFilled,
+  AppGenericRegular as AppsRegular,
+  AppGenericFilled as AppsFilled,
 
   SettingsRegular,
   SettingsFilled,
@@ -98,7 +98,7 @@ export function ApplicationView() {
       <div className="h-full w-20 flex flex-col gap-2 px-2 pb-2 items-center text-center">
         <NavigationSidebar item={item} setItem={setItem} />
       </div>
-      <div className="w-full h-full rounded-tl-xl p-3 bg-accent/70">
+      <div className="w-full h-full rounded-tl-xl p-3 bg-accent/50">
         <h1>Hello World</h1>
       </div>
     </div>;

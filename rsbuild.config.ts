@@ -17,6 +17,11 @@ export default defineConfig({
       index: './src/main.tsx',
     },
   },
+  dev: {
+    watchFiles: {
+      paths: ["./src/**/*"],
+    },
+  },
   server: {
     port: 1420,
     strictPort: true,
