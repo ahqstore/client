@@ -37,7 +37,7 @@ function App() {
                 }
               </PopoverTrigger>
 
-              <PopoverContent className="shadow-sm w-auto h-auto p-2 backdrop-blur-2xl stylish rounded-lg border border-neutral-content/20">
+              <PopoverContent className={`!bg-accent shadow-sm w-auto h-auto p-2 backdrop-blur-3xl stylish rounded-lg border border-neutral-content/20`}>
                 <MenuList className="bg-transparent">
                   <MenuItem
                     style={{ background: "transparent" }}

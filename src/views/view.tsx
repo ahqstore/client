@@ -1,8 +1,8 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import {
-  AppGenericRegular as AppsRegular,
-  AppGenericFilled as AppsFilled,
+  AppsRegular,
+  AppsFilled,
 
   SettingsRegular,
   SettingsFilled,
@@ -13,17 +13,24 @@ import {
   LibraryRegular,
   LibraryFilled,
 
+  WindowDevToolsFilled,
+  WindowDevToolsRegular,
+
+  MegaphoneLoudRegular,
+  MegaphoneLoudFilled,
+
   ToolboxRegular,
   ToolboxFilled
 } from "@fluentui/react-icons";
 
 import { platform } from "@tauri-apps/plugin-os";
-import { Library, LayoutGrid, Settings, User, LibraryBig } from "lucide-react";
+import { Library, LayoutGrid, Settings, User, LibraryBig, Code2Icon } from "lucide-react";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import NavigationSidebar from "./nav";
 import { useExperiment } from "@/lib/experiment";
 import { useAuth } from "@/lib/auth/provider";
+import Changelog from "./changelogs";
 
 export const items:
   ({
@@ -61,9 +68,9 @@ export const items:
       iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
     },
     {
-      name: "Dev",
+      name: "Developer",
       id: 3,
-      hidden: () => useAuth()?.dev || true,
+      hidden: () => !(useAuth()?.dev || false),
       icon: <ToolboxRegular className="size-[1.5em]" />,
       iconFilled: <ToolboxFilled className="size-[1.5em]" style={{ color: "var(--win32-accent)" }} />,
       iconMobile: <ToolboxRegular className="size-[1.5em]" />,
@@ -73,14 +80,23 @@ export const items:
       name: "Lab",
       id: 6,
       hidden: () => !useExperiment(),
-      icon: <ToolboxRegular className="size-[1.5em]" />,
-      iconFilled: <ToolboxFilled className="size-[1.5em]" style={{ color: "var(--win32-accent)" }} />,
-      iconMobile: <ToolboxRegular className="size-[1.5em]" />,
-      iconMobileFilled: <ToolboxFilled className="size-[1.5em]" />,
+      icon: <WindowDevToolsRegular className="size-[1.5em]" />,
+      iconFilled: <WindowDevToolsFilled className="size-[1.5em]" style={{ color: "var(--win32-accent)" }} />,
+      iconMobile: <Code2Icon className="size-[1.5em]" />,
+      iconMobileFilled: <Code2Icon className="size-[1.5em]" />,
+    },
+    {
+      name: "Updates",
+      id: 7,
+      hidden: () => !useMediaQuery("(min-width: 640px)"),
+      icon: <MegaphoneLoudRegular className="size-[1.5em]" />,
+      iconFilled: <MegaphoneLoudFilled className="size-[1.5em]" style={{ color: "var(--win32-accent)" }} />,
+      iconMobile: <Settings size="1.5em" />,
+      iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
     },
     {
       name: "Settings",
-      id: 7,
+      id: 8,
       icon: <SettingsRegular className="size-[1.5em]" />,
       iconFilled: <SettingsFilled className="size-[1.5em]" style={{ color: "var(--win32-accent)" }} />,
       iconMobile: <Settings size="1.5em" />,
@@ -93,24 +109,55 @@ export function ApplicationView() {
 
   const desktop = useMediaQuery("(min-width: 640px)");
 
+  const ui = useMemo(() => <GetJsx item={item} />, [item]);
+
   if (desktop) {
     return <div className="mt-2 w-full h-full flex">
-      <div className="h-full w-20 flex flex-col gap-2 px-2 pb-2 items-center text-center">
+      <div className="animate h-full w-20 flex flex-col gap-2 px-2 pb-2 items-center text-center">
         <NavigationSidebar item={item} setItem={setItem} />
       </div>
-      <div className="w-full h-full rounded-tl-xl p-3 bg-accent/50">
-        <h1>Hello World</h1>
+      <div className="w-full h-full flex flex-col space-y-2 rounded-tl-xl p-3 bg-accent/50">
+        {ui}
       </div>
     </div>;
   }
 
   return <div className="w-full h-full flex flex-col">
+    <div className="h-full w-full flex flex-col space-y-2 p-2">
+      {ui}
+    </div>
     <BottomNavigation item={item} setItem={setItem} />
   </div>;
 }
 
+
+interface Props {
+  item: number;
+}
+
+function GetJsx({ item }: Props) {
+  switch (item) {
+    case 0:
+      return <>APps</>
+    case 1:
+      return <>Library</>
+    case 2:
+      return <>Profile</>
+    case 3:
+      return <>Developer</>
+    case 6:
+      return <>Lab</>
+    case 7:
+      return <Changelog />
+    case 8:
+      return <>Settings</>
+    default:
+      return <>Not Found</>
+  }
+}
+
 function BottomNavigation({ item, setItem }: { item: number, setItem: (_: number) => void }) {
-  return <div className="dock dock-xl bg-neutral/30">
+  return <div className="dock dock-xl bg-neutral/30" style={{ position: "initial" }}>
     {
       items
         .filter((s) => !(s.hidden && s.hidden()))

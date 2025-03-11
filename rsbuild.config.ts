@@ -33,4 +33,11 @@ export default defineConfig({
       "@controls": path.resolve(__dirname, "./src/controls"),
     },
   },
+  tools: {
+    rspack: {
+      watchOptions: {
+        ignored: /^(?!.*\/src\/).*/
+      }
+    }
+  }
 });

@@ -1,0 +1,4 @@
+.category:hover .chv,
+.chv:hover {
+  @apply bg-neutral-content/20;
+}
