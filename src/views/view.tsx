@@ -112,8 +112,8 @@ export function ApplicationView() {
   const ui = useMemo(() => <GetJsx item={item} />, [item]);
 
   if (desktop) {
-    return <div className="mt-2 w-full h-full flex">
-      <div className="animate h-full w-20 flex flex-col gap-2 px-2 pb-2 items-center text-center">
+    return <div className="mt-2 w-full h-full flex overflow-hidden">
+      <div className="animate h-full w-20 flex flex-col gap-2 px-2 pb-2 items-center text-center overflow-hidden overflow-y-scroll">
         <NavigationSidebar item={item} setItem={setItem} />
       </div>
       <div className="w-full h-full flex flex-col space-y-2 rounded-tl-xl p-3 bg-accent/50">
@@ -122,8 +122,8 @@ export function ApplicationView() {
     </div>;
   }
 
-  return <div className="w-full h-full flex flex-col">
-    <div className="h-full w-full flex flex-col space-y-2 p-2">
+  return <div className="w-full h-full flex flex-col overflow-hidden">
+    <div className="h-full w-full flex flex-col space-y-2 p-2 overflow-scroll">
       {ui}
     </div>
     <BottomNavigation item={item} setItem={setItem} />
