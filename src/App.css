@@ -1,13 +1,19 @@
 @import "tailwindcss";
-@import "./views/view.css";
-@import "./components/category.css";
-
 @custom-variant dark (&:is(.dark *));
 
 @variant dark (&:is(.dark *));
 @plugin "tailwindcss-animate";
 
 @plugin "daisyui";
+
+/* Pages */
+@import "./views/apps/app.css";
+
+/* Views */
+@import "./views/view.css";
+
+/* Components */
+@import "./components/category.css";
 
 :root {
   --background: hsl(0 0% 100%);
@@ -59,6 +65,8 @@
   --chart-5: hsl(27 87% 67%);
 
   --radius: 0.6rem;
+
+  scrollbar-color: unset !important;
 }
 
 .dark {
@@ -169,10 +177,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-::-webkit-scrollbar {
-  display: none;
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -241,4 +245,9 @@ html:not(.not-win) {
 
 .readd>div {
   @apply flex flex-col gap-2;
+}
+
+::-webkit-scrollbar {
+  display: none !important;
+  size: 0px !important;
 }

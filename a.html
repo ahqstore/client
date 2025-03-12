@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Store-Style UI</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: #ffffff;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        gap: 16px;
+      }
+
+      .container {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .hero {
+        position: relative;
+        background: url("https://wallpapers.com/images/hd/destiny-logo-1n7t45dciywzuwck.jpg")
+          center/cover;
+        border-radius: 16px;
+        overflow: hidden;
+        height: 400px;
+        display: flex;
+        align-items: flex-start;
+        padding: 24px;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to right,
+          rgba(0, 0, 0, 0.8),
+          rgba(0, 0, 0, 0.2)
+        );
+        z-index: 0;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+        margin: 0;
+      }
+
+      .hero p {
+        font-size: 18px;
+        margin: 8px 0 16px;
+        color: #ccc;
+      }
+
+      .hero button {
+        background-color: #ffffff;
+        color: #000;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .hero button:hover {
+        background-color: #e0e0e0;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .card {
+        background: #1e1e1e;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .card img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+      }
+
+      .card-content {
+        padding: 12px;
+      }
+
+      .card h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #fff;
+      }
+
+      .card p {
+        margin: 4px 0 0;
+        font-size: 14px;
+        color: #aaa;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1>New & Notable PC Games</h1>
+          <p>Enjoy this collection of must-have games</p>
+          <button>See details</button>
+        </div>
+      </div>
+
+      <!-- Cards Section -->
+      <div class="cards">
+        <div class="card">
+          <img src="https://via.placeholder.com/240x120" alt="Destiny 2" />
+          <div class="card-content">
+            <h3>Destiny 2</h3>
+            <p>Epic multiplayer adventure!</p>
+          </div>
+        </div>
+        <div class="card">
+          <img src="https://via.placeholder.com/240x120" alt="Valorant" />
+          <div class="card-content">
+            <h3>Valorant</h3>
+            <p>Tactical FPS action</p>
+          </div>
+        </div>
+        <div class="card">
+          <img
+            src="https://via.placeholder.com/240x120"
+            alt="Shamrock Showdown"
+          />
+          <div class="card-content">
+            <h3>Shamrock Showdown</h3>
+            <p>Luck meets strategy!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

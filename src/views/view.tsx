@@ -31,6 +31,7 @@ import NavigationSidebar from "./nav";
 import { useExperiment } from "@/lib/experiment";
 import { useAuth } from "@/lib/auth/provider";
 import Changelog from "./changelogs";
+import { AppsHome } from "./apps";
 
 export const items:
   ({
@@ -138,7 +139,7 @@ interface Props {
 function GetJsx({ item }: Props) {
   switch (item) {
     case 0:
-      return <>APps</>
+      return <AppsHome />
     case 1:
       return <>Library</>
     case 2:
