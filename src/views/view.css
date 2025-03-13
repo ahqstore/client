@@ -1,6 +1,6 @@
 @layer utilities {
   .nav_item {
-    @apply hover:bg-neutral-content/10 gap-1;
+    @apply hover:bg-accent/10 hover:dark:bg-neutral-content/10 gap-1;
   }
 
   .nav_item svg {

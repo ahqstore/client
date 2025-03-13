@@ -1,5 +1,5 @@
 .hero {
-  @apply min-w-full max-w-full lg:min-w-[65%] lg:max-w-[65%] lg:h-96 h-80 rounded-lg;
+  @apply min-w-full max-w-full lg:min-w-[58%] lg:max-w-[58%] xl:min-w-[65%] xl:max-w-[65%] lg:h-96 md:h-80 h-40 rounded-lg;
 
   @apply overflow-hidden flex p-6 relative;
   align-items: flex-start;
@@ -23,7 +23,7 @@
 }
 
 .hero button {
-  @apply relative overflow-hidden mt-12 rounded-xl bg-primary text-primary-foreground text-xl py-2 px-6 cursor-pointer transition-transform duration-200 ease-in-out backdrop-blur-md shadow-md;
+  @apply hidden md:block relative overflow-hidden mt-12 rounded-xl bg-primary text-primary-foreground text-xl py-2 px-6 cursor-pointer transition-transform duration-200 ease-in-out backdrop-blur-md shadow-md;
 }
 
 .hero button:hover {
@@ -36,9 +36,31 @@
 }
 
 .cards {
-  @apply grid grid-cols-2 gap-3 w-full;
+  @apply max-h-[100%] grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-5 w-full;
 }
 
 .cards>div {
-  @apply w-[2fr] h-[1fr] min-h-24 rounded-lg lg:hover:translate-[-3px] cursor-pointer bg-accent-foreground/10;
+  @apply w-[2fr] h-[1fr] min-h-24 rounded-lg lg:hover:translate-[-3px] cursor-pointer bg-accent-foreground/10 relative;
+}
+
+.cards>div>div:nth-child(1) {
+  font-family: Arial, sans-serif;
+  @apply absolute z-0 w-full h-full left-0 top-0 rounded-lg;
+  @apply from-primary-foreground/10 hover:from-primary-foreground/0 via-primary-foreground/10 to-primary-foreground/40 bg-gradient-to-br;
+
+  @apply flex flex-col items-end justify-end p-6;
+  @apply text-xl text-transparent md:text-muted font-bold;
+}
+
+.cards>div:nth-child(1) {
+  @apply col-span-2 min-h-[1fr] max-h-[1fr];
+}
+
+.cards>div>img {
+  @apply rounded-lg h-full w-full;
+  object-fit: cover;
+}
+
+.cards>div:hover {
+  box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 50%, transparent);
 }

@@ -13,7 +13,7 @@ export function AppsHome() {
       </div>
     </div>
 
-    <div className="flex flex-col lg:flex-row grow-0 w-full gap-3 animate">
+    <div className="flex flex-col mt-3 lg:flex-row grow-0 w-full gap-5 animate">
       <div className="hero" style={{ background: `url("https://www.39digits.com/static/5cda054ca018a2f574e6a08a533ff251/2bef9/firefox-logo-banner.png") center/cover` }}>
         <div></div>
         <div className="flex flex-col h-full">
@@ -24,22 +24,26 @@ export function AppsHome() {
             <button>Explore Firefox</button>
           </div>
 
-          <h3 className="mt-auto mb-2">&copy; Mozilla Firefox</h3>
+          <h3 className="mt-auto mb-2 hidden md:block">Mozilla Firefox</h3>
         </div>
       </div>
 
       <div className="cards">
         <div>
-          A
+          <div>
+            VLC Media Player
+          </div>
+          <img src="https://image.winudf.com/v2/image1/b3JnLnZpZGVvbGFuLnZsY19iYW5uZXJfMTU1NTA2ODYzMl8wNDA/banner.jpg?fakeurl=1&w=600" />
         </div>
+
         <div>
-          A
+          <div></div>
+          <img src="https://img-c.udemycdn.com/course/750x422/4466386_ab00_3.jpg" />
         </div>
+
         <div>
-          A
-        </div>
-        <div>
-          A
+          <div></div>
+          <img src="https://cdn.mos.cms.futurecdn.net/K9WURpCKWvEZH6L4Cg428g.jpg" />
         </div>
       </div>
     </div>

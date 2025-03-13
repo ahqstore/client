@@ -41,6 +41,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (windows) {
+      setDark(def == "true");
+    }
+  }, [windows]);
+
+  useEffect(() => {
     localStorage.setItem("dark", String(dark));
 
     if (dark) {

@@ -15,9 +15,9 @@ import { ChevronDown } from "lucide-react";
 export function Category({ title, description, Icon, children, normallyOpen }: CategoryProps) {
   const [open, setOpen] = useState(normallyOpen || false);
 
-  return <div className={`bg-neutral-content/10 animate w-full rounded-lg`}>
+  return <div className={`bg-accent dark:bg-neutral-content/10 animate w-full rounded-lg`}>
     <div
-      className={`w-full flex cursor-pointer text-white category p-3`}
+      className={`w-full flex cursor-pointer text-muted-content dark:text-foreground category p-3`}
       onClick={() => setOpen((o) => !o)}
     >
       <div className="size-10 my-auto">

@@ -99,7 +99,7 @@ function App() {
       >
         <img data-tauri-drag-region src="/icon.png" className="ml-1 my-1 w-6 h-6" />
         <h1 data-tauri-drag-region className="my-auto ml-2 text-md font-sans">AHQ Store</h1>
-        {useMediaQuery("(min-width: 400px)") && <h1 data-tauri-drag-region className="my-auto ml-1 text-neutral-content text-md font-sans italic font-bold">NEO</h1>}
+        {useMediaQuery("(min-width: 400px)") && <h1 data-tauri-drag-region className="my-auto ml-1 text-black dark:text-neutral-content text-md font-sans italic font-bold">NEO</h1>}
       </WindowTitlebar>}
 
       {useHome() == undefined ? <Loading /> : <ApplicationView />}
