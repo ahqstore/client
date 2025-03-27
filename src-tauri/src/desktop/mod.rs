@@ -38,25 +38,30 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
 
   let handle = app.handle();
 
+  println!("Autostart");
   handle.plugin(tauri_plugin_autostart::init(
     MacosLauncher::LaunchAgent,
     Some(vec!["--hidden"]),
   ))?;
 
+  println!("Updater");
   handle.plugin(tauri_plugin_updater::Builder::new().build())?;
 
+  println!("Single Instance");
   handle.plugin(tauri_plugin_single_instance::init(|app, _, _| {
     let _ = app.get_webview_window("main").expect("Impossible").show();
   }))?;
 
   let handle = app.handle().clone();
 
+  println!("Checking for update");
   tauri::async_runtime::spawn(async move {
     if let Err(_) = update(handle).await {
       println!("Couldn't check update");
     }
   });
 
+  println!("Listen");
   if !should_be_hidden() {
     let handle = app.handle().clone();
 
@@ -68,12 +73,14 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     });
   }
 
+  println!("Deep Linking");
   #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
   {
     use tauri_plugin_deep_link::DeepLinkExt;
     app.deep_link().register_all().expect("Unable to register");
   }
 
+  println!("Building Tray Icon");
   TrayIconBuilder::with_id("main")
     .tooltip("AHQ Store is running")
     .icon(Image::from_bytes(include_bytes!("../../icons/icon.png"))?)

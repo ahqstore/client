@@ -20,7 +20,7 @@ fn get_accent() -> Option<String> {
       Some(&mut pcbdata as *mut u32)
     ).ok().ok()?;
 
-    println!("Color: {color:?}");
+    println!("[INFO] Color: {color:?}");
 
     let [r, g, b, _] = color;
 
@@ -43,12 +43,14 @@ pub fn run() {
     .plugin(tauri_plugin_deep_link::init())
     .plugin(tauri_plugin_ahqstore::init())
     .setup(|app| {
+      println!("[INFO] Running Desktop Setup");
       #[cfg(desktop)]
       desktop::setup(app)?;
 
       #[cfg(desktop)]
       app.handle().plugin(tauri_plugin_window_state::Builder::default().build())?;
 
+      println!("[INFO] Running");
       Ok(())
     })
     .run(tauri::generate_context!())

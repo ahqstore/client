@@ -22,7 +22,11 @@
         "minWidth": 348,
         "visible": false,
         "decorations": false,
-        "transparent": true
+        "transparent": true,
+        "windowEffects": {
+          "effects": ["mica"]
+        },
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required"
       }
     ],
     "security": {
