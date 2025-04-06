@@ -55,7 +55,7 @@ pub struct InstallerOptionsWindows {
 
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[doc = "🔬 Planned\n\n"]
+#[doc = "🔬 Under Development\n\n"]
 #[cfg_attr(feature = "js", wasm_bindgen)]
 pub enum AndroidAbi {
   Aarch64,
@@ -75,9 +75,19 @@ impl AndroidAbi {
   }
 }
 
+fn android_abi() -> &'static str {
+  match ARCH {
+    "x86" => "android-x86",
+    "x86_64" => "android-x86_64",
+    "arm" => "android-armv7",
+    "aarch64" => "android-aarch64",
+    _ => "none"
+  }
+}
+
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[doc = "🔬 Planned\n\n"]
+#[doc = "🔬 Under Development\n\n"]
 #[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 pub struct InstallerOptionsAndroid {
   #[doc = "🎯 Introduced in v2\n\n"]
@@ -137,10 +147,25 @@ impl InstallerOptions {
   pub fn is_supported(&self) -> bool {
     let os = self.list_os_arch();
     if OS == "android" {
-      return os.contains(&"android");
+      return os.contains(&android_abi());
     }
 
     os.contains(&format!("{}-{}", OS, ARCH).as_str())
+  }
+
+  #[doc = "🎯 Introduced in v3"]
+  pub fn is_supported_android(&self, sdk: u32) -> bool {
+    let os = self.list_os_arch();
+
+    let Some(x) = &self.android else {
+      return false;
+    };
+
+    if OS == "android" {
+      return os.contains(&android_abi()) && x.min_sdk == sdk;
+    }
+
+    false
   }
 
   #[doc = "🎯 Introduced in v2"]

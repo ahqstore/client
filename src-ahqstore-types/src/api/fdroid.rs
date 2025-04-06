@@ -17,6 +17,7 @@ pub static FDROID_APP_ASSET_URL: LazyLock<String> =
   LazyLock::new(|| format!("{FDROID_BASE_URL}/db/res/{{APP_ID}}/{{ASSET}}"));
 
 pub static FDROID_TOTAL: LazyLock<String> = LazyLock::new(|| format!("{FDROID_BASE_URL}/db/total"));
+pub static FDROID_HOME: LazyLock<String> = LazyLock::new(|| format!("{FDROID_BASE_URL}/db/home.json"));
 
 pub static FDROID_SEARCH: LazyLock<String> =
   LazyLock::new(|| format!("{FDROID_BASE_URL}/db/search/{{ID}}.json"));

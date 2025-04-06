@@ -16,17 +16,14 @@ use super::{
     AHQSTORE_MAP, AHQSTORE_SEARCH, AHQSTORE_TOTAL,
   },
   fdroid::{
-    FDROID_APPS_DEV, FDROID_APP_ASSET_URL, FDROID_APP_URL, FDROID_DEV_DATA, FDROID_MAP,
-    FDROID_SEARCH, FDROID_TOTAL,
+    FDROID_APPS_DEV, FDROID_APP_ASSET_URL, FDROID_APP_URL, FDROID_DEV_DATA, FDROID_HOME, FDROID_MAP, FDROID_SEARCH, FDROID_TOTAL
   },
   linux::{
-    self, LINUX_APPS_DEV, LINUX_APP_ASSET_URL, LINUX_APP_URL, LINUX_DEV_DATA, LINUX_MAP,
-    LINUX_SEARCH, LINUX_TOTAL,
+    self, LINUX_APPS_DEV, LINUX_APP_ASSET_URL, LINUX_APP_URL, LINUX_DEV_DATA, LINUX_HOME, LINUX_MAP, LINUX_SEARCH, LINUX_TOTAL
   },
   methods::{self, OfficialManifestSource, Store},
   winget::{
-    WINGET_APPS_DEV, WINGET_APP_ASSET_URL, WINGET_APP_URL, WINGET_DEV_DATA, WINGET_MAP,
-    WINGET_SEARCH, WINGET_TOTAL,
+    WINGET_APPS_DEV, WINGET_APP_ASSET_URL, WINGET_APP_URL, WINGET_DEV_DATA, WINGET_HOME, WINGET_MAP, WINGET_SEARCH, WINGET_TOTAL
   },
   SearchEntry,
 };
@@ -89,10 +86,19 @@ pub async fn get_total_maps_by_source(
   methods::get_total_maps(total, commit).await.context("")
 }
 
-pub async fn get_home(ahqstore_repo_commit: &str) -> Result<Vec<(String, Vec<String>)>> {
-  let home = &*AHQSTORE_HOME;
+#[allow(unreachable_patterns)]
+pub async fn get_home(source: OfficialManifestSource, commit: &str) -> Result<Vec<(String, Vec<String>)>> {
+  let home = match source {
+    OfficialManifestSource::AHQStore => &*AHQSTORE_HOME,
+    OfficialManifestSource::WinGet => &*WINGET_HOME,
+    OfficialManifestSource::FDroid => &*FDROID_HOME,
+    OfficialManifestSource::Linux => &*LINUX_HOME,
+    _ => {
+      return Err(anyhow!("source not supported"));
+    }
+  };
 
-  methods::get_home(home, ahqstore_repo_commit)
+  methods::get_home(home, commit)
     .await
     .context("")
 }
