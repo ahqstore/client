@@ -11,16 +11,13 @@ use tsify::*;
 #[cfg(feature = "js")]
 use wasm_bindgen::JsValue;
 
-#[cfg(feature = "js")]
-use kfghdfghdfkgh_js_macros::TsifyAsync;
-
 pub use install::*;
 pub use other_fields::*;
 
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[doc = "Use the official ahqstore (<https://crates.io/crates/ahqstore_cli_rs>) cli\n🎯 Introduced in v1, Revamped in v2"]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
+#[cfg_attr(feature = "js", derive(Tsify))]
 #[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
 pub struct AHQStoreApplication {
   /// The ID of the application

@@ -10,8 +10,6 @@ use serde_json::{from_str, to_string, to_string_pretty};
 use std::fs::read;
 
 #[cfg(feature = "js")]
-use kfghdfghdfkgh_js_macros::TsifyAsync;
-#[cfg(feature = "js")]
 use tsify::*;
 #[cfg(feature = "js")]
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
@@ -49,12 +47,6 @@ pub mod winget;
 /// This module lists the standard commands & types that AHQ Store sends to AHQ Store Service
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
-pub struct Commit {
-  pub sha: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "js", wasm_bindgen)]
 pub struct Prefs {
   pub launch_app: bool,
@@ -85,96 +77,8 @@ impl Prefs {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum Package {
-  LeadLang,
-  DevCamp,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum Command {
-  GetSha(RefId),
-
-  GetApp(RefId, AppId),
-  InstallApp(RefId, AppId),
-  UninstallApp(RefId, AppId),
-
-  ListApps(RefId),
-  GetLibrary(RefId),
-
-  RunUpdate(RefId),
-  UpdateStatus(RefId),
-
-  GetPrefs(RefId),
-  SetPrefs(RefId, Prefs),
-
-  AddPkg(RefId, Package),
-
-  ExecutableRunStatus(RefId, Success),
-}
-
-impl Command {
-  pub fn try_from<T: AsRef<str>>(value: T) -> Option<Self> {
-    serde_json::from_str(value.as_ref()).ok()
-  }
-}
-
-#[cfg_attr(feature = "js", wasm_bindgen)]
-impl Command {
-  pub fn try_from_js(value: String) -> Option<Command> {
-    serde_json::from_str(&value).ok()
-  }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum Reason {
-  UnknownData(RefId),
-
-  Unauthenticated,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum ErrorType {
-  GetAppFailed(RefId, AppId),
-  AppPlatformNoSupport(RefId, AppId),
-  AVBlockedApp(RefId, AppId),
-  PrefsError(RefId),
-  PkgError(RefId),
-  GetSHAFailed(RefId),
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub struct Library {
-  pub app_id: String,
-  pub status: AppStatus,
-  pub is_update: bool,
-  pub to: ToDo,
-  pub progress: f64,
-  pub max: u64,
-  pub app: Option<AHQStoreApplication>,
-  pub user: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum ToDo {
-  Install,
-  Uninstall,
-}
-
 #[derive(Debug, Deserialize, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
+#[cfg_attr(feature = "js", derive(Tsify))]
 #[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
 pub enum AppStatus {
   Pending,
@@ -208,7 +112,7 @@ impl Serialize for AppStatus {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
+#[cfg_attr(feature = "js", derive(Tsify))]
 #[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
 pub enum UpdateStatusReport {
   Disabled,
@@ -231,50 +135,6 @@ impl From<&Commits> for Commits {
     value.clone()
   }
 }
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum ResponseToSend {
-  Ready,
-
-  Error(ErrorType),
-
-  SHAId(RefId, Commits),
-
-  Disconnect(Reason),
-
-  AppData(RefId, AppId, AHQStoreApplication),
-  AppDataUrl(RefId, AppId, String),
-
-  ListApps(RefId, Vec<AppData>),
-  Library(RefId, Vec<Library>),
-
-  UpdateStatus(RefId, UpdateStatusReport),
-
-  Acknowledged(RefId),
-
-  Prefs(RefId, Prefs),
-  PrefsSet(RefId),
-
-  DownloadPkgProg(RefId, [u64; 2]),
-  InstallPkg(RefId),
-  InstalledPkg(RefId),
-
-  TerminateBlock(RefId),
-  RunExecutable(RefId, String),
-}
-
-#[cfg_attr(feature = "js", wasm_bindgen)]
-impl ResponseToSend {
-  pub fn as_msg(msg: ResponseToSend) -> Vec<u8> {
-    to_string_pretty(&msg)
-      .unwrap_or("ERRR".to_string())
-      .into_bytes()
-  }
-}
-
-pub type Response = ResponseToSend;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AuthPing {

@@ -16,21 +16,25 @@ use super::{
     AHQSTORE_MAP, AHQSTORE_SEARCH, AHQSTORE_TOTAL,
   },
   fdroid::{
-    FDROID_APPS_DEV, FDROID_APP_ASSET_URL, FDROID_APP_URL, FDROID_DEV_DATA, FDROID_HOME, FDROID_MAP, FDROID_SEARCH, FDROID_TOTAL
+    FDROID_APPS_DEV, FDROID_APP_ASSET_URL, FDROID_APP_URL, FDROID_DEV_DATA, FDROID_HOME,
+    FDROID_MAP, FDROID_SEARCH, FDROID_TOTAL,
   },
   linux::{
-    self, LINUX_APPS_DEV, LINUX_APP_ASSET_URL, LINUX_APP_URL, LINUX_DEV_DATA, LINUX_HOME, LINUX_MAP, LINUX_SEARCH, LINUX_TOTAL
+    self, LINUX_APPS_DEV, LINUX_APP_ASSET_URL, LINUX_APP_URL, LINUX_DEV_DATA, LINUX_HOME,
+    LINUX_MAP, LINUX_SEARCH, LINUX_TOTAL,
   },
   methods::{self, OfficialManifestSource, Store},
   winget::{
-    WINGET_APPS_DEV, WINGET_APP_ASSET_URL, WINGET_APP_URL, WINGET_DEV_DATA, WINGET_HOME, WINGET_MAP, WINGET_SEARCH, WINGET_TOTAL
+    WINGET_APPS_DEV, WINGET_APP_ASSET_URL, WINGET_APP_URL, WINGET_DEV_DATA, WINGET_HOME,
+    WINGET_MAP, WINGET_SEARCH, WINGET_TOTAL,
   },
-  SearchEntry,
+  Home, SearchEntry,
 };
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "js", derive(tsify::Tsify))]
 pub struct Commits {
   pub ahqstore: String,
   pub alt: String,
@@ -59,7 +63,7 @@ pub async fn get_all_commits(token: Option<String>) -> Result<Commits> {
   Ok(Commits {
     ahqstore,
     #[cfg(feature = "js")]
-    alt: "".into(),
+    alt: "".to_string(),
     #[cfg(windows)]
     alt: winget,
     #[cfg(target_os = "android")]
@@ -87,7 +91,7 @@ pub async fn get_total_maps_by_source(
 }
 
 #[allow(unreachable_patterns)]
-pub async fn get_home(source: OfficialManifestSource, commit: &str) -> Result<Vec<(String, Vec<String>)>> {
+pub async fn get_home(source: OfficialManifestSource, commit: &str) -> Result<Home> {
   let home = match source {
     OfficialManifestSource::AHQStore => &*AHQSTORE_HOME,
     OfficialManifestSource::WinGet => &*WINGET_HOME,
@@ -98,9 +102,7 @@ pub async fn get_home(source: OfficialManifestSource, commit: &str) -> Result<Ve
     }
   };
 
-  methods::get_home(home, commit)
-    .await
-    .context("")
+  methods::get_home(home, commit).await.context("")
 }
 
 pub async fn get_search_by_source(

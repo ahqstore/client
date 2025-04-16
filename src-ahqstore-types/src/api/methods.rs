@@ -15,7 +15,7 @@ use crate::AHQStoreApplication;
 
 use super::{
   ahqstore::AHQSTORE_COMMIT_URL, fdroid::FDROID_COMMIT_URL, linux::LINUX_COMMIT_URL,
-  winget::WINGET_COMMIT_URL, RepoHomeData, CLIENT,
+  winget::WINGET_COMMIT_URL, Home, CLIENT,
 };
 
 #[derive(Serialize, Deserialize)]
@@ -72,33 +72,15 @@ pub async fn get_total_maps(total: &str, commit: &str) -> Option<usize> {
     .ok()
 }
 
-pub async fn get_home(home: &str, commit: &str) -> Option<Vec<(String, Vec<String>)>> {
-  let home: RepoHomeData = CLIENT
+pub async fn get_home(home: &str, commit: &str) -> Option<Home> {
+  CLIENT
     .get(home.replace("{COMMIT}", commit))
     .send()
     .await
     .ok()?
     .json()
     .await
-    .ok()?;
-
-  let mut resp_home = vec![];
-
-  for (title, data) in home {
-    let mut resp_data = vec![];
-
-    for item in data {
-      let id = item.get_id();
-
-      if let Some(id) = id {
-        resp_data.push(id);
-      }
-    }
-
-    resp_home.push((title, resp_data));
-  }
-
-  Some(resp_home)
+    .ok()
 }
 
 pub async fn get_search(search: &str, commit: &str, id: &str) -> Option<Vec<super::SearchEntry>> {

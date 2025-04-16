@@ -1,8 +1,11 @@
 #[cfg(feature = "js")]
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 #[cfg(feature = "js")]
-use tsify::declare;
+use kfghdfghdfkgh_js_macros::TsifyAsync;
+
+#[cfg(feature = "js")]
+use tsify::{declare, JsValueSerdeExt};
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -45,38 +48,95 @@ pub static CLIENT: LazyLock<Client> = LazyLock::new(|| {
 });
 
 #[cfg_attr(feature = "js", declare)]
-pub type MapData = HashMap<String, String>;
+pub type MapData = HashMap<String, Vec<String>>;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct HomeItem {
-  pub ahqstore: Option<String>,
-  pub winget: Option<String>,
-  pub flatpak: Option<String>,
-  pub fdroid: Option<String>,
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "js", wasm_bindgen)]
+pub struct HomeMapData {
+  inner: HashMap<String, Vec<String>>,
 }
 
-impl HomeItem {
-  pub fn get_id(self) -> Option<String> {
-    if let Some(x) = self.ahqstore {
-      return Some(x);
-    }
-
-    #[cfg(target_os = "windows")]
-    return self.winget;
-
-    #[cfg(target_os = "linux")]
-    return self.flatpak;
-
-    #[cfg(target_os = "android")]
-    return self.fdroid;
-
-    #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "android")))]
-    return None;
+impl Serialize for HomeMapData {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: serde::Serializer,
+  {
+    self.inner.serialize(serializer)
   }
 }
 
-pub type RepoHomeData = Vec<(String, Vec<HomeItem>)>;
-pub type HomeData = Vec<(String, Vec<String>)>;
+impl<'de> Deserialize<'de> for HomeMapData {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: serde::Deserializer<'de>,
+  {
+    let inner = HashMap::deserialize(deserializer)?;
+    Ok(HomeMapData { inner })
+  }
+}
+
+#[cfg(feature = "js")]
+#[wasm_bindgen]
+impl HomeMapData {
+  #[wasm_bindgen(constructor)]
+  pub fn new() -> HomeMapData {
+    HomeMapData {
+      inner: HashMap::new(),
+    }
+  }
+
+  #[wasm_bindgen(getter)]
+  pub fn inner(&self) -> JsValue {
+    serde_wasm_bindgen::to_value(&self.inner).unwrap()
+  }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+pub struct Home {
+  pub splash: Option<Splash>,
+  pub home: HomeMapData,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+pub struct Splash {
+  pub hero: Hero,
+  pub subhero: SubHero,
+  #[serde(rename = "3rd")]
+  pub third: Semi,
+  #[serde(rename = "4th")]
+  pub fourth: Semi,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+#[allow(non_snake_case)]
+pub struct Hero {
+  pub title: String,
+  pub description: String,
+  pub button: String,
+  pub background: String,
+  pub author: String,
+  pub appId: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+#[allow(non_snake_case)]
+pub struct SubHero {
+  pub title: String,
+  pub background: String,
+  pub appId: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+#[allow(non_snake_case)]
+pub struct Semi {
+  pub background: String,
+  pub appId: String,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]

@@ -81,7 +81,7 @@ fn android_abi() -> &'static str {
     "x86_64" => "android-x86_64",
     "arm" => "android-armv7",
     "aarch64" => "android-aarch64",
-    _ => "none"
+    _ => "none",
   }
 }
 
