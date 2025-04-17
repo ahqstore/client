@@ -134,6 +134,7 @@ pub struct SubHero {
 #[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 #[allow(non_snake_case)]
 pub struct Semi {
+  pub title: String,
   pub background: String,
   pub appId: String,
 }
