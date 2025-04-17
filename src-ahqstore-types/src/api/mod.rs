@@ -52,8 +52,9 @@ pub type MapData = HashMap<String, Vec<String>>;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "js", wasm_bindgen)]
+/// This is exactly `Vec<(String, Vec<String>)>`
 pub struct HomeMapData {
-  inner: HashMap<String, Vec<String>>,
+  inner: Vec<(String, Vec<String>)>,
 }
 
 impl Serialize for HomeMapData {
@@ -70,7 +71,7 @@ impl<'de> Deserialize<'de> for HomeMapData {
   where
     D: serde::Deserializer<'de>,
   {
-    let inner = HashMap::deserialize(deserializer)?;
+    let inner = Vec::deserialize(deserializer)?;
     Ok(HomeMapData { inner })
   }
 }

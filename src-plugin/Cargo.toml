@@ -19,7 +19,9 @@ serde_json = "1"
 chacha20poly1305 = { version = "0.10", features = ["heapless"] }
 bcrypt = "0.17"
 lazy_static = "1"
-reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = [
+  "rustls-tls",
+] }
 tokio = { version = "1", features = ["time", "sync"] }
 
 [target.'cfg(windows)'.dependencies]

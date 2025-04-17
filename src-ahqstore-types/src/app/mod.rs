@@ -14,6 +14,8 @@ use wasm_bindgen::JsValue;
 pub use install::*;
 pub use other_fields::*;
 
+use crate::api::Commits;
+
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[doc = "Use the official ahqstore (<https://crates.io/crates/ahqstore_cli_rs>) cli\n🎯 Introduced in v1, Revamped in v2"]
@@ -295,10 +297,19 @@ impl AHQStoreApplication {
 
   #[cfg(feature = "internet")]
   #[doc = "🎯 Introduced in v3"]
+  #[deprecated(since = "3.14.3", note = "Use `get_resource` instead")]
   pub async fn get_resource(&self, resource: u8) -> Option<Vec<u8>> {
-    use crate::internet::{get_all_commits, get_app_asset};
+    use crate::api::internet::{get_all_commits, get_app_asset};
 
     let commit = get_all_commits(None).await.ok()?;
+
+    get_app_asset(&commit, &self.appId, &resource.to_string()).await
+  }
+
+  #[cfg(feature = "internet")]
+  #[doc = "🎯 Introduced in v3.14.3"]
+  pub async fn get_resource_commit(&self, commit: &Commits, resource: u8) -> Option<Vec<u8>> {
+    use crate::{api::internet::get_all_commits, get_app_asset};
 
     get_app_asset(&commit, &self.appId, &resource.to_string()).await
   }

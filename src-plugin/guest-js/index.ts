@@ -1,5 +1,10 @@
 import { Channel, invoke } from '@tauri-apps/api/core'
-import { AHQStoreApplication, Commit, DevData, type SearchEntry } from "ahqstore-types"
+import { AHQStoreApplication, DevData, type SearchEntry } from "ahqstore-types"
+
+interface Commits {
+  ahqstore: string,
+  alt: string,
+}
 
 export type DownloadEvent = {
   event: "started";
@@ -85,13 +90,42 @@ export async function refreshCommit() {
   return await invoke<void>("plugin:ahqstore|refresh_commit");
 }
 
-export const getCommit = async () => await invoke<Commit>("plugin:ahqstore|get_commit");
+export const getCommit = async () => await invoke<Commits>("plugin:ahqstore|get_commit");
 
 export const search = async (query: string) => {
   return await invoke<SearchEntry[]>("plugin:ahqstore|get_all_search", { query });
 }
 
-export const getHome = async () => await invoke<[string, string[]][]>("plugin:ahqstore|get_home");
+export interface Home {
+  splash?: {
+    hero: {
+      title: string,
+      description: string,
+      button: string,
+      background: string,
+      author: string,
+      appId: string,
+    },
+    subhero: {
+      title: string,
+      background: string,
+      appId: string,
+    },
+    third: {
+      title: string,
+      background: string,
+      appId: string,
+    },
+    fourth: {
+      title: string,
+      background: string,
+      appId: string,
+    }
+  },
+  home: [string, string[]][]
+}
+
+export const getHome = async () => await invoke<Home>("plugin:ahqstore|get_home");
 export const getApp = async (app: string) => await invoke<AHQStoreApplication>("plugin:ahqstore|get_app", { app });
 export const getDevData = async (dev: string) => invoke<DevData>("plugin:ahqstore|get_dev_data", { dev });
 export const getAppAsset = async (app: string, asset: string) => invoke<Uint8Array>("plugin:ahqstore|get_app_asset", { app, asset });

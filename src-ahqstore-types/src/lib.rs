@@ -121,21 +121,6 @@ pub enum UpdateStatusReport {
   Updating,
 }
 
-impl Clone for Commits {
-  fn clone(&self) -> Self {
-    Self {
-      ahqstore: self.ahqstore.clone(),
-      alt: self.alt.clone(),
-    }
-  }
-}
-
-impl From<&Commits> for Commits {
-  fn from(value: &Commits) -> Self {
-    value.clone()
-  }
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AuthPing {
   pub process: usize,

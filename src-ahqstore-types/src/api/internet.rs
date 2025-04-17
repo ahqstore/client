@@ -33,7 +33,7 @@ use super::{
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "js", derive(tsify::Tsify))]
 pub struct Commits {
   pub ahqstore: String,
