@@ -3,7 +3,8 @@
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use ahqstore_types::{AHQStoreApplication, Commits, DevData};
+use ahqstore_types::methods::OfficialManifestSource;
+use ahqstore_types::{AHQStoreApplication, Commits, DevData, Home};
 
 use anyhow::Context;
 
@@ -65,8 +66,20 @@ pub(crate) async fn get_all_search(app: AppHandle, query: &str) -> Result<Vec<Re
 }
 
 #[command(async)]
-pub(crate) async fn get_home(app: AppHandle) -> Result<Vec<(String, Vec<String>)>> {
-  Ok(internet::get_home(&*app.ahqstore().commits.lock().await.ahqstore).await?)
+pub(crate) async fn get_home(app: AppHandle) -> Result<Home> {
+  Ok(internet::get_home(
+    (||{
+      #[cfg(windows)]
+      return OfficialManifestSource::WinGet;
+
+      #[cfg(target_os = "linux")]
+      return OfficialManifestSource::Linux;
+
+      #[cfg(mobile)]
+      return OfficialManifestSource::FDroid;
+    })(),
+    &app.ahqstore().commits.lock().await.alt
+  ).await?)
 }
 
 #[command(async)]

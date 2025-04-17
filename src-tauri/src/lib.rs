@@ -31,13 +31,13 @@ fn get_accent() -> Option<String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   #[cfg(windows)]
-  let accent = get_accent().unwrap_or("window.accent = \"rgb(53,126,199)\"".into()).leak();
+  let accent: &'static str = get_accent().unwrap_or("window.accent = \"rgb(53,126,199)\"".into()).leak();
 
   #[cfg(not(windows))]
   let accent = "window.accent = \"rgb(53,126,199)\"";
 
   tauri::Builder::default()
-    .on_page_load(|c, _| c.eval(accent).expect("Unable to evaluate script"))
+    .on_page_load(move |c, _| c.eval(accent).expect("Unable to evaluate script"))
     .plugin(tauri_plugin_http::init())
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_deep_link::init())

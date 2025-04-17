@@ -317,10 +317,6 @@ jobs:
           npm i -g pnpm
           pnpm install
           pnpm build
-
-          cd ../src-tauri
-          rm Cargo.toml
-          cp ./Cargo.patch.toml ./Cargo.toml
         working-directory: src-ahqstore-types
 
       - name: Build Tauri App
