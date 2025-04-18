@@ -82,7 +82,7 @@ impl HomeMapData {
   #[wasm_bindgen(constructor)]
   pub fn new() -> HomeMapData {
     HomeMapData {
-      inner: HashMap::new(),
+      inner: vec![],
     }
   }
 
