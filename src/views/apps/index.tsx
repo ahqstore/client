@@ -43,12 +43,16 @@ export function AppsHome() {
           </div>
 
           <div>
-            <div></div>
+            <div>
+              {splash.third.title}
+            </div>
             <img src={splash.third.background} />
           </div>
 
           <div>
-            <div></div>
+            <div>
+              {splash.fourth.title}
+            </div>
             <img src={splash.fourth.background} />
           </div>
         </div>
