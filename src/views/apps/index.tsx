@@ -1,6 +1,11 @@
+import { useSplash } from "@/lib/data";
 import { Search } from "lucide-react";
 
 export function AppsHome() {
+  const splash = useSplash();
+
+  console.log(splash);
+
   return <>
     <div className="flex w-full justify-center text-center items-center">
       <div className="relative w-full max-w-xl">
@@ -13,39 +18,41 @@ export function AppsHome() {
       </div>
     </div>
 
-    <div className="flex flex-col mt-3 lg:flex-row grow-0 w-full gap-5 animate">
-      <div className="hero" style={{ background: `url("https://www.39digits.com/static/5cda054ca018a2f574e6a08a533ff251/2bef9/firefox-logo-banner.png") center/cover` }}>
-        <div></div>
-        <div className="flex flex-col h-full">
-          <h1>Your Next Browser!</h1>
-          <h2 className="">Get the browser that puts your privacy first — and always has</h2>
+    {splash && <>
+      <div className="flex flex-col mt-3 lg:flex-row grow-0 w-full gap-5 animate">
+        <div className="hero" style={{ background: `url("${splash.hero.background}") center/cover` }}>
+          <div></div>
+          <div className="flex flex-col h-full">
+            <h1>{splash.hero.title}</h1>
+            <h2 className="">{splash.hero.description}</h2>
 
-          <div className="w-full">
-            <button>Explore Firefox</button>
+            <div className="w-full">
+              <button>{splash.hero.button}</button>
+            </div>
+
+            <h3 className="mt-auto mb-2 hidden md:block">{splash.hero.author}</h3>
           </div>
-
-          <h3 className="mt-auto mb-2 hidden md:block">Mozilla Firefox</h3>
         </div>
-      </div>
 
-      <div className="cards">
-        <div>
+        <div className="cards">
           <div>
-            VLC Media Player
+            <div>
+              {splash.subhero.title}
+            </div>
+            <img src={splash.subhero.background} />
           </div>
-          <img src="https://image.winudf.com/v2/image1/b3JnLnZpZGVvbGFuLnZsY19iYW5uZXJfMTU1NTA2ODYzMl8wNDA/banner.jpg?fakeurl=1&w=600" />
-        </div>
 
-        <div>
-          <div></div>
-          <img src="https://img-c.udemycdn.com/course/750x422/4466386_ab00_3.jpg" />
-        </div>
+          <div>
+            <div></div>
+            <img src={splash.third.background} />
+          </div>
 
-        <div>
-          <div></div>
-          <img src="https://cdn.mos.cms.futurecdn.net/K9WURpCKWvEZH6L4Cg428g.jpg" />
+          <div>
+            <div></div>
+            <img src={splash.fourth.background} />
+          </div>
         </div>
       </div>
-    </div>
+    </>}
   </>;
 }

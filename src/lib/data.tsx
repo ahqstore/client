@@ -5,6 +5,7 @@ const Home = createContext<[string, string[]][] | undefined>(undefined);
 const Splash = createContext<HomeInterface["splash"]>(undefined);
 
 export const useHome = () => useContext(Home);
+export const useSplash = () => useContext(Splash);
 
 export function HomeProvider({ children }: { children: ReactNode }) {
   const [home, setHome] = useState<[string, string[]][] | undefined>(undefined);
