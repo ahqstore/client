@@ -4,8 +4,6 @@ import { Search } from "lucide-react";
 export function AppsHome() {
   const splash = useSplash();
 
-  console.log(splash);
-
   return <>
     <div className="flex w-full justify-center text-center items-center">
       <div className="relative w-full max-w-xl">
