@@ -18,13 +18,12 @@ class Library : GlanceAppWidgetReceiver() {
 
 class LibraryWidget : GlanceAppWidget() {
 
-  override suspend fun provideGlance(context: Context, id: GlanceId) { 
-    withContext(Dispatchers.Default) {
+  override suspend fun provideGlance(context: Context, id: GlanceId) {
       provideContent {
         GlanceTheme {
           MyContent()
         }
-      }
+      
     }
   }
   
