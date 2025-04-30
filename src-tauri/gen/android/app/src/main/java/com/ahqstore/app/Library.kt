@@ -1,58 +1,34 @@
 package com.ahqstore.app
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.view.View
-import android.widget.RemoteViews
+import androidx.glance.GlanceId
+import androidx.glance.GlanceTheme
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.provideContent
+import androidx.glance.text.Text
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class Library : AppWidgetProvider() {
-  override fun onUpdate(
-    context: Context,
-    appWidgetManager: AppWidgetManager,
-    appWidgetIds: IntArray
-  ) {
-    // There may be multiple widgets active, so update all of them
-    for (appWidgetId in appWidgetIds) {
-      updateAppWidget(context, appWidgetManager, appWidgetId)
-    }
-  }
-
-  override fun onEnabled(context: Context) {
-    
-  }
-
-  override fun onDisabled(context: Context) {
-    
-  }
+class MyAppWidgetReceiver : GlanceAppWidgetReceiver() {
+  override val glanceAppWidget: GlanceAppWidget = Library()
 }
 
-internal fun updateAppWidget(
-  context: Context,
-  appWidgetManager: AppWidgetManager,
-  appWidgetId: Int
-) {
-  val widgetText = context.getString(R.string.appwidget_text)
-  
-  val intent = Intent(context, UpdateDataService::class.java).apply {
-    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-    data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
-  }
+class Library : GlanceAppWidget() {
 
-  val views = RemoteViews(context.packageName, R.layout.library).apply {
-    // Set up the RemoteViews object to use a RemoteViews adapter.
-    // This adapter connects to a RemoteViewsService through the
-    // specified intent.
-    // This is how you populate the data.
-    setRemoteAdapter(R.id.list, intent)
+  override suspend fun provideGlance(context: Context, id: GlanceId) {
 
+    // In this method, load data needed to render the AppWidget.
+    // Use `withContext` to switch to another thread for long running
+    // operations.
     
-    setEmptyView(R.id.list, R.id.up_to_date)
+    withContext(Dispatchers.Default) {
+      provideContent {
+        GlanceTheme {
+          // create your AppWidget here
+          Text("Hello World")
+        }
+      }
+    }
   }
-
-  // Do additional processing specific to this widget.
-
-  appWidgetManager.updateAppWidget(appWidgetId, views)
 }
