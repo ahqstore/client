@@ -19,3 +19,31 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Glance Core
+-keep class androidx.glance.** { *; }
+-dontwarn androidx.glance.**
+
+# Keep Compose-related functions used by Glance
+-keep class androidx.compose.runtime.** { *; }
+-dontwarn androidx.compose.runtime.**
+
+# Keep Composables used by Glance
+-keepclassmembers class * {
+    @androidx.compose.runtime.Composable <methods>;
+}
+
+# Prevent R8 from stripping Composable annotations (important!)
+-keepattributes *Annotation*
+
+# For reflection
+-keepclassmembers class ** {
+    *;
+}
+
+# (Optional) Logging/debugging
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}

@@ -1,4 +1,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
   android:initialLayout="@layout/glance_default_loading_layout"
+  android:resizeMode="horizontal|vertical"
+  android:targetCellHeight="2"
+  android:targetCellWidth="3"
   android:updatePeriodMillis="0">
 </appwidget-provider>
