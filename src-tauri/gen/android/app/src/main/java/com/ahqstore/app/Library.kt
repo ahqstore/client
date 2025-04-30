@@ -12,18 +12,13 @@ import androidx.glance.text.Text
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class MyAppWidgetReceiver : GlanceAppWidgetReceiver() {
-  override val glanceAppWidget: GlanceAppWidget = Library()
+class Library : GlanceAppWidgetReceiver() {
+  override val glanceAppWidget: GlanceAppWidget = LibraryWidget()
 }
 
-class Library : GlanceAppWidget() {
+class LibraryWidget : GlanceAppWidget() {
 
-  override suspend fun provideGlance(context: Context, id: GlanceId) {
-
-    // In this method, load data needed to render the AppWidget.
-    // Use `withContext` to switch to another thread for long running
-    // operations.
-    
+  override suspend fun provideGlance(context: Context, id: GlanceId) { 
     withContext(Dispatchers.Default) {
       provideContent {
         GlanceTheme {
