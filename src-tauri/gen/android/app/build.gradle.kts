@@ -69,8 +69,13 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
-        buildConfig = true
+      buildConfig = true
       viewBinding = true
+      compose = true
+    }
+
+    composeOptions {
+      kotlinCompilerExtensionVersion = "1.5.15"
     }
 }
 
@@ -79,7 +84,9 @@ rust {
 }
 
 dependencies {
-    implementation("androidx.webkit:webkit:1.12.1")
+    implementation("androidx.webkit:webkit:1.13.0")
+    implementation("androidx.glance:glance-appwidget:1.1.1")
+    implementation("androidx.glance:glance-material3:1.1.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     testImplementation("junit:junit:4.13.2")
