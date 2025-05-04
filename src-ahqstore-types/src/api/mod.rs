@@ -127,6 +127,7 @@ pub struct SubHero {
   pub title: String,
   pub background: String,
   pub appId: String,
+  pub color: Option<String>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -136,6 +137,7 @@ pub struct Semi {
   pub title: String,
   pub background: String,
   pub appId: String,
+  pub color: Option<String>
 }
 
 #[derive(Serialize, Deserialize, Debug)]

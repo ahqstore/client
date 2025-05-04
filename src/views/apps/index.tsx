@@ -34,21 +34,21 @@ export function AppsHome() {
 
         <div className="cards">
           <div>
-            <div>
+            <div style={{ color: splash.subhero.color }}>
               {splash.subhero.title}
             </div>
             <img src={splash.subhero.background} />
           </div>
 
           <div>
-            <div>
+            <div style={{ color: splash.third.color }}>
               {splash.third.title}
             </div>
             <img src={splash.third.background} />
           </div>
 
           <div>
-            <div>
+            <div style={{ color: splash.fourth.color }}>
               {splash.fourth.title}
             </div>
             <img src={splash.fourth.background} />

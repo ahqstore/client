@@ -48,8 +48,8 @@
   @apply absolute z-0 w-full h-full left-0 top-0 rounded-lg;
   @apply from-primary-foreground/10 hover:from-primary-foreground/0 via-primary-foreground/10 to-primary-foreground/40 bg-gradient-to-br;
 
-  @apply flex flex-col items-end justify-end p-6;
-  @apply text-xl text-transparent md:text-muted font-bold;
+  @apply flex flex-col items-end justify-end p-2 px-4;
+  @apply text-xl md:text-muted font-bold;
 }
 
 .cards>div:nth-child(1) {

@@ -110,16 +110,19 @@ export interface Home {
       title: string,
       background: string,
       appId: string,
+      color?: string
     },
     third: {
       title: string,
       background: string,
       appId: string,
+      color?: string
     },
     fourth: {
       title: string,
       background: string,
       appId: string,
+      color?: string
     }
   },
   home: [string, string[]][]
