@@ -8,7 +8,7 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
   const [val, setVal] = useState(false);
   useEffect(() => {
     window.addEventListener("keydown", (e) => {
-      if (e.ctrlKey && e.altKey && e.key == "E") {
+      if (e.ctrlKey && e.key == "E") {
         setVal((d) => !d);
       }
     });
