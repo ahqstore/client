@@ -20,7 +20,3 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class com.ahqstore.app.LibraryWidget { *; }
--keep class androidx.glance.appwidget.** { *; }
--keep class kotlin.jvm.functions.** { *; }
--keep class kotlin.coroutines.** { *; }
