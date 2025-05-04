@@ -104,9 +104,7 @@ pub struct Home {
 pub struct Splash {
   pub hero: Hero,
   pub subhero: SubHero,
-  #[serde(rename = "3rd")]
   pub third: Semi,
-  #[serde(rename = "4th")]
   pub fourth: Semi,
 }
 
