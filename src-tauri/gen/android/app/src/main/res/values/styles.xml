@@ -1,4 +1,9 @@
 <resources>
-  <style name="Widget.Android.AppWidget.Container" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
-  </style>
+
+    <style name="Widget.Android.AppWidget.Container" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar"></style>
+
+    <style name="Widget.Android.AppWidget.InnerView" parent="android:Widget">
+        <item name="android:background">?android:attr/colorBackground</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
 </resources>
