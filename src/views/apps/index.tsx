@@ -1,8 +1,11 @@
-import { useSplash } from "@/lib/data";
+import { useHome, useSplash } from "@/lib/data";
 import { Search } from "lucide-react";
+
+import { ChevronRight } from "lucide-react";
 
 export function AppsHome() {
   const splash = useSplash();
+  const home = useHome();
 
   console.log(splash);
 
@@ -58,5 +61,27 @@ export function AppsHome() {
         </div>
       </div>
     </>}
+
+    {
+      home?.map((apps) =>
+        <div className="home_apps" key={apps[0]}>
+          <div>
+            <span>{apps[0]}</span>
+            <ChevronRight className="arrow" color="color-mix(in srgb, var(--color-neutral-content) 5%, var(--win32-accent) 75%)" />
+            <button className="all">
+              <span>All</span>
+              <ChevronRight className="arrow" />
+            </button>
+          </div>
+          <div>
+            {
+              apps[1].map((app) => (
+                <div key={`${app}${apps[0]}`}>{app}</div>
+              ))
+            }
+          </div>
+        </div>
+      )
+    }
   </>;
 }

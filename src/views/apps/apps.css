@@ -1,0 +1,54 @@
+.home_apps {
+  @apply flex flex-col w-full;
+}
+
+.home_apps>div:nth-child(1) {
+  @apply w-full flex;
+  @apply text-xl font-semibold;
+
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.home_apps>div:nth-child(1)>.arrow {
+  @apply hidden;
+}
+
+.home_apps>div:nth-child(1) .all {
+  @apply flex text-sm ml-auto px-2 py-1 rounded-md cursor-pointer;
+
+  background: color-mix(in srgb, var(--color-neutral-content) 10%, var(--win32-accent) 5%) !important;
+}
+
+@media (min-width: 36rem) {
+  .home_apps>div:nth-child(1) {
+    @apply transition-all w-fit rounded-lg cursor-pointer flex items-center;
+    @apply hover:pl-3 hover:pr-3 pr-6 py-2;
+
+    @apply text-xl font-semibold;
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .home_apps>div:nth-child(1)>.arrow {
+    @apply block;
+  }
+
+  .home_apps>div:nth-child(1) .all {
+    @apply hidden;
+  }
+
+  .home_apps>div:nth-child(1):hover {
+    color: color-mix(in srgb, var(--color-neutral-content) 5%, var(--win32-accent) 75%) !important;
+    background: color-mix(in srgb, var(--color-neutral-content) 10%, var(--win32-accent) 5%) !important;
+  }
+
+  .home_apps>div:nth-child(2) {
+    @apply columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 mt-2;
+  }
+
+  .home_apps>div:nth-child(2)>div {
+    @apply break-inside-avoid rounded-xl p-4 shadow-md cursor-pointer transition-all;
+
+    @apply bg-accent/15 dark:bg-neutral-content/15 hover:dark:bg-neutral-content/10;
+  }
+}

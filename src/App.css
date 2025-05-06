@@ -8,6 +8,7 @@
 
 /* Pages */
 @import "./views/apps/app.css";
+@import "./views/apps/apps.css";
 
 /* Views */
 @import "./views/view.css";
