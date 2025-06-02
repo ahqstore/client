@@ -1,8 +1,10 @@
+![Banner](./readme/banner.png)
+
 [![References](https://img.icons8.com/cute-clipart/13/book.png) References](#references)
 
-# AHQ Store
+# [<img src="https://ahqstore.github.io/favicon.png" width="29" height="29" alt="Logo" align="center"> AHQ Store](https://ahqstore.github.io)
 
-The Open Sourced App Store
+Empowering app distribution for all
 
 AHQ Store is a **free** and **open sourced** App Store, which allows you to publish apps for **free** and no restrictions[\*](#references)
 
