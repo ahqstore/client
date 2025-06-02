@@ -1,4 +1,4 @@
-![Banner](./readme/banner.png)
+[![Banner](./readme/banner.png)](https://ahqstore.github.io/download)
 
 [![References](https://img.icons8.com/cute-clipart/13/book.png) References](#references)
 
