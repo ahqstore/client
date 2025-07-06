@@ -48,7 +48,7 @@ pub static CLIENT: LazyLock<Client> = LazyLock::new(|| {
 });
 
 #[cfg_attr(feature = "js", declare)]
-pub type MapData = HashMap<String, Vec<String>>;
+pub type MapData = Vec<String>;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "js", wasm_bindgen)]

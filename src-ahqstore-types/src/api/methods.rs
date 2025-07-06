@@ -99,15 +99,13 @@ pub async fn get_search(search: &str, commit: &str, id: &str) -> Option<Vec<supe
 pub async fn get_full_map(total: &str, map: &str, commit: &str) -> Option<super::MapData> {
   let total = get_total_maps(total, commit).await?;
 
-  let mut result = HashMap::new();
+  let mut result = vec![];
 
   let mut i = 1;
   while i <= total {
-    let map_result = get_map(map, commit, &i.to_string()).await?;
+    let map = get_map(map, commit, &i.to_string()).await?;
 
-    for (k, v) in map_result {
-      result.insert(k, v);
-    }
+    result.extend(map);
 
     i += 1;
   }
