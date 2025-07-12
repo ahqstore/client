@@ -24,5 +24,6 @@ AHQ Store is a **free** and **open sourced** App Store, which allows you to publ
 
 # References
 
-- [Terms of Service](https://github.com/ahqsoftwares/tauri-ahq-store/security/policy)
+- [Terms of Service](https://ahqstore.github.io/tos/index.html)
+- [Security Policy](https://github.com/ahqsoftwares/tauri-ahq-store/security/policy)
 - [\*](#ahq-store) Your app might be screened by the maintainers AND your app will be scanned by Windows Defender (windows) on every install on every users' computer
