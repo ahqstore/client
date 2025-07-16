@@ -36,22 +36,24 @@ export async function isWindows11(): Promise<boolean> {
     .catch((_) => false);
 }
 
-export async function download(
-  url: string,
-  name: string,
-  destDir: string,
+/**
+ * 
+ * @param appId Your Application ID
+ * @param progressUpdate 
+ * @returns A channel to cancel the download
+ */
+export async function downloadApp(
+  appId: string,
   progressUpdate: (event: DownloadEvent) => void
-) {
+): Promise<Channel<void>> {
 
   const channel = new Channel<DownloadEvent>();
 
   channel.onmessage = (resp) => progressUpdate(resp);
 
-  return invoke<void>("plugin:ahqstore|download", {
-    url,
-    name,
-    path: destDir,
-    channel
+  return invoke<Channel<void>>("plugin:ahqstore|download", {
+    appId,
+    prog: channel,
   });
 }
 
@@ -134,4 +136,4 @@ export const getDevData = async (dev: string) => invoke<DevData>("plugin:ahqstor
 export const getAppAsset = async (app: string, asset: string) => invoke<Uint8Array>("plugin:ahqstore|get_app_asset", { app, asset });
 export const getDevsApps = async (dev: string) => invoke<string[]>("plugin:ahqstore|get_devs_apps", { dev });
 
-export const getArch = async () => invoke<string>("plugin:ahqstore|get_arch");
+export const getArch = async () => invoke<"x86" | "x86_64" | "aarch64" | "arm">("plugin:ahqstore|get_arch");

@@ -1,12 +1,16 @@
-use std::{io::SeekFrom, sync::{Arc, LazyLock}, time::Duration};
+use std::{
+  io::SeekFrom,
+  sync::{Arc, LazyLock},
+  time::Duration,
+};
 
 use reqwest::{Client, ClientBuilder, StatusCode};
-use tauri::async_runtime::{
-  self,
-  JoinHandle
-};
+use tauri::async_runtime::{self, JoinHandle};
 use tokio::{
-  fs::{create_dir_all, remove_dir_all, remove_file, File, OpenOptions}, io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt}, sync::mpsc::{channel, error::TryRecvError, Sender}, time::sleep
+  fs::{create_dir_all, remove_dir_all, remove_file, File, OpenOptions},
+  io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt},
+  sync::mpsc::{channel, error::TryRecvError, Sender},
+  time::sleep,
 };
 
 static CLIENT: LazyLock<Client> = LazyLock::new(|| {
@@ -16,30 +20,38 @@ static CLIENT: LazyLock<Client> = LazyLock::new(|| {
     .unwrap()
 });
 
-pub async fn download<F: FnMut(f64) -> ()>(url: &str, out_file: &str, out_dir: &str, temp_dir: &str, turbo: bool, mut log: F) -> Option<()> {
+pub async fn download<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
+  url: &str,
+  out_file: &str,
+  out_dir: &str,
+  temp_dir: &str,
+  turbo: bool,
+  mut len_fn: T,
+  mut log: F,
+) -> Option<()> {
   let _ = remove_dir_all(out_dir).await;
   create_dir_all(out_dir).await.ok()?;
 
   let _ = remove_dir_all(temp_dir).await;
   create_dir_all(temp_dir).await.ok()?;
 
-  let ranged = supports_ranged(url).await && turbo;
+  let ranged = turbo && supports_ranged(url).await;
 
   log(0.0);
 
   let size = get_size(url).await;
 
   if ranged && size.is_some() {
-    dwn_ranged(size, url, format!("{out_dir}/{out_file}"), temp_dir, log).await?;
+    dwn_ranged(size, url, format!("{out_dir}/{out_file}"), temp_dir, len_fn, log).await?;
   } else {
     let mut file = File::create(format!("{out_dir}/{out_file}")).await.ok()?;
 
-    let mut resp = CLIENT.get(url)
-      .send()
-      .await
-      .ok()?;
+    let mut resp = CLIENT.get(url).send().await.ok()?;
 
     let len = resp.content_length().unwrap_or(1);
+
+    len_fn(len);
+
     let mut curr = 0u64;
 
     let mut least = 0.0;
@@ -63,14 +75,23 @@ pub async fn download<F: FnMut(f64) -> ()>(url: &str, out_file: &str, out_dir: &
   Some(())
 }
 
-async fn dwn_ranged<F: FnMut(f64) -> ()>(size: Option<u64>, url: &str, out: String, temp: &str, mut log: F) -> Option<()> {
+async fn dwn_ranged<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
+  size: Option<u64>,
+  url: &str,
+  out: String,
+  temp: &str,
+  mut len: T,
+  mut log: F,
+) -> Option<()> {
   let mut file = File::create(&out).await.ok()?;
 
   let url = Arc::new(url.to_string());
   let temp = Arc::new(temp.to_string());
 
-  let size = size.unwrap();
+  let size = size?;
   let mut done = 0u64;
+
+  len(size);
 
   let (tx, mut rx) = channel::<u64>(20);
 
@@ -78,7 +99,7 @@ async fn dwn_ranged<F: FnMut(f64) -> ()>(size: Option<u64>, url: &str, out: Stri
 
   for (start, end) in divide_into_ranges(size) {
     let tx = tx.clone();
-    
+
     let url = url.clone();
     let temp = temp.clone();
 
@@ -118,11 +139,11 @@ async fn dwn_ranged<F: FnMut(f64) -> ()>(size: Option<u64>, url: &str, out: Stri
     }
 
     if pool.iter().all(|x| match x {
-      JoinHandle::Tokio(x) => x.is_finished()
+      JoinHandle::Tokio(x) => x.is_finished(),
     }) {
       break;
     }
-    
+
     sleep(Duration::from_millis(100)).await;
   }
 
@@ -131,12 +152,12 @@ async fn dwn_ranged<F: FnMut(f64) -> ()>(size: Option<u64>, url: &str, out: Stri
   for data in pool {
     let (path, mut data) = data.await.ok()??;
     data.seek(SeekFrom::Start(0)).await.ok()?;
-    
+
     let mut buf = [0; 4096];
 
     loop {
       let size = data.read(&mut buf).await.ok()?;
-    
+
       if size == 0 {
         break;
       }
@@ -153,29 +174,30 @@ async fn dwn_ranged<F: FnMut(f64) -> ()>(size: Option<u64>, url: &str, out: Stri
   Some(())
 }
 
-async fn download_range(url: &str, tx: Sender<u64>, start: u64, end: u64, temp: &str) -> Option<(String, File)> {
+async fn download_range(
+  url: &str,
+  tx: Sender<u64>,
+  start: u64,
+  end: u64,
+  temp: &str,
+) -> Option<(String, File)> {
   let mut resp = CLIENT
     .get(url)
     .header("Range", format!("bytes={}-{}", start, end))
     .send()
     .await
-    .unwrap();
+    .ok()?;
 
   let file = format!("{temp}/{start}_to_{end}");
 
   let mut buf = OpenOptions::new();
 
-  buf.create_new(true)
-    .read(true)
-    .write(true)
-    .truncate(true);
-  
+  buf.create_new(true).read(true).write(true).truncate(true);
+
   #[cfg(windows)]
   buf.share_mode(0);
 
-  let mut buf = buf.open(&file)
-    .await
-    .ok()?;
+  let mut buf = buf.open(&file).await.ok()?;
 
   while let Some(chunk) = resp.chunk().await.ok()? {
     let _ = tx.send(chunk.len() as u64).await;
@@ -186,7 +208,7 @@ async fn download_range(url: &str, tx: Sender<u64>, start: u64, end: u64, temp: 
 }
 
 fn divide_into_ranges(total_size: u64) -> Vec<(u64, u64)> {
-  let mut total = total_size / 1024*1024;
+  let mut total = total_size / 1024 * 1024;
 
   if total > 100 {
     total = 100;
@@ -197,7 +219,7 @@ fn divide_into_ranges(total_size: u64) -> Vec<(u64, u64)> {
 
   for i in 0..total {
     let start = i * chunk_size;
-    
+
     let end = if i == (total - 1) {
       total_size - 1 // Ensure the last chunk goes to the end
     } else {
@@ -211,7 +233,7 @@ fn divide_into_ranges(total_size: u64) -> Vec<(u64, u64)> {
 }
 
 pub async fn get_size(url: &str) -> Option<u64> {
-  let resp = CLIENT.head(url).send().await.unwrap();
+  let resp = CLIENT.head(url).send().await.ok()?;
 
   let headers = resp.headers();
 
@@ -222,12 +244,16 @@ pub async fn get_size(url: &str) -> Option<u64> {
 }
 
 async fn supports_ranged(url: &str) -> bool {
-  CLIENT
+  let res = CLIENT
     .get(url)
     .header("Range", "bytes=0-0")
     .send()
-    .await
-    .unwrap()
-    .status()
-    == StatusCode::PARTIAL_CONTENT
+    .await;
+
+
+  if let Ok(res) = res {
+    return res.status() == StatusCode::PARTIAL_CONTENT
+  }
+
+  false
 }

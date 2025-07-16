@@ -26,8 +26,8 @@ use crate::error::Result;
 
 use open as open_2;
 
-mod encrypt;
 mod download;
+mod encrypt;
 
 pub use download::*;
 pub use encrypt::*;
@@ -67,19 +67,22 @@ pub(crate) async fn get_all_search(app: AppHandle, query: &str) -> Result<Vec<Re
 
 #[command(async)]
 pub(crate) async fn get_home(app: AppHandle) -> Result<Home> {
-  Ok(internet::get_home(
-    (||{
-      #[cfg(windows)]
-      return OfficialManifestSource::WinGet;
+  Ok(
+    internet::get_home(
+      (|| {
+        #[cfg(windows)]
+        return OfficialManifestSource::WinGet;
 
-      #[cfg(target_os = "linux")]
-      return OfficialManifestSource::Linux;
+        #[cfg(target_os = "linux")]
+        return OfficialManifestSource::Linux;
 
-      #[cfg(mobile)]
-      return OfficialManifestSource::FDroid;
-    })(),
-    &app.ahqstore().commits.lock().await.alt
-  ).await?)
+        #[cfg(mobile)]
+        return OfficialManifestSource::FDroid;
+      })(),
+      &app.ahqstore().commits.lock().await.alt,
+    )
+    .await?,
+  )
 }
 
 #[command(async)]

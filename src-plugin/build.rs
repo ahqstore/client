@@ -21,7 +21,7 @@ const COMMANDS: &[&str] = &[
   "set_scale",
   "encrypt",
   "decrypt",
-  "download"
+  "download",
 ];
 
 fn main() {

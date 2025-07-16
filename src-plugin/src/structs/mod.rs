@@ -51,6 +51,14 @@ impl<R: Runtime> Ahqstore<R> {
   }
 
   #[cfg(mobile)]
+  pub fn android_build(&self) -> crate::Result<AndroidBuildOutput> {
+    self
+      .handle
+      .run_mobile_plugin("getAndroidBuild", ())
+      .map_err(Into::into)
+  }
+
+  #[cfg(mobile)]
   pub fn show_code(&self, code: String) -> crate::Result<()> {
     self
       .handle

@@ -9,6 +9,8 @@ mod structs;
 
 mod commands;
 use commands::*;
+// Another set of commands
+use crate::structs::platform::*;
 
 mod error;
 mod models;
@@ -38,12 +40,9 @@ pub fn init() -> TauriPlugin<tauri::Wry> {
       get_linux_distro,
       #[cfg(windows)]
       is_windows_11,
-      
       download,
-
       encrypt,
       decrypt,
-
       open,
       set_progress,
       is_development,

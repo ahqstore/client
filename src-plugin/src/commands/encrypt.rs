@@ -1,11 +1,11 @@
+use crate::error::Result;
+use anyhow::Context;
 use bcrypt::{hash_with_salt, Version, DEFAULT_COST};
 use chacha20poly1305::{
   aead::{generic_array::GenericArray, Aead, KeyInit},
   ChaCha20Poly1305,
 };
 use lazy_static::lazy_static;
-use anyhow::Context;
-use crate::error::Result;
 
 lazy_static! {
   static ref CRYPTER: ChaCha20Poly1305 = {
@@ -25,15 +25,23 @@ use serde_json::to_string;
 #[tauri::command(async)]
 pub fn encrypt(payload: String) -> Result<Vec<u8>> {
   let nonce = GenericArray::from_slice(b"SSSSSSSSSSSS");
-  
-  Ok(CRYPTER.encrypt(nonce, payload.as_bytes()).ok().context("Cannot encrypt")?)
+
+  Ok(
+    CRYPTER
+      .encrypt(nonce, payload.as_bytes())
+      .ok()
+      .context("Cannot encrypt")?,
+  )
 }
 
 #[tauri::command(async)]
 pub fn decrypt(encrypted: Vec<u8>) -> Result<String> {
   let nonce = GenericArray::from_slice(b"SSSSSSSSSSSS");
 
-  let decrypted = CRYPTER.decrypt(nonce, &*encrypted).ok().context("Cannot decrypt")?;
+  let decrypted = CRYPTER
+    .decrypt(nonce, &*encrypted)
+    .ok()
+    .context("Cannot decrypt")?;
 
   Ok(String::from_utf8(decrypted)?)
 }
