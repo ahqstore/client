@@ -1,4 +1,5 @@
 use tauri::AppHandle;
+use crate::AhqstoreExt;
 use ahqstore_types::{AHQStoreApplication, DownloadUrl};
 
 pub fn is_supported(handle: &AppHandle, app: &AHQStoreApplication) -> crate::Result<bool> {
