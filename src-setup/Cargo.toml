@@ -17,13 +17,6 @@ serde = { version = "1.0.206", features = ["derive"] }
 slint = "1"
 tokio = { version = "1", features = ["rt"] }
 
-[target.'cfg(unix)'.dependencies]
-notify-rust = "4"
-
-[target.'cfg(all(unix, any(target_arch = "aarch64", target_arch = "arm")))'.dependencies]
-openssl = { version = "*", features = ["vendored"] }
-openssl-sys = { version = "*", features = ["vendored"] }
-
 [target.'cfg(windows)'.dependencies]
 check_elevation = "0.2.4"
 winreg = "0.55"

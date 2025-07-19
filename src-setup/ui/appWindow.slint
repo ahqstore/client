@@ -1,8 +1,9 @@
-import { Button, VerticalBox, HorizontalBox, ProgressIndicator, CheckBox, Palette, GridBox, ListView } from "std-widgets.slint";
+import { Button, VerticalBox, HorizontalBox, ProgressIndicator, CheckBox, Palette, ListView } from "std-widgets.slint";
+import { ToolTip } from "Tooltip.slint";
 
 export component AppWindow inherits Window {
-    max-height: 500px;
-    min-height: 500px;
+    max-height: 540px;
+    min-height: 540px;
     min-width: 350px;
     max-width: 350px;
     icon: @image-url("logo.png");
@@ -13,9 +14,19 @@ export component AppWindow inherits Window {
     in-out property <bool> preview: false;
     in-out property <bool> indet: false;
     in-out property <bool> uninstall: false;
+    in-out property <bool> server: false;
     callback start-install();
     callback tos();
     callback site();
+    crfToolTip := ToolTip {
+        x: crfTouch.x;
+        y: crfTouch.y + 210px;
+        height: 6.5rem;
+        width: 27rem;
+        text: "The service runs as NT Authority/SYSTEM and allows installing application without UAC prompt. Only works for people in the Administrator group. More info in the Readme Window opened";
+        user_is_hovering: crfTouch.has-hover;
+    }
+
     popup := PopupWindow {
         max-height: 200px;
         min-height: 200px;
@@ -39,6 +50,7 @@ export component AppWindow inherits Window {
                 ListView {
                     for data in [
                         " • CD Icon by icons8.com",
+                        " • Info Icon by flaticon.com",
                         " • Store app by AHQ & Org",
                         " • Made with slint"
                     ]: Text {
@@ -51,9 +63,9 @@ export component AppWindow inherits Window {
     }
 
     VerticalBox {
-        height: 500px;
-        max-height: 500px;
-        min-height: 500px;
+        height: 540px;
+        max-height: 540px;
+        min-height: 540px;
         width: 400px;
         min-width: 400px;
         max-width: 400px;
@@ -80,13 +92,35 @@ export component AppWindow inherits Window {
         VerticalBox {
             alignment: LayoutAlignment.stretch;
             HorizontalBox {
-                alignment: LayoutAlignment.center;
+                alignment: LayoutAlignment.start;
+                padding-left: 50px;
                 CheckBox {
                     checked: uninstall ? true : root.preview;
                     text: uninstall ? "Uninstall" : "Install Prerelease";
                     enabled: counter == -1.0;
                     toggled => {
                         root.preview = !root.preview;
+                    }
+                }
+            }
+
+            crfTouch := TouchArea {
+                HorizontalBox {
+                    alignment: LayoutAlignment.start;
+                    padding-left: 50px;
+                    CheckBox {
+                        checked: root.server;
+                        text: "Install AHQ Store Service (Soon)";
+                        enabled: false && counter == -1.0;
+                        toggled => {
+                            root.server = !root.server;
+                        }
+                    }
+
+                    Image {
+                        source: Palette.color-scheme == ColorScheme.dark ? @image-url("info.png") : @image-url("info-light.png");
+                        image-rendering: ImageRendering.smooth;
+                        width: 15px;
                     }
                 }
             }

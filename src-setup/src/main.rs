@@ -47,6 +47,11 @@ fn main() -> Result<(), slint::PlatformError> {
 
   let splash_hwnd = splash.as_weak();
 
+  let welcome = Welcome::new()?;
+  center::center_window(welcome.window());
+
+  let welcome_hwnd = welcome.as_weak();
+
   let ui = AppWindow::new()?;
   center::center_window(ui.window());
 
@@ -61,6 +66,13 @@ fn main() -> Result<(), slint::PlatformError> {
         5
       }
     ));
+
+    if !shall_we_update {
+      welcome_hwnd.upgrade_in_event_loop(|welcome| {
+        welcome.show();
+      });
+    }
+
     splash_hwnd.upgrade_in_event_loop(|s| {
       center::hide(s.window());
     });

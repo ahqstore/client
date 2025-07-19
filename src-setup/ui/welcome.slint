@@ -1,0 +1,176 @@
+import { VerticalBox, HorizontalBox, ProgressIndicator, GridBox, GroupBox, Palette, ScrollView, Button } from "std-widgets.slint";
+
+export component Welcome inherits Window {
+    icon: @image-url("logo.png");
+    title: "AHQ Store Setup"; // Changed title to match screenshot
+    height: 480px;
+    width: 800px;
+
+    // Main layout for the entire window content
+    VerticalBox {
+        width: 100%;
+        height: 100%;
+        spacing: 10px; // Spacing between main sections
+
+        // Header section (optional, but good for structure)
+        HorizontalBox {
+            width: 100%;
+            height: 50px; // Fixed height for header area
+            alignment: LayoutAlignment.center;
+            Text {
+                text: "Welcome to AHQ Store Installer!";
+                font-size: 20px;
+                font-weight: 700; // Bold for heading
+                font-family: "Inter";
+            }
+        }
+
+        // Scrollable content area for the main text
+        ScrollView {
+            // flex-grow: 1; // Allows ScrollView to take available space
+            width: 100%;
+            padding: 15px; // Padding around the scrollable content
+
+            VerticalBox {
+                alignment: LayoutAlignment.start;
+                spacing: 10px; // Spacing between text blocks
+
+                Text {
+                    text: "Licensed under MIT. We are not responsible for any damages as outlined in our TOS:";
+                    wrap: word-wrap;
+                    font-size: 14px;
+                    font-family: "Inter";
+                }
+
+                Text {
+                    text: "In no event shall the developers or contributors be liable for any damages, including but not limited to direct, indirect, incidental, special, or consequential damages, arising out of the use or inability to use the software.";
+                    wrap: word-wrap;
+                    font-size: 14px;
+                    font-family: "Inter";
+                }
+
+                // Links
+                Text {
+                    text: "TOS: https://ahqstore.github.io/tos/index.html\nPrivacy Policy: https://ahqstore.github.io/privacy/index.html";
+                    wrap: word-wrap;
+                    font-size: 14px;
+                    font-family: "Inter";
+                    // In SLINT, direct clickable links like HTML aren't standard for Text.
+                    // You'd typically handle this by having a button or a specific area
+                    // that triggers an external URL opening via a callback to your backend logic.
+                }
+
+                Text {
+                    text: "By continuing, you agree to the same";
+                    wrap: word-wrap;
+                    font-size: 14px;
+                    font-family: "Inter";
+                    font-weight: 600; // Slightly bolder to emphasize agreement
+                }
+
+                // Separator 1
+                Rectangle {
+                    width: 100%;
+                    height: 1px;
+                    background: Palette.alternate-background; // A subtle line
+                    padding-top: 10px;
+                    padding-bottom: 10px;
+                }
+
+                Text {
+                    text: "AHQ Store distributes third party apps, thus even though we scan the community repository (that does not include winget, fdroid, appimage[linux] repository), we advise your own discretion.";
+                    wrap: word-wrap;
+                    font-size: 14px;
+                    font-family: "Inter";
+                }
+
+                // Separator 2
+                Rectangle {
+                    width: 100%;
+                    height: 1px;
+                    background: Palette.border;
+                    padding-top: 10px;
+                    padding-bottom: 10px;
+                }
+
+                Text {
+                    text: "Introducing AHQ Store Service";
+                    font-size: 16px;
+                    font-weight: 700; // Bold for sub-heading
+                    font-family: "Inter";
+                }
+
+                // List items for service features
+                VerticalBox {
+                    spacing: 5px;
+                    Text {
+                        text: "- It allows you to install AHQ Store Applications for all users bypassing UAC prompt.";
+                        wrap: word-wrap;
+                        font-size: 14px;
+                        font-family: "Inter";
+                    }
+
+                    Text {
+                        text: "- It only works if you're logged into an Administrator account.";
+                        wrap: word-wrap;
+                        font-size: 14px;
+                        font-family: "Inter";
+                    }
+
+                    Text {
+                        text: "- Only the AHQ Store application can trigger this.";
+                        wrap: word-wrap;
+                        font-size: 14px;
+                        font-family: "Inter";
+                    }
+                }
+
+                // "BUT, and that's a BIG BUT" section
+                Text {
+                    text: "BUT, and that's a BIG BUT";
+                    font-size: 16px;
+                    font-weight: 800; // Extra bold for emphasis
+                    color: red; // Make it red for strong warning
+                    font-family: "Inter";
+                    padding-top: 10px;
+                }
+
+                // List items for cons
+                VerticalBox {
+                    spacing: 5px;
+                    Text {
+                        text: "- Due to the nature of 3rd party packages, if a malicious package installs, it gains complete system access without UAC prompt.";
+                        wrap: word-wrap;
+                        font-size: 14px;
+                        font-family: "Inter";
+                    }
+
+                    Text {
+                        text: "- Note that the above issue still exists due to the nature of 3rd party packages";
+                        wrap: word-wrap;
+                        font-size: 14px;
+                        font-family: "Inter";
+                    }
+                }
+
+                Text {
+                    text: "This is designed to be insecure & can run arbitrary code.";
+                    wrap: word-wrap;
+                    font-size: 14px;
+                    font-family: "Inter";
+                    font-weight: 600; // Bolder for emphasis
+                }
+
+                Text {
+                    text: "We recommend not to install this. Only install if you're absolutely sure about it.";
+                    wrap: word-wrap;
+                    font-size: 14px;
+                    font-weight: 700; // Bold for final warning
+                    color: red; // Red for strong warning
+                    font-family: "Inter";
+                    padding-bottom: 20px;
+                }
+            }
+        }
+    }
+}

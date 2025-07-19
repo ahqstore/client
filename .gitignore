@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+/src-plugin/android/.gradle/**/*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -26,3 +28,4 @@ dist-ssr
 .keys
 function_to_encrypt.cjs
 keystore.properties
+src-plugin/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock
