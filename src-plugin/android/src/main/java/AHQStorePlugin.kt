@@ -1,5 +1,6 @@
 package com.plugin.ahqstore
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
@@ -10,6 +11,11 @@ import android.os.Build
 import android.provider.Settings
 import android.webkit.WebView
 import androidx.core.content.FileProvider
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 
 import app.tauri.annotation.Command
 import app.tauri.annotation.InvokeArg
@@ -33,6 +39,7 @@ import ru.solrudev.ackpine.uninstaller.PackageUninstaller
 import ru.solrudev.ackpine.uninstaller.parameters.UninstallParameters
 import java.io.File
 import java.util.Vector
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.cancellation.CancellationException
 
 @InvokeArg
@@ -60,6 +67,30 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
 
     override fun load(webView: WebView) {
       this.webView = webView
+
+      if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+        activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
+      }
+
+      val manager = WorkManager.getInstance(activity.baseContext!!)
+
+      val constraints = Constraints(
+        requiresBatteryNotLow = true,
+        requiredNetworkType = NetworkType.CONNECTED
+      )
+
+      val periodicWork = PeriodicWorkRequestBuilder<BackgroundUpdateWorker>(
+        15,
+        TimeUnit.MINUTES
+      )
+        .setConstraints(constraints)
+        .build()
+
+      manager.enqueueUniquePeriodicWork(
+        "updater",
+        ExistingPeriodicWorkPolicy.UPDATE,
+        periodicWork
+      )
     }
 
     @SuppressLint("QueryPermissionsNeeded")
