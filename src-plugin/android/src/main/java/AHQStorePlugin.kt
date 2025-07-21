@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.webkit.WebView
 import androidx.core.content.FileProvider
 import androidx.work.Constraints
@@ -92,6 +93,8 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
         ExistingPeriodicWorkPolicy.UPDATE,
         periodicWork
       )
+
+      Log.i("Enqueued", "Periodic Work Registered");
     }
 
     @SuppressLint("QueryPermissionsNeeded")
