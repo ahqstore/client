@@ -84,6 +84,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
         TimeUnit.MINUTES
       )
         .setConstraints(constraints)
+        .setInitialDelay(5, TimeUnit.SECONDS)
         .build()
 
       manager.enqueueUniquePeriodicWork(
