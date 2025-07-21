@@ -3,6 +3,7 @@ package com.plugin.ahqstore
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -39,6 +40,10 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
     store.start()
 
     // Work
+
+    NotificationCompat.Builder(this.applicationContext, notificationChannelId)
+      .setContentTitle("Updates")
+      .setContentText("We have updated!!")
 
     store.stop();
 
