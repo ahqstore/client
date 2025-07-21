@@ -41,9 +41,15 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
 
     // Work
 
-    NotificationCompat.Builder(this.applicationContext, notificationChannelId)
+    val notif = NotificationCompat.Builder(this.applicationContext, notificationChannelId)
       .setContentTitle("Updates")
       .setContentText("We have updated!!")
+      .build()
+
+    ContextCompat.getSystemService(
+      applicationContext,
+      NotificationManager::class.java
+    )?.notify(1, notif);
 
     store.stop();
 
