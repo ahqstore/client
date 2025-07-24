@@ -66,6 +66,8 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
     private var pkgInstaller: PackageInstaller? = null
     private var pkgUninstaller: PackageUninstaller? = null
 
+    private val updatePref = UpdatePreferencesState(activity)
+
     override fun load(webView: WebView) {
       this.webView = webView
 
@@ -122,6 +124,33 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
     }
 
     @Command
+    fun getUpdatePref(invoke: Invoke) {
+      scope.launch {
+        val ret = JSObject()
+
+        ret.put("pref", updatePref.getAutoUpdatePreference())
+
+        invoke.resolve(ret)
+      }
+    }
+
+    @Command
+    fun setUpdatePref(invoke: Invoke) {
+      scope.launch {
+        val toSet = invoke.parseArgs(String::class.java)
+
+        val toSetFinal = fromString(toSet)
+
+        updatePref.setAutoUpdatePreference(toSetFinal)
+
+        val ret = JSObject()
+
+        invoke.resolve(ret)
+      }
+    }
+
+
+  @Command
     fun uninstall(invoke: Invoke) {
       scope.launch {
         uninstallInner(invoke)

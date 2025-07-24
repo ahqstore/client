@@ -36,6 +36,12 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
   override suspend fun doWork(): Result {
     createNotificationChannel()
 
+    val pref = UpdatePreferencesState(this.applicationContext)
+
+    if (!pref.shallUpdateCheck()) {
+      return Result.success();
+    }
+
     val store = UpdateWorkerStore(this.applicationContext)
 
     store.start()
