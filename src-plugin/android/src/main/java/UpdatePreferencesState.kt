@@ -8,12 +8,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 val Context.updateState: DataStore<Preferences> by preferencesDataStore(name = "updateprefs")
 
 val AutoUpdatePrefs = stringPreferencesKey("AUTOUPDATE")
+val AppsToUpdateList = stringPreferencesKey("AppsToUpdate")
 
 enum class AutoUpdatePreference {
   Skip,
@@ -57,6 +59,14 @@ class UpdatePreferencesState() {
 
       return@map ret;
     }.first()
+  }
+
+  fun listenableAppsToUpdate(): Flow<List<String>> {
+    return this.ctx.updateState.data.map { data ->
+      val ret = data[AppsToUpdateList] ?: ""
+
+      return@map ret.split(",")
+    }
   }
 
   suspend fun shallUpdateCheck(): Boolean {

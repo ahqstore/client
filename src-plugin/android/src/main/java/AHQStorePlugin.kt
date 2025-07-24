@@ -28,6 +28,7 @@ import app.tauri.plugin.JSArray
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 import ru.solrudev.ackpine.installer.PackageInstaller
@@ -58,262 +59,297 @@ class Data {
   var data: String = ""
 }
 
-val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
 @TauriPlugin
 class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
-    private var webView: WebView? = null
-    private var pkgInstaller: PackageInstaller? = null
-    private var pkgUninstaller: PackageUninstaller? = null
+  private var webView: WebView? = null
+  private var pkgInstaller: PackageInstaller? = null
+  private var pkgUninstaller: PackageUninstaller? = null
 
-    private val updatePref = UpdatePreferencesState(activity)
+  private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    override fun load(webView: WebView) {
-      this.webView = webView
+  private val updatePref = UpdatePreferencesState(activity)
+  private val updateWorkerState = UpdateWorkerStore(activity)
 
-      if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+  override fun load(webView: WebView) {
+    this.webView = webView
+
+    if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
       }
-
-      val manager = WorkManager.getInstance(activity.baseContext!!)
-
-      val constraints = Constraints(
-        requiresBatteryNotLow = true,
-        requiredNetworkType = NetworkType.CONNECTED
-      )
-
-      val periodicWork = PeriodicWorkRequestBuilder<BackgroundUpdateWorker>(
-        15,
-        TimeUnit.MINUTES
-      )
-        .setConstraints(constraints)
-        .setInitialDelay(5, TimeUnit.SECONDS)
-        .build()
-
-      manager.enqueueUniquePeriodicWork(
-        "updater",
-        ExistingPeriodicWorkPolicy.UPDATE,
-        periodicWork
-      )
-
-      Log.i("Enqueued", "Periodic Work Registered");
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
-    private fun loadAHQStoreApps(): Vector<PackageInfo> {
-      val packageManager = activity.baseContext.packageManager
+    val manager = WorkManager.getInstance(activity.baseContext!!)
 
-      val packages: Vector<PackageInfo> = Vector()
+    val constraints = Constraints(
+      requiresBatteryNotLow = true,
+      requiredNetworkType = NetworkType.CONNECTED
+    )
 
-      for (application in packageManager.getInstalledPackages(0)) {
-        val name = application!!.packageName
+    val periodicWork = PeriodicWorkRequestBuilder<BackgroundUpdateWorker>(
+      15,
+      TimeUnit.MINUTES
+    )
+      .setConstraints(constraints)
+      .setInitialDelay(5, TimeUnit.SECONDS)
+      .build()
 
-        if (isAHQStorePackage(name)) {
-          packages.add(application)
-        }
-      }
+    manager.enqueueUniquePeriodicWork(
+      "updater",
+      ExistingPeriodicWorkPolicy.UPDATE,
+      periodicWork
+    )
 
-      return packages
+    Log.i("Enqueued", "Periodic Work Registered");
+
+    this.dataSync()
+  }
+
+  @Command
+  fun unload(invoke: Invoke) {
+    Log.d("AHQStorePlugin", "Tauri @Command unload called. Cancelling pluginScope.")
+    try {
+      scope.cancel("Plugin is shutting down") // CRITICAL: Cancel the scope
+      // Clear references to help garbage collection
+      webView = null
+      pkgInstaller = null
+      pkgUninstaller = null
+    } catch (e: Exception) {
+      Log.e("AHQStorePlugin", "Error during plugin unload/cancellation: ${e.message}", e)
+    } finally {
+      invoke.resolve() // Always resolve the invoke
     }
+  }
 
-    @Command
-    fun install(invoke: Invoke) {
-      scope.launch {
-        installInner(invoke)
-      }
-    }
-
-    @Command
-    fun getUpdatePref(invoke: Invoke) {
-      scope.launch {
+  private fun dataSync() {
+    scope.launch {
+      updatePref.listenableAppsToUpdate().collect { data ->
         val ret = JSObject()
 
-        ret.put("pref", updatePref.getAutoUpdatePreference())
+        ret.put("update", data)
 
-        invoke.resolve(ret)
+        trigger("updateStat", ret)
       }
     }
 
-    @Command
-    fun setUpdatePref(invoke: Invoke) {
-      scope.launch {
-        val toSet = invoke.parseArgs(String::class.java)
-
-        val toSetFinal = fromString(toSet)
-
-        updatePref.setAutoUpdatePreference(toSetFinal)
-
+    scope.launch {
+      updateWorkerState.listenableIsBusy().collect { data ->
         val ret = JSObject()
 
-        invoke.resolve(ret)
+        ret.put("update", data)
+        trigger("workerCurrentStat", ret)
       }
     }
+  }
+
+  @SuppressLint("QueryPermissionsNeeded")
+  private fun loadAHQStoreApps(): Vector<PackageInfo> {
+    val packageManager = activity.baseContext.packageManager
+
+    val packages: Vector<PackageInfo> = Vector()
+
+    for (application in packageManager.getInstalledPackages(0)) {
+      val name = application!!.packageName
+      if (isAHQStorePackage(name)) {
+        packages.add(application)
+      }
+    }
+
+    return packages
+  }
+
+  @Command
+  fun install(invoke: Invoke) {
+    scope.launch {
+      installInner(invoke)
+    }
+  }
+
+  @Command
+  fun getUpdatePref(invoke: Invoke) {
+    scope.launch {
+      val ret = JSObject()
+      ret.put("pref", updatePref.getAutoUpdatePreference())
+
+      invoke.resolve(ret)
+    }
+  }
+
+  @Command
+  fun setUpdatePref(invoke: Invoke) {
+    scope.launch {
+      val toSet = invoke.parseArgs(String::class.java)
+
+      val toSetFinal = fromString(toSet)
+
+      updatePref.setAutoUpdatePreference(toSetFinal)
+
+      val ret = JSObject()
+
+      invoke.resolve(ret)
+    }
+  }
 
 
   @Command
-    fun uninstall(invoke: Invoke) {
-      scope.launch {
-        uninstallInner(invoke)
+  fun uninstall(invoke: Invoke) {
+    scope.launch {
+      uninstallInner(invoke)
+    }
+  }
+
+  @Command
+  fun getAndroidBuild(invoke: Invoke) {
+    val ret = JSObject()
+    ret.put("sdk", Build.VERSION.SDK_INT)
+    ret.put("release", Build.VERSION.RELEASE)
+
+    invoke.resolve(ret)
+  }
+
+  private fun isAHQStorePackage(pkg: String): Boolean {
+    val packageManager = activity.packageManager
+
+    val source = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      packageManager.getInstallSourceInfo(pkg).initiatingPackageName
+    } else {
+      packageManager.getInstallerPackageName(pkg)
+    }
+
+    return source == activity.applicationInfo.packageName
+  }
+
+  @Command
+  fun isAHQStorePackage(invoke: Invoke) {
+    isAHQStorePackage(invoke.parseArgs(String::class.java))
+  }
+
+  @Command
+  fun listInstalled(invoke: Invoke) {
+    val pm = activity.packageManager
+    val ret = JSObject()
+    val pkgs = JSArray()
+
+    for (pkg in pm.getInstalledPackages(PackageManager.GET_META_DATA)) {
+      val pkg = pkg!!
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        pm.getInstallSourceInfo(pkg.packageName).installingPackageName
+      }
+      if (pkg.applicationInfo != null) {
+        pkgs.put(pkg)
       }
     }
 
-    @Command
-    fun getAndroidBuild(invoke: Invoke) {
-      val ret = JSObject()
+    ret.put("apps", pkgs)
 
-      ret.put("sdk", Build.VERSION.SDK_INT)
-      ret.put("release", Build.VERSION.RELEASE)
+    invoke.resolve(ret)
+  }
 
-      invoke.resolve(ret)
+  @Command
+  fun showCode(invoke: Invoke) {
+    val args = invoke.parseArgs(ShowCodeRequest::class.java)
+
+    invoke.resolve()
+  }
+
+  @Command
+  fun zoom(invoke: Invoke) {
+    val args = invoke.parseArgs(ZoomRequest::class.java)
+
+    val currentZoom = webView!!.scale
+    webView!!.zoomBy(args.zoom / currentZoom)
+
+    invoke.resolve()
+  }
+
+  private suspend fun installInner(invoke: Invoke) {
+    val path = invoke.parseArgs(Data::class.java).data
+
+    val apk = File(path)
+
+    val pkgMan = activity.packageManager
+
+    if (pkgInstaller == null) {
+      pkgInstaller = PackageInstaller.getInstance(activity.baseContext)
+    }
+    if (!pkgMan.canRequestPackageInstalls()) {
+      activity.startActivity(
+        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+          .setData(Uri.parse(String.format("package:%s", activity.baseContext.packageName)))
+      )
     }
 
-    private fun isAHQStorePackage(pkg: String): Boolean {
-      val packageManager = activity.packageManager
+    val ret = JSObject()
 
-      val source = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        packageManager.getInstallSourceInfo(pkg).initiatingPackageName
-      } else {
-        packageManager.getInstallerPackageName(pkg)
-      }
-
-      return source == activity.applicationInfo.packageName
-    }
-
-    @Command
-    fun isAHQStorePackage(invoke: Invoke) {
-      isAHQStorePackage(invoke.parseArgs(String::class.java))
-    }
-
-    @Command
-    fun listInstalled(invoke: Invoke) {
-      val pm = activity.packageManager
-      val ret = JSObject()
-
-      val pkgs = JSArray()
-
-      for (pkg in pm.getInstalledPackages(PackageManager.GET_META_DATA)) {
-        val pkg = pkg!!
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-           pm.getInstallSourceInfo(pkg.packageName).installingPackageName
-        }
-
-        if (pkg.applicationInfo != null) {
-          pkgs.put(pkg)
-        }
-      }
-
-      ret.put("apps", pkgs)
-
-      invoke.resolve(ret)
-    }
-
-    @Command
-    fun showCode(invoke: Invoke) {
-      val args = invoke.parseArgs(ShowCodeRequest::class.java)
-
-      invoke.resolve()
-    }
-
-    @Command
-    fun zoom(invoke: Invoke) {
-      val args = invoke.parseArgs(ZoomRequest::class.java)
-
-      val currentZoom = webView!!.scale
-      webView!!.zoomBy(args.zoom / currentZoom)
-
-      invoke.resolve()
-    }
-
-    private suspend fun installInner(invoke: Invoke) {
-      val path = invoke.parseArgs(Data::class.java).data
-
-      val apk = File(path)
-
-      val pkgMan = activity.packageManager
-
-      if (pkgInstaller == null) {
-        pkgInstaller = PackageInstaller.getInstance(activity.baseContext)
-      }
-      if (!pkgMan.canRequestPackageInstalls()) {
-        activity.startActivity(
-          Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
-            .setData(Uri.parse(String.format("package:%s", activity.baseContext.packageName))),
-        )
-      }
-
-      val ret = JSObject()
-
-      ret.put("success", false)
-      if (apk.exists()) {
-        try {
-          val apkUri: Uri = FileProvider.getUriForFile(
-            activity.baseContext,
-            activity.applicationContext.packageName + ".fileprovider",
-            apk
-          )
-
-          println("Got apk Uri")
-
-          try {
-            println("pkg installer")
-            when (val result = pkgInstaller!!.createSession(InstallParameters(apkUri) {
-              confirmation = Confirmation.IMMEDIATE
-            }).await()) {
-              is Session.State.Failed -> {
-                println("Error $result")
-                ret.put("msg", result.toString())
-              }
-              Session.State.Succeeded -> {
-                ret.put("success", true)
-                ret.put("msg", "Success")
-              }
-            }
-          } catch (_: CancellationException) {
-            println("Error Cancelled (u  s  e  r)")
-            ret.put("msg", "The operation was cancelled")
-          } catch (e: Exception) {
-            println("Error $e")
-            ret.put("msg", "Error: ${e.message}")
-          }
-        } catch (e: Throwable) {
-          println("Error $e")
-          ret.put("msg", e.message)
-        }
-      } else {
-        ret.put("success", false)
-        ret.put("msg", "The app path was not found!")
-      }
-
-      invoke.resolve(ret)
-    }
-
-
-    private suspend fun uninstallInner(invoke: Invoke) {
-      val packageString = invoke.parseArgs(Data::class.java).data
-      val resp = JSObject()
-
-      resp.put("success", false)
-
-      if (pkgUninstaller == null) {
-        pkgUninstaller = PackageUninstaller.getInstance(activity.baseContext)
-      }
-
+    ret.put("success", false)
+    if (apk.exists()) {
       try {
-        when (val res = pkgUninstaller!!.createSession(UninstallParameters(packageString) {
-          confirmation = Confirmation.IMMEDIATE
-        }).await()) {
-          is Session.State.Failed -> {
-            resp.put("msg", res.toString())
+        val apkUri: Uri = FileProvider.getUriForFile(
+          activity.baseContext,
+          activity.applicationContext.packageName + ".fileprovider",
+          apk
+        )
+
+        println("Got apk Uri")
+
+        try {
+          println("pkg installer")
+          when (val result = pkgInstaller!!.createSession(InstallParameters(apkUri) {
+            confirmation = Confirmation.IMMEDIATE
+          }).await()) {
+            is Session.State.Failed -> {
+              println("Error $result")
+              ret.put("msg", result.toString())
+            }
+            Session.State.Succeeded -> {
+              ret.put("success", true)
+              ret.put("msg", "Success")
+            }
           }
-          Session.State.Succeeded -> {
-            resp.put("success", true)
-            resp.put("msg", "Successful")
-          }
+        } catch (_: CancellationException) {
+          println("Error Cancelled (u  s  e  r)")
+          ret.put("msg", "The operation was cancelled")
+        } catch (e: Exception) {
+          println("Error $e")
+          ret.put("msg", "Error: ${e.message}")
         }
       } catch (e: Throwable) {
-        resp.put("msg", e.message)
+        println("Error $e")
+        ret.put("msg", e.message)
       }
-
-      invoke.resolve(resp)
+    } else {
+      ret.put("success", false)
+      ret.put("msg", "The app path was not found!")
     }
+    invoke.resolve(ret)
+  }
+
+
+  private suspend fun uninstallInner(invoke: Invoke) {
+    val packageString = invoke.parseArgs(Data::class.java).data
+    val resp = JSObject()
+
+    resp.put("success", false)
+
+    if (pkgUninstaller == null) {
+      pkgUninstaller = PackageUninstaller.getInstance(activity.baseContext)
+    }
+
+    try {
+      when (val res = pkgUninstaller!!.createSession(UninstallParameters(packageString) {
+        confirmation = Confirmation.IMMEDIATE
+      }).await()) {
+        is Session.State.Failed -> {
+          resp.put("msg", res.toString())
+        }
+        Session.State.Succeeded -> {
+          resp.put("success", true)
+          resp.put("msg", "Successful")
+        }
+      }
+    } catch (e: Throwable) {
+      resp.put("msg", e.message)
+    }
+    invoke.resolve(resp)
+  }
 }

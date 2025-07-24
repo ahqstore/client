@@ -15,34 +15,43 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
   private fun createNotificationChannel()
   {
 
-      val notificationChannel = NotificationChannel(
-        notificationChannelId,
-        "Update Notifications",
-        NotificationManager.IMPORTANCE_DEFAULT,
-      )
+    val notificationChannel = NotificationChannel(
+      notificationChannelId,
+      "Update Notifications",
+      NotificationManager.IMPORTANCE_DEFAULT,
+    )
 
-      val notificationManager: NotificationManager? =
-        ContextCompat.getSystemService(
-          applicationContext,
-          NotificationManager::class.java)
+    val notificationManager: NotificationManager? =
+      ContextCompat.getSystemService(
+        applicationContext,
+        NotificationManager::class.java)
 
-      notificationManager?.createNotificationChannel(
-        notificationChannel
-      )
-
+    notificationManager?.createNotificationChannel(
+      notificationChannel
+    )
   }
 
 
   override suspend fun doWork(): Result {
+    val store = UpdateWorkerStore(this.applicationContext)
+
+    try {
+      return run(store, false)
+    } catch (_: Exception) {
+      // If coroutine shuts down due to 10mins reached
+      store.stop();
+      return Result.failure();
+    }
+  }
+
+  private suspend fun run(store: UpdateWorkerStore, runForced: Boolean): Result {
     createNotificationChannel()
 
     val pref = UpdatePreferencesState(this.applicationContext)
 
-    if (!pref.shallUpdateCheck()) {
+    if (!runForced || !pref.shallUpdateCheck()) {
       return Result.success();
     }
-
-    val store = UpdateWorkerStore(this.applicationContext)
 
     store.start()
 
