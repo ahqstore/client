@@ -69,6 +69,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
 
   private val updatePref = UpdatePreferencesState(activity)
   private val updateWorkerState = UpdateWorkerStore(activity)
+  private val installHelper = InstallerHelper(activity)
 
   override fun load(webView: WebView) {
     this.webView = webView
