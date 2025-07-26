@@ -31,18 +31,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-import ru.solrudev.ackpine.installer.PackageInstaller
-import ru.solrudev.ackpine.installer.parameters.InstallParameters
-import ru.solrudev.ackpine.session.Session
-import ru.solrudev.ackpine.session.parameters.Confirmation
-import ru.solrudev.ackpine.session.await
-
-import ru.solrudev.ackpine.uninstaller.PackageUninstaller
-import ru.solrudev.ackpine.uninstaller.parameters.UninstallParameters
 import java.io.File
 import java.util.Vector
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.cancellation.CancellationException
 
 @InvokeArg
 class ShowCodeRequest {
@@ -62,8 +53,6 @@ class Data {
 @TauriPlugin
 class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
   private var webView: WebView? = null
-  private var pkgInstaller: PackageInstaller? = null
-  private var pkgUninstaller: PackageUninstaller? = null
 
   private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -101,7 +90,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
       periodicWork
     )
 
-    Log.i("Enqueued", "Periodic Work Registered");
+    Log.i("Enqueued", "Periodic Work Registered")
 
     this.dataSync()
   }
@@ -113,8 +102,6 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
       scope.cancel("Plugin is shutting down") // CRITICAL: Cancel the scope
       // Clear references to help garbage collection
       webView = null
-      pkgInstaller = null
-      pkgUninstaller = null
     } catch (e: Exception) {
       Log.e("AHQStorePlugin", "Error during plugin unload/cancellation: ${e.message}", e)
     } finally {
@@ -163,6 +150,50 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
   fun install(invoke: Invoke) {
     scope.launch {
       installInner(invoke)
+    }
+  }
+
+  @Command
+  fun update(invoke: Invoke) {
+    scope.launch {
+      val path = invoke.parseArgs(Data::class.java).data
+
+      val apk = File(path)
+
+      val pkgMan = activity.packageManager
+
+      if (!pkgMan.canRequestPackageInstalls()) {
+        activity.startActivity(
+          Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+            .setData(Uri.parse(String.format("package:%s", activity.baseContext.packageName)))
+        )
+      }
+
+      val ret = JSObject()
+
+      ret.put("success", false)
+      if (apk.exists()) {
+        try {
+          val apkUri: Uri = FileProvider.getUriForFile(
+            activity.baseContext,
+            activity.applicationContext.packageName + ".fileprovider",
+            apk
+          )
+
+          val archive = pkgMan.getPackageArchiveInfo(apk.path, 0)!!
+
+          println("Got apk Uri")
+
+          ret.put("success", installHelper.update(archive.packageName, apkUri))
+        } catch (e: Throwable) {
+          println("Error $e")
+          ret.put("msg", e.message)
+        }
+      } else {
+        ret.put("success", false)
+        ret.put("msg", "The app path was not found!")
+      }
+      invoke.resolve(ret)
     }
   }
 
@@ -270,9 +301,6 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
 
     val pkgMan = activity.packageManager
 
-    if (pkgInstaller == null) {
-      pkgInstaller = PackageInstaller.getInstance(activity.baseContext)
-    }
     if (!pkgMan.canRequestPackageInstalls()) {
       activity.startActivity(
         Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
@@ -293,27 +321,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
 
         println("Got apk Uri")
 
-        try {
-          println("pkg installer")
-          when (val result = pkgInstaller!!.createSession(InstallParameters(apkUri) {
-            confirmation = Confirmation.IMMEDIATE
-          }).await()) {
-            is Session.State.Failed -> {
-              println("Error $result")
-              ret.put("msg", result.toString())
-            }
-            Session.State.Succeeded -> {
-              ret.put("success", true)
-              ret.put("msg", "Success")
-            }
-          }
-        } catch (_: CancellationException) {
-          println("Error Cancelled (u  s  e  r)")
-          ret.put("msg", "The operation was cancelled")
-        } catch (e: Exception) {
-          println("Error $e")
-          ret.put("msg", "Error: ${e.message}")
-        }
+        ret.put("success", installHelper.install(apkUri))
       } catch (e: Throwable) {
         println("Error $e")
         ret.put("msg", e.message)
@@ -330,27 +338,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
     val packageString = invoke.parseArgs(Data::class.java).data
     val resp = JSObject()
 
-    resp.put("success", false)
-
-    if (pkgUninstaller == null) {
-      pkgUninstaller = PackageUninstaller.getInstance(activity.baseContext)
-    }
-
-    try {
-      when (val res = pkgUninstaller!!.createSession(UninstallParameters(packageString) {
-        confirmation = Confirmation.IMMEDIATE
-      }).await()) {
-        is Session.State.Failed -> {
-          resp.put("msg", res.toString())
-        }
-        Session.State.Succeeded -> {
-          resp.put("success", true)
-          resp.put("msg", "Successful")
-        }
-      }
-    } catch (e: Throwable) {
-      resp.put("msg", e.message)
-    }
+    resp.put("success", installHelper.uninstall(packageString))
     invoke.resolve(resp)
   }
 }

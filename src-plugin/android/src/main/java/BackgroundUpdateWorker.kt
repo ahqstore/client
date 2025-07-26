@@ -7,11 +7,14 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.delay
+import kotlin.time.Duration
+
+private const val notificationChannelId = "UpdateNotifications"
 
 class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineWorker(ctx, params) {
-  private val notificationChannelId = "UpdateNotifications"
-
   private fun createNotificationChannel()
   {
 
@@ -35,8 +38,20 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
   override suspend fun doWork(): Result {
     val store = UpdateWorkerStore(this.applicationContext)
 
+    createNotificationChannel()
+
     try {
-      return run(store, false)
+      val available = check(this.applicationContext, store, false)
+
+      if (available) {
+        setForeground(startForeground())
+
+        runUpdate()
+
+        delay(Duration.parse("15m"))
+      }
+
+      return Result.success()
     } catch (_: Exception) {
       // If coroutine shuts down due to 10mins reached
       store.stop();
@@ -44,35 +59,54 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
     }
   }
 
-  private suspend fun run(store: UpdateWorkerStore, runForced: Boolean): Result {
-    createNotificationChannel()
+  private fun startForeground(): ForegroundInfo {
+    val ctx = this.applicationContext
 
-    val pref = UpdatePreferencesState(this.applicationContext)
-
-    if (!runForced || !pref.shallUpdateCheck()) {
-      return Result.success();
-    }
-
-    store.start()
-
-    // Work
-
-    val notif = NotificationCompat.Builder(this.applicationContext, notificationChannelId)
-      .setContentTitle("Updates")
-      .setContentText("We have updated!!")
-      .setSmallIcon(
-        R.drawable.favicon,
-      )
+    val notify = NotificationCompat.Builder(ctx, notificationChannelId)
+      .setContentTitle("Updating")
+      .setSmallIcon(R.drawable.favicon)
+      .setOngoing(true)
+      .setTicker("Updating")
+      .setOnlyAlertOnce(true)
+      .setContentText("Installing 20/30 applications")
       .build()
 
-    Log.i("Enqueued", "Sent notification")
-    ContextCompat.getSystemService(
-      applicationContext,
-      NotificationManager::class.java
-    )?.notify(1, notif)
-
-    store.stop()
-
-    return Result.success()
+    return ForegroundInfo(8, notify)
   }
+}
+
+suspend fun check(ctx: Context, store: UpdateWorkerStore, runForced: Boolean): Boolean {
+  val pref = UpdatePreferencesState(ctx)
+
+  if (!runForced || !pref.shallUpdateCheck()) {
+    return false;
+  }
+
+  store.start()
+
+  // Work
+
+  val notif = NotificationCompat.Builder(ctx, notificationChannelId)
+    .setContentTitle("Updates")
+    .setContentText("We have updated!!")
+    .setSmallIcon(
+      R.drawable.favicon,
+    )
+    .build()
+
+  Log.i("Enqueued", "Sent notification")
+  ContextCompat.getSystemService(
+    ctx,
+    NotificationManager::class.java
+  )?.notify(1, notif)
+
+  store.stop()
+
+  val updateAvailable = false
+
+  return updateAvailable
+}
+
+suspend fun runUpdate() {
+
 }
