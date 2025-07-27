@@ -74,8 +74,8 @@ class UpdatePreferencesState() {
       AutoUpdatePreference.Skip -> false
       AutoUpdatePreference.Notify -> true
       AutoUpdatePreference.UpdateOverWifiNonMetered -> isWifi() && !isWifiMetered()
-      AutoUpdatePreference.UpdateOverWifiMetered -> isWifi()
-      AutoUpdatePreference.UpdateOverMobileData -> isCellular() || isWifi()
+      AutoUpdatePreference.UpdateOverWifiMetered -> true
+      AutoUpdatePreference.UpdateOverMobileData -> true
     }
   }
 
@@ -112,7 +112,7 @@ class UpdatePreferencesState() {
       val network = man.activeNetwork
       val capability = man.getNetworkCapabilities(network)!!
 
-      return capability.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && !capability.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+      return !capability.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
     } catch (e: Exception) {
       return false;
     }

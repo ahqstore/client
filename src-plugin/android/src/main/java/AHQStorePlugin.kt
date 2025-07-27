@@ -63,6 +63,8 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
   override fun load(webView: WebView) {
     this.webView = webView
 
+    Log.w("Enqueued", "Periodic Work Running")
+
     if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
@@ -81,7 +83,6 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
       TimeUnit.MINUTES
     )
       .setConstraints(constraints)
-      .setInitialDelay(5, TimeUnit.SECONDS)
       .build()
 
     manager.enqueueUniquePeriodicWork(
@@ -90,7 +91,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
       periodicWork
     )
 
-    Log.i("Enqueued", "Periodic Work Registered")
+    Log.w("Enqueued", "Periodic Work Registered")
 
     this.dataSync()
   }

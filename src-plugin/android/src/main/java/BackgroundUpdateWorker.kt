@@ -78,7 +78,9 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
 suspend fun check(ctx: Context, store: UpdateWorkerStore, runForced: Boolean): Boolean {
   val pref = UpdatePreferencesState(ctx)
 
-  if (!runForced || !pref.shallUpdateCheck()) {
+  val updating = runForced || pref.shallUpdateCheck()
+  Log.i("WORK", "Updating: $updating")
+  if (!updating) {
     return false;
   }
 
