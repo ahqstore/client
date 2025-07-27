@@ -55,7 +55,7 @@ class UpdatePreferencesState() {
 
   suspend fun getAutoUpdatePreference(): AutoUpdatePreference {
     return this.ctx.updateState.data.map { data ->
-      val ret = fromString(data[AutoUpdatePrefs] ?: "Skip")
+      val ret = fromString(data[AutoUpdatePrefs] ?: "Notify")
 
       return@map ret;
     }.first()
@@ -92,7 +92,7 @@ class UpdatePreferencesState() {
     }
   }
 
-  private fun isCellular(): Boolean {
+  fun isCellular(): Boolean {
     try {
       val man = this.ctx.getSystemService(ConnectivityManager::class.java)!!
 
@@ -105,7 +105,7 @@ class UpdatePreferencesState() {
     }
   }
 
-  private fun isWifiMetered(): Boolean {
+  fun isWifiMetered(): Boolean {
     try {
       val man = this.ctx.getSystemService(ConnectivityManager::class.java)!!
 
@@ -116,18 +116,6 @@ class UpdatePreferencesState() {
     } catch (e: Exception) {
       return false;
     }
-  }
-
-  suspend fun shallUpdateRun(): Boolean {
-    var ret = false
-
-    when (this.getAutoUpdatePreference()) {
-      AutoUpdatePreference.Skip -> false
-      else -> false
-    }
-
-
-    return ret
   }
 
   suspend fun setAutoUpdatePreference(pref: AutoUpdatePreference) {

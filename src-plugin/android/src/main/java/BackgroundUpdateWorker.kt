@@ -102,7 +102,7 @@ suspend fun check(ctx: Context, store: UpdateWorkerStore, runForced: Boolean): B
 
   store.stop()
 
-  val updateAvailable = false
+  val updateAvailable = true
 
   return updateAvailable
 }
