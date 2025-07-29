@@ -1,0 +1,52 @@
+{
+  "name": "Response",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "length": {
+        "description": "Suggest the length of the body. Use the items in the enum. A description within 300 words is considered Good in length. Longer descriptions takes more time to read and can be easily shortened.\nToo Long: The description is too long for its provided intent.\nLong: The Description is a bit longer than how much long an issue should be\nGood: The description is perfect for its intent",
+        "enum": ["Too Long", "Long", "Good"]
+      },
+      "words": {
+        "description": "Total words present",
+        "type": "integer"
+      },
+      "tone": {
+        "description": "Describes the tone of the body",
+        "enum": ["Respectful", "Casual", "Too Formal", "Disrespectful"]
+      },
+      "toneInfo": {
+        "description": "Inform that user that the tone is casual or too formal and that it inhibits professionalism (Empty string if the tone is not \"Casual\" or \"Too Formal\"). You can use `@user` to ping them",
+        "type": "string"
+      },
+      "spam": {
+        "description": "Is it spam?",
+        "type": "boolean"
+      },
+      "warn": {
+        "description": "Warning to the user only if the user is desrespectful in the conversation or is engaged in spam activities. You can use `@user` to ping them. Do inform them that they can get blocked if they continue this.",
+        "type": "string"
+      },
+      "summary": {
+        "description": "Provide a summary in nicely formatted markdown, you should use `-` and form the summary in bullet points in all the languages English, Hindi, Bengali, Sanskrit, French, German, Chinese. You can omit the English summary if the original body is not more than 300 characters. Start with \"# Summary (English)\", \"# Summary (Hindi)\", \"# Summary (Bengali)\", \"# Summary (Sanskrit)\", \"# Summary (French)\", \"# Summary (German)\", \"# Summary (Chinese)\"",
+        "type": "string"
+      },
+      "comment": {
+        "description": "Anything else you'd like to tell the user, \"@user\" to ping them if you want to. You can also add a short comment about length, if thats too long. Also that the devs will look into it shortly etc. Can be empty string. Recommendation is to say something to the user. Keep it a bit long and a bit details (not too long). Also tell them to share more information if the information provided is not enough.",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "length",
+      "warn",
+      "spam",
+      "tone",
+      "toneInfo",
+      "words",
+      "summary",
+      "comment"
+    ]
+  }
+}

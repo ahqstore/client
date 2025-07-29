@@ -1,0 +1,87 @@
+name: Summarize new issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      models: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run AI Inference
+        uses: actions/github-script@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const ai = await import("${{ github.workspace }}/.github/scripts/ai/compiled/prompt.js");
+
+            const issue = context.payload.issue;
+
+            const resp = await ai.handle(`# ${issue.title}\n ${issue.body}`)
+
+            const [owner, repo] = "${{ github.repository }}".split("/");
+            const issue_number = ${{ github.event.issue.number }};
+
+            console.log(JSON.stringify(issue, null, 2));
+
+            if (resp.warn.length > 0) {
+              await github.rest.issues.createComment({
+                owner,
+                repo, 
+                issue_number,
+                body: `${resp.warn}`.replace(/@user/g, `@${issue.user.login}`),
+              });
+            }
+
+            if (resp.toneInfo.length > 0) {
+              await github.rest.issues.createComment({
+                owner,
+                repo, 
+                issue_number,
+                body: resp.toneInfo.replace(/@user/g, `@${issue.user.login}`),
+              });
+            }
+
+            const comment = await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: JSON.stringify(resp, null, 4)
+            });
+
+
+            console.log(comment.data);
+
+            await github.rest.issues.updateComment({
+              owner,
+              repo,
+              comment_id: comment.data.id,
+              body: "_Mods logs are here_"
+            });
+
+            if (resp.comment.length > 0) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: comment.data.id,
+                body: resp.comment.replace(/@user/g, `@${issue.user.login}`)
+              });
+            }
+
+            if (resp.summary.length > 0) {
+              await github.rest.issues.createComment({
+                owner,
+                repo, 
+                issue_number,
+                body: resp.summary,
+              });
+            }

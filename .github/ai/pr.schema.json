@@ -1,0 +1,35 @@
+{
+  "name": "Response",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "length": {
+        "description": "Suggest the length of the body. Use the items in the enum.\nToo Long: The description is too long for its provided intent.\nLong: The Description is a bit longer than how much long an issue should be (recommended size: 200words max)\nGood: The description is perfect for its intent",
+        "enum": ["Too Long", "Long", "Good"]
+      },
+      "words": {
+        "description": "Total words present",
+        "type": "integer"
+      },
+      "tone": {
+        "description": "Describes the tone of the body",
+        "enum": ["Respectful", "Casual", "Too Formal", "Disrespectful"]
+      },
+      "spam": {
+        "description": "Is it spam?",
+        "enum": ["Absolutely", "Probably", "No"]
+      },
+      "warn": {
+        "description": "Warning to the user only if the user is desrespectful in the conversation",
+        "type": "string"
+      },
+      "summary": {
+        "description": "Provide a summary in nicely formatted markdown, you should use `-` to show bullet points (set it only if the length is set to \"Too Long\" or \"Long\" or else let it be an empty string)",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "required": ["length", "warn", "spam", "tone", "words", "summary"]
+  }
+}
