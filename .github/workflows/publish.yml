@@ -260,7 +260,7 @@ jobs:
         include:
           - target: universal-linux-android
             suffix: universal
-            args:
+            args: ""
 
           - target: aarch64-linux-android
             suffix: aarch64
