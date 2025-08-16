@@ -33,19 +33,19 @@ android {
 }
 
 dependencies {
-    val ackpineVersion = "0.10.1"
+    val ackpineVersion = "0.15.1"
 
     implementation("ru.solrudev.ackpine:ackpine-core:$ackpineVersion")
     implementation("ru.solrudev.ackpine:ackpine-ktx:$ackpineVersion")
 
-    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.work:work-runtime-ktx:2.10.2")
+    implementation("androidx.work:work-runtime-ktx:2.10.3")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
 
     implementation("com.google.android.material:material:1.12.0")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     implementation(project(":tauri-android"))
 }

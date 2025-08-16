@@ -18,6 +18,7 @@
     android:label="@string/app_name"
     android:theme="@style/Theme.ahqstore_new"
     android:usesCleartextTraffic="true">
+    
     <receiver
       android:name=".Library"
       android:exported="false">

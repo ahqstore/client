@@ -15,13 +15,13 @@ val tauriProperties = Properties().apply {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 36
     namespace = "com.ahqstore.app"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
         applicationId = "com.ahqstore.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()
         versionName = tauriProperties.getProperty("tauri.android.versionName", "1.0")
     }
@@ -84,16 +84,19 @@ rust {
 }
 
 dependencies {
-    implementation("androidx.work:work-runtime-ktx:2.10.1")
-    implementation("androidx.webkit:webkit:1.13.0")
-  
+    implementation("androidx.work:work-runtime-ktx:2.10.3")
+    implementation("androidx.webkit:webkit:1.14.0")
+
+    // For AppWidgets support
     implementation("androidx.glance:glance-appwidget:1.1.1")
+    //  For interop APIs with Material 3
     implementation("androidx.glance:glance-material3:1.1.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
+  
+    implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.material:material:1.12.0")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 }
 
 apply(from = "tauri.build.gradle.kts")
