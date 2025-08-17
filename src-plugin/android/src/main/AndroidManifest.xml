@@ -17,7 +17,7 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/library_info" />
+                android:resource="@xml/library_widget" />
         </receiver>
     </application>
 </manifest>
