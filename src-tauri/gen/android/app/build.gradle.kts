@@ -84,9 +84,15 @@ rust {
 }
 
 dependencies {
+    val composeBom = platform("androidx.compose:compose-bom:2025.05.00")
+    implementation(composeBom)
+    
     implementation("androidx.work:work-runtime-ktx:2.10.3")
     implementation("androidx.webkit:webkit:1.14.0")
 
+    // Get Full Compose
+    implementation("androidx.compose.material3:material3")
+  
     // For AppWidgets support
     implementation("androidx.glance:glance-appwidget:1.1.1")
     //  For interop APIs with Material 3

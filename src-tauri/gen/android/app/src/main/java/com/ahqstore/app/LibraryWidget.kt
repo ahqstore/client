@@ -13,7 +13,7 @@ class LibraryWidget: GlanceAppWidget() {
     provideContent {
       GlanceTheme {
         Scaffold {
-          Text("Hello World")
+          Text("Library Widget")
         }
       }
     }
