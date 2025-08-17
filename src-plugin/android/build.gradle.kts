@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.10"
 }
 
 android {
@@ -30,6 +31,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
+    }
 }
 
 dependencies {
@@ -42,6 +51,14 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.work:work-runtime-ktx:2.10.3")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
+
+    // Get Full Compose
+    implementation("androidx.compose.material3:material3")
+
+    // For AppWidgets support
+    implementation("androidx.glance:glance-appwidget:1.1.1")
+    //  For interop APIs with Material 3
+    implementation("androidx.glance:glance-material3:1.1.1")
 
     implementation("com.google.android.material:material:1.12.0")
     testImplementation("junit:junit:4.13.2")
