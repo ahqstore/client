@@ -1,11 +1,13 @@
 package com.plugin.ahqstore
 
+import LibraryWidget
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -47,6 +49,8 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
         setForeground(startForeground())
 
         runUpdate()
+
+        LibraryWidget().updateAll(this.applicationContext)
 
         delay(Duration.parse("15m"))
       }
