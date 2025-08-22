@@ -9,6 +9,10 @@
 
   .act_nav_item {
     @apply shadow-lg;
-    background: color-mix(in srgb, var(--color-neutral-content) 10%, var(--win32-accent) 5%) !important;
+    background: color-mix(
+      in srgb,
+      var(--color-neutral-content) 10%,
+      var(--win32-accent) 5%
+    ) !important;
   }
 }

@@ -8,7 +8,6 @@ import { toast } from "sonner";
 
 import { clientId, scopes } from "./server";
 
-
 interface DeviceCode {
   device_code: string;
   user_code: string;
@@ -37,9 +36,9 @@ export async function startLogin(auth: Auth) {
   toast(`Enter code: ${val.user_code}`, {
     cancel: {
       label: "Ok",
-      onClick: () => { }
+      onClick: () => {},
     },
-    duration: 30_000
+    duration: 30_000,
   });
 
   open(val.verification_uri);

@@ -35,9 +35,7 @@ export async function getResource(appId: string, uid: string) {
   }
 
   const buf = await invoke("get_app_asset", { app: appId, asset: uid })
-    .then(async (r) =>
-      r as ArrayBuffer
-    )
+    .then(async (r) => r as ArrayBuffer)
     .then((d) => {
       if (d) {
         return URL.createObjectURL(new Blob([d]));
@@ -60,7 +58,7 @@ export async function fetchAuthor(uid: string) {
     github: "",
     id: "",
     name: "",
-    free: () => { }
+    free: () => {},
   } as AuthorObject;
 
   authorCache[uid] = author;
@@ -92,7 +90,8 @@ async function resolveApps(apps: string[]): Promise<appData[]> {
                 appDisplayName: "Unknown",
                 appId: `winget_app_super_unknown_${Math.random() * 2054568120}`,
                 authorId: "",
-                description: "This application has been removed or app id changed",
+                description:
+                  "This application has been removed or app id changed",
                 downloadUrls: [],
                 license_or_tos: "",
                 releaseTagName: "",
@@ -101,15 +100,16 @@ async function resolveApps(apps: string[]): Promise<appData[]> {
                 appShortcutName: "Unknown",
                 displayImages: [],
                 install: {
-                  free: () => { },
+                  free: () => {},
                 },
                 repo: {
-                  author: "", repo: "",
-                  free: () => { },
+                  author: "",
+                  repo: "",
+                  free: () => {},
                 },
                 verified: false,
                 resources: {},
-                version: "none"
+                version: "none",
               } as unknown as ApplicationData;
             });
 

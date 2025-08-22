@@ -1,4 +1,4 @@
-import type { JSX, SVGProps } from "react"
+import type { JSX, SVGProps } from "react";
 
 export const Icons = {
   minimizeWin: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
@@ -34,7 +34,7 @@ export const Icons = {
     </svg>
   ),
   maximizeRestoreWin: (
-    props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
+    props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>,
   ) => (
     <svg
       width="10"
@@ -139,4 +139,4 @@ export const Icons = {
       </g>
     </svg>
   ),
-}
+};

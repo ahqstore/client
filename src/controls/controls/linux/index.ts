@@ -1,1 +1,1 @@
-export { Gnome } from "./gnome"
+export { Gnome } from "./gnome";

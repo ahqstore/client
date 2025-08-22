@@ -11,20 +11,17 @@ export function onAuthChange(auth: Auth, callback: (auth?: User) => void) {
 
 export async function tryAutoLogin(auth: Auth) {
   try {
-    const rawToken = JSON.parse(localStorage.getItem("token") || "[]") as number[];
+    const rawToken = JSON.parse(
+      localStorage.getItem("token") || "[]",
+    ) as number[];
 
     const token = await decrypt(rawToken);
 
     await login(auth, token);
-  } catch (_) {
-
-  }
+  } catch (_) {}
 }
 
-export async function login(
-  auth: Auth,
-  auth_tok: string
-): Promise<boolean> {
+export async function login(auth: Auth, auth_tok: string): Promise<boolean> {
   const { ok, data } = await fetch(`https://api.github.com/user`, {
     method: "GET",
     headers: {

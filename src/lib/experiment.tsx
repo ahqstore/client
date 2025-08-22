@@ -1,4 +1,10 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 const Experiment = createContext(false);
 
@@ -14,7 +20,5 @@ export function ExperimentProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  return <Experiment.Provider value={val}>
-    {children}
-  </Experiment.Provider>
+  return <Experiment.Provider value={val}>{children}</Experiment.Provider>;
 }

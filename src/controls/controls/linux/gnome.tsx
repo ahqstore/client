@@ -1,12 +1,16 @@
-import { useContext, type HTMLProps } from "react"
-import { Button } from "@controls/components/button"
-import { Icons } from "@controls/components/icons"
-import TauriAppWindowContext from "@controls/contexts/plugin-window"
-import { cn } from "@controls/libs/utils"
+import { useContext, type HTMLProps } from "react";
+import { Button } from "@controls/components/button";
+import { Icons } from "@controls/components/icons";
+import TauriAppWindowContext from "@controls/contexts/plugin-window";
+import { cn } from "@controls/libs/utils";
 
-export function Gnome({ className, children, ...props }: HTMLProps<HTMLDivElement>) {
+export function Gnome({
+  className,
+  children,
+  ...props
+}: HTMLProps<HTMLDivElement>) {
   const { isWindowMaximized, minimizeWindow, maximizeWindow, closeWindow } =
-    useContext(TauriAppWindowContext)
+    useContext(TauriAppWindowContext);
 
   return (
     <div
@@ -37,5 +41,5 @@ export function Gnome({ className, children, ...props }: HTMLProps<HTMLDivElemen
         <Icons.closeWin className="h-2 w-2" />
       </Button>
     </div>
-  )
+  );
 }

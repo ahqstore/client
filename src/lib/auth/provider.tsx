@@ -1,4 +1,10 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { genAuth, User } from ".";
 import { tryAutoLogin } from "./login";
 
@@ -18,7 +24,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     tryAutoLogin(authObject);
   }, []);
 
-  return <Auth.Provider value={user}>
-    {children}
-  </Auth.Provider>
-}
+  return <Auth.Provider value={user}>{children}</Auth.Provider>;
+};

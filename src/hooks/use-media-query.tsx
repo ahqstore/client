@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 
 export function useMediaQuery(mediaQuery: string) {
-  const [query, setQuery] = useState(
-    window.matchMedia(mediaQuery).matches
-  );
+  const [query, setQuery] = useState(window.matchMedia(mediaQuery).matches);
 
   useEffect(() => {
     window.addEventListener("resize", (_) => {

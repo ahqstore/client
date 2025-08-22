@@ -1,4 +1,10 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { getHome, Home as HomeInterface } from "tauri-plugin-ahqstore-api";
 
 const Home = createContext<[string, string[]][] | undefined>(undefined);
@@ -20,9 +26,7 @@ export function HomeProvider({ children }: { children: ReactNode }) {
 
   return (
     <Home.Provider value={home}>
-      <Splash.Provider value={splash}>
-        {children}
-      </Splash.Provider>
+      <Splash.Provider value={splash}>{children}</Splash.Provider>
     </Home.Provider>
   );
 }

@@ -39,11 +39,11 @@
   @apply max-h-[100%] grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-5 w-full;
 }
 
-.cards>div {
+.cards > div {
   @apply w-[2fr] h-[1fr] min-h-24 rounded-lg lg:hover:translate-[-3px] cursor-pointer bg-accent-foreground/10 relative;
 }
 
-.cards>div>div:nth-child(1) {
+.cards > div > div:nth-child(1) {
   font-family: Arial, sans-serif;
   @apply absolute z-0 w-full h-full left-0 top-0 rounded-lg;
   @apply from-primary-foreground/10 hover:from-primary-foreground/0 via-primary-foreground/10 to-primary-foreground/40 bg-gradient-to-br;
@@ -52,15 +52,15 @@
   @apply text-xl md:text-muted font-bold;
 }
 
-.cards>div:nth-child(1) {
+.cards > div:nth-child(1) {
   @apply col-span-2 min-h-[1fr] max-h-[1fr];
 }
 
-.cards>div>img {
+.cards > div > img {
   @apply rounded-lg h-full w-full;
   object-fit: cover;
 }
 
-.cards>div:hover {
+.cards > div:hover {
   box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 50%, transparent);
 }

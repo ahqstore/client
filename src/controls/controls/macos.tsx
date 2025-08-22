@@ -1,47 +1,51 @@
-import { useContext, useEffect, useState, type HTMLProps } from "react"
-import { Icons } from "@controls/components/icons"
-import { cn } from "@controls/libs/utils"
-import { Button } from "../components/button"
-import TauriAppWindowContext from "../contexts/plugin-window"
+import { useContext, useEffect, useState, type HTMLProps } from "react";
+import { Icons } from "@controls/components/icons";
+import { cn } from "@controls/libs/utils";
+import { Button } from "../components/button";
+import TauriAppWindowContext from "../contexts/plugin-window";
 
-export function MacOS({ className, children, ...props }: HTMLProps<HTMLDivElement>) {
+export function MacOS({
+  className,
+  children,
+  ...props
+}: HTMLProps<HTMLDivElement>) {
   const { minimizeWindow, maximizeWindow, fullscreenWindow, closeWindow } =
-    useContext(TauriAppWindowContext)
+    useContext(TauriAppWindowContext);
 
-  const [isAltKeyPressed, setIsAltKeyPressed] = useState(false)
-  const [isHovering, setIsHovering] = useState(false)
+  const [isAltKeyPressed, setIsAltKeyPressed] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
-  const last = isAltKeyPressed ? <Icons.plusMac /> : <Icons.fullMac />
-  const key = "Alt"
+  const last = isAltKeyPressed ? <Icons.plusMac /> : <Icons.fullMac />;
+  const key = "Alt";
 
   const handleMouseEnter = () => {
-    setIsHovering(true)
-  }
+    setIsHovering(true);
+  };
   const handleMouseLeave = () => {
-    setIsHovering(false)
-  }
+    setIsHovering(false);
+  };
 
   const handleAltKeyDown = (e: KeyboardEvent) => {
     if (e.key === key) {
-      setIsAltKeyPressed(true)
+      setIsAltKeyPressed(true);
     }
-  }
+  };
   const handleAltKeyUp = (e: KeyboardEvent) => {
     if (e.key === key) {
-      setIsAltKeyPressed(false)
+      setIsAltKeyPressed(false);
     }
-  }
+  };
   useEffect(() => {
     // Attach event listeners when the component mounts
-    window.addEventListener("keydown", handleAltKeyDown)
-    window.addEventListener("keyup", handleAltKeyUp)
-  }, [])
+    window.addEventListener("keydown", handleAltKeyDown);
+    window.addEventListener("keyup", handleAltKeyUp);
+  }, []);
 
   return (
     <div
       className={cn(
         "space-x-2 px-3 text-black active:text-black dark:text-black",
-        className
+        className,
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -69,5 +73,5 @@ export function MacOS({ className, children, ...props }: HTMLProps<HTMLDivElemen
         {isHovering && last}
       </Button>
     </div>
-  )
+  );
 }

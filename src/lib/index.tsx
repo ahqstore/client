@@ -1,5 +1,15 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { teamsDarkTheme, teamsLightTheme, FluentProvider } from "@fluentui/react-components"
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import {
+  teamsDarkTheme,
+  teamsLightTheme,
+  FluentProvider,
+} from "@fluentui/react-components";
 import { isWindows11 } from "src-plugin/dist-js";
 
 const def = String(window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -17,7 +27,7 @@ export default function fnTheme(windows: boolean) {
 }
 
 const ThemeContext = createContext(false);
-export let setUITheme = (_: boolean) => { };
+export let setUITheme = (_: boolean) => {};
 
 export const useUITheme = () => {
   if (useContext(ThemeContext)) {
@@ -25,7 +35,7 @@ export const useUITheme = () => {
   } else {
     return teamsLightTheme;
   }
-}
+};
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(true);
@@ -35,23 +45,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   setUITheme = (theme: boolean) => setDark(theme);
 
   useEffect(() => {
-    document.querySelector("html")!!.style.setProperty("--win32-accent", window.accent);
+    document
+      .querySelector("html")!!
+      .style.setProperty("--win32-accent", window.accent);
   }, []);
 
   useEffect(() => {
-    isWindows11().then((d) =>
-      setWindows(d && dark == (def == "true"))
-    ).catch(console.error);
+    isWindows11()
+      .then((d) => setWindows(d && dark == (def == "true")))
+      .catch(console.error);
   }, [dark]);
 
   useEffect(() => {
     const dark = localStorage.getItem("dark");
 
-    setDark(dark == "true");
+    if (typeof dark == "string") setDark(dark == "true");
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("dark", String(dark));
+    localStorage.setItem("dark", dark ? "true" : "false");
 
     if (dark) {
       setTheme(teamsDarkTheme);
@@ -62,11 +74,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     fnTheme(windows);
   }, [dark, windows]);
 
-  return <ThemeContext.Provider value={dark} >
-    <FluentProvider theme={theme}>
-      <div className="content">
-        {children}
-      </div>
-    </FluentProvider>
-  </ThemeContext.Provider>
+  return (
+    <ThemeContext.Provider value={dark}>
+      <FluentProvider theme={theme}>
+        <div className="content">{children}</div>
+      </FluentProvider>
+    </ThemeContext.Provider>
+  );
 }
