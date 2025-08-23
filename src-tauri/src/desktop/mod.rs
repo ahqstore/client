@@ -5,6 +5,9 @@ use tauri::menu::MenuItem;
 use tauri::menu::PredefinedMenuItem;
 use tauri::tray::TrayIconBuilder;
 use tauri::tray::TrayIconEvent;
+use tauri::utils::config::WindowEffectsConfig;
+use tauri::webview::WebviewWindowBuilder;
+use tauri::window::Effect;
 use tauri::{App, Emitter};
 use tauri::{Listener, Manager};
 
@@ -61,16 +64,19 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     }
   });
 
-  println!("Listen");
-  if !should_be_hidden() {
-    let handle = app.handle().clone();
+  let handle = app.handle().clone();
 
-    app.listen("loaded", move |_| {
-      let _ = handle
-        .get_webview_window("main")
-        .expect("Impossible")
-        .show();
-    });
+  // Show everytime
+  app.listen("loaded", move |_| {
+    let _ = handle
+      .get_webview_window("main")
+      .expect("Impossible")
+      .show();
+  });
+
+  println!("Creating Window");
+  if !should_be_hidden() {
+    create_window(&mut app.handle().clone());
   }
 
   println!("Deep Linking");
@@ -143,6 +149,42 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     .expect("Failed to build tray icon");
 
   Ok(())
+}
+
+pub(crate) fn remove_window(app: &tauri::AppHandle) {
+  if let Some(x) = app.get_webview_window("main") {
+    _ = x.close();
+  }
+}
+
+pub(crate) fn create_window(app: &mut tauri::AppHandle) {
+  if app.get_webview_window("main").is_some() {
+    return;
+  }
+
+  _ = WebviewWindowBuilder::new(
+    app,
+    "main",
+    tauri::WebviewUrl::App("/".into())
+  )
+    .center()
+    .min_inner_size(348.0, 700.0)
+    .inner_size(1024.0, 760.0)
+    .resizable(true)
+    .prevent_overflow()
+    .title("AHQ Store Neo")
+    .transparent(true)
+    .effects(
+      WindowEffectsConfig {
+        effects: vec![Effect::Mica],
+        state: None,
+        radius: None,
+        color: None,
+      }
+    )
+    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
+    .build()
+    .unwrap();
 }
 
 fn should_be_hidden() -> bool {

@@ -1,6 +1,8 @@
 #[cfg(desktop)]
 mod desktop;
 
+pub static SHOULD_EXIT: i32 = 20;
+
 #[cfg(windows)]
 fn get_accent() -> Option<String> {
   use windows::Win32::System::Registry::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD};
@@ -29,6 +31,7 @@ fn get_accent() -> Option<String> {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[allow(dead_code)]
 pub fn run() {
   #[cfg(windows)]
   let accent: &'static str = get_accent().unwrap_or("window.accent = \"rgb(53,126,199)\"".into()).leak();
@@ -36,23 +39,34 @@ pub fn run() {
   #[cfg(not(windows))]
   let accent = "window.accent = \"rgb(53,126,199)\"";
 
-  tauri::Builder::default()
+  let app = tauri::Builder::default()
     .on_page_load(move |c, _| c.eval(accent).expect("Unable to evaluate script"))
     .plugin(tauri_plugin_http::init())
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_deep_link::init())
     .plugin(tauri_plugin_ahqstore::init())
-    .setup(|app| {
+    .setup(|_app| {
+      #[cfg(desktop)]
       println!("[INFO] Running Desktop Setup");
       #[cfg(desktop)]
-      desktop::setup(app)?;
+      desktop::setup(_app)?;
 
       #[cfg(desktop)]
-      app.handle().plugin(tauri_plugin_window_state::Builder::default().build())?;
+      _app.handle().plugin(tauri_plugin_window_state::Builder::default().build())?;
 
       println!("[INFO] Running");
       Ok(())
     })
-    .run(tauri::generate_context!())
+    .build(tauri::generate_context!())
     .expect("error while running tauri application");
+
+  app.run(|_handle, event| match event {
+    tauri::RunEvent::ExitRequested { api, code, .. } => {
+      #[cfg(desktop)]
+      if code.unwrap_or(0) != SHOULD_EXIT {
+        api.prevent_exit();
+      }
+    }
+    _ => {}
+  });
 }

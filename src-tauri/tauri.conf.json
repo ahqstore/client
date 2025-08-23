@@ -10,25 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [
-      {
-        "center": true,
-        "height": 760,
-        "resizable": true,
-        "title": "AHQ Store Neo",
-        "label": "main",
-        "width": 1200,
-        "minHeight": 700,
-        "minWidth": 348,
-        "visible": false,
-        "decorations": false,
-        "transparent": true,
-        "windowEffects": {
-          "effects": ["mica"]
-        },
-        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required"
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": null
     }
