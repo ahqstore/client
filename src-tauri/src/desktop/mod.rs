@@ -49,15 +49,6 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
   println!("Updater");
   handle.plugin(tauri_plugin_updater::Builder::new().build())?;
 
-  println!("Single Instance");
-  handle.plugin(tauri_plugin_single_instance::init(|app, _, _| {
-    // TODO: fix
-    let app_c = app.clone();
-    std::thread::spawn(move || {
-      show_window(&app_c);
-    });
-  }))?;
-
   let handle = app.handle().clone();
 
   println!("Checking for update");

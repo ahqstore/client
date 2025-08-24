@@ -49,10 +49,25 @@ pub fn run() {
   let accent = "window.accent = \"rgb(53,126,199)\"";
 
   let app = tauri::Builder::default()
-    .on_page_load(move |c, _| c.eval(accent).expect("Unable to evaluate script"))
+    .on_page_load(move |c, _| c.eval(accent).expect("Unable to evaluate script"));
+
+  #[cfg(desktop)]
+  let app = app
+    .plugin(tauri_plugin_single_instance::init(|app, _, _| {
+      // TODO: fix
+      let app_c = app.clone();
+      std::thread::spawn(move || {
+        use crate::desktop::show_window;
+
+        show_window(&app_c);
+      });
+    }));
+    
+  let app = app
     .plugin(tauri_plugin_http::init())
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_ahqstore::init())
+    .plugin(tauri_plugin_deep_link::init())
     .setup(|_app| {
       #[cfg(desktop)]
       println!("[INFO] Running Desktop Setup");
@@ -68,7 +83,6 @@ pub fn run() {
       println!("[INFO] Running");
       Ok(())
     })
-    .plugin(tauri_plugin_deep_link::init())
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
 

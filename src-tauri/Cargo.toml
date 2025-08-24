@@ -2,7 +2,7 @@
 name = "ahqstore-new"
 version = "0.1.0"
 description = "The Open Sourced App Store"
-authors = ["AHQ Softwares"]
+authors = ["AHQ Softwares <ahqsecret@gmail.com>"]
 edition = "2021"
 
 [lib]
