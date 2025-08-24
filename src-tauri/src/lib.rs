@@ -87,20 +87,26 @@ pub(crate) fn create_window<T: Manager<R>, R: tauri::Runtime>(app: &T) {
   let builder = WebviewWindowBuilder::new(
     app,
     "main",
-    tauri::WebviewUrl::App("/".into())
+    {
+      #[cfg(not(debug_assertions))]
+      let url = tauri::WebviewUrl::App("/".into());
+
+      #[cfg(debug_assertions)]
+      let url = tauri::WebviewUrl::External(app.config().build.dev_url.as_ref().unwrap().clone());
+
+      url
+    }
   );
 
   #[cfg(desktop)]
-  let builder = builder.center();
-  
-  builder.min_inner_size(348.0, 700.0)
+  let builder = builder.center()
+    .min_inner_size(348.0, 700.0)
     .inner_size(1024.0, 760.0)
     .resizable(true)
     .decorations(false)
     .visible(false)
     .prevent_overflow()
     .title("AHQ Store Neo")
-    .transparent(true)
     .effects(
       WindowEffectsConfig {
         effects: vec![Effect::Mica],
@@ -109,7 +115,10 @@ pub(crate) fn create_window<T: Manager<R>, R: tauri::Runtime>(app: &T) {
         color: None,
       }
     )
-    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
+    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required");
+  
+  builder
+    .transparent(true)
     .build()
     .unwrap();
 }
