@@ -5,18 +5,17 @@ use tauri::menu::MenuItem;
 use tauri::menu::PredefinedMenuItem;
 use tauri::tray::TrayIconBuilder;
 use tauri::tray::TrayIconEvent;
-use tauri::utils::config::WindowEffectsConfig;
-use tauri::webview::WebviewWindowBuilder;
-use tauri::window::Effect;
-use tauri::{App, Emitter};
+
+use tauri::App;
 use tauri::{Listener, Manager};
 
 use tauri_plugin_autostart::MacosLauncher;
 
 use tauri_plugin_updater::UpdaterExt;
 
-#[cfg(windows)]
-use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWINDOWATTRIBUTE};
+use crate::SHOULD_EXIT;
+
+use super::create_window;
 
 pub fn setup(app: &mut App) -> tauri::Result<()> {
 //   #[cfg(windows)]
@@ -53,14 +52,14 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
   println!("Single Instance");
   handle.plugin(tauri_plugin_single_instance::init(|app, _, _| {
     // TODO: fix
-    let _ = app.get_webview_window("main").expect("Impossible").show();
+    show_window(app);
   }))?;
 
   let handle = app.handle().clone();
 
   println!("Checking for update");
   tauri::async_runtime::spawn(async move {
-    if let Err(_) = update(handle).await {
+    if let Err(_) = update(&handle).await {
       println!("Couldn't check update");
     }
   });
@@ -94,12 +93,7 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     .show_menu_on_left_click(false)
     .on_tray_icon_event(move |app, event| match event {
       TrayIconEvent::Click { .. } => {
-        // TODO: Fix show
-        let _ = app
-          .app_handle()
-          .get_webview_window("main")
-          .expect("Impossible")
-          .show();
+        show_window(app.app_handle());
       }
       _ => {}
     })
@@ -133,16 +127,20 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
 
       match id.as_str() {
         "quit" => {
-          app.exit(0);
+          app.exit(SHOULD_EXIT);
         }
         "check" => {
-          let _ = app
-            .get_webview_window("main")
-            .expect("Impossible")
-            .emit("update", "");
+          let handle = app.clone();
+
+          println!("Checking for update");
+          tauri::async_runtime::spawn(async move {
+            if let Err(_) = update(&handle).await {
+              println!("Couldn't check update");
+            }
+          });
         }
         "show" => {
-          let _ = app.get_webview_window("main").expect("Impossible").show();
+          show_window(app);
         }
         _ => {}
       }
@@ -153,43 +151,20 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
   Ok(())
 }
 
-pub(crate) fn remove_window(app: &tauri::AppHandle) {
+pub(crate) fn show_window(app: &tauri::AppHandle) {
   if let Some(x) = app.get_webview_window("main") {
-    _ = x.close();
+    _ = x.show();
+    _ = x.set_focus();
+  } else {
+    create_window(app);
   }
 }
 
-pub(crate) fn create_window(app: &mut tauri::AppHandle) {
-  if app.get_webview_window("main").is_some() {
-    return;
-  }
-
-  _ = WebviewWindowBuilder::new(
-    app,
-    "main",
-    tauri::WebviewUrl::App("/".into())
-  )
-    .center()
-    .min_inner_size(348.0, 700.0)
-    .inner_size(1024.0, 760.0)
-    .resizable(true)
-    .decorations(false)
-    .visible(false)
-    .prevent_overflow()
-    .title("AHQ Store Neo")
-    .transparent(true)
-    .effects(
-      WindowEffectsConfig {
-        effects: vec![Effect::Mica],
-        state: None,
-        radius: None,
-        color: None,
-      }
-    )
-    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
-    .build()
-    .unwrap();
-}
+// pub(crate) fn remove_window(app: &tauri::AppHandle) {
+//   if let Some(x) = app.get_webview_window("main") {
+//     _ = x.close();
+//   }
+// }
 
 fn should_be_hidden() -> bool {
   if let Some(args) = std::env::args().last() {
@@ -201,7 +176,7 @@ fn should_be_hidden() -> bool {
   false
 }
 
-async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
+async fn update(app: &tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
   if let Some(update) = app.updater()?.check().await? {
     let mut downloaded = 0;
 

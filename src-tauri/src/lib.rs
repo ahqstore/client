@@ -1,3 +1,8 @@
+use tauri::utils::config::WindowEffectsConfig;
+use tauri::webview::WebviewWindowBuilder;
+use tauri::window::Effect;
+use tauri::Manager;
+
 #[cfg(desktop)]
 mod desktop;
 
@@ -69,4 +74,36 @@ pub fn run() {
     }
     _ => {}
   });
+}
+
+pub(crate) fn create_window<T: Manager<R>, R: tauri::Runtime>(app: &T) {
+  if app.get_webview_window("main").is_some() {
+    return;
+  }
+
+  _ = WebviewWindowBuilder::new(
+    app,
+    "main",
+    tauri::WebviewUrl::App("/".into())
+  )
+    .center()
+    .min_inner_size(348.0, 700.0)
+    .inner_size(1024.0, 760.0)
+    .resizable(true)
+    .decorations(false)
+    .visible(false)
+    .prevent_overflow()
+    .title("AHQ Store Neo")
+    .transparent(true)
+    .effects(
+      WindowEffectsConfig {
+        effects: vec![Effect::Mica],
+        state: None,
+        radius: None,
+        color: None,
+      }
+    )
+    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
+    .build()
+    .unwrap();
 }
