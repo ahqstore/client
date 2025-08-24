@@ -1,5 +1,5 @@
 import { ConfigSelect } from "@/components/select";
-import { Checkbox, Select, Slider, Switch } from "@fluentui/react-components";
+import { Select, Switch } from "@fluentui/react-components";
 import { ZoomIn, Aperture } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
