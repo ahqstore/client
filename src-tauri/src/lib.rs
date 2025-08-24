@@ -1,6 +1,10 @@
-use tauri::utils::config::WindowEffectsConfig;
 use tauri::webview::WebviewWindowBuilder;
+
+#[cfg(desktop)]
+use tauri::utils::config::WindowEffectsConfig;
+#[cfg(desktop)]
 use tauri::window::Effect;
+
 use tauri::Manager;
 
 #[cfg(desktop)]
@@ -48,7 +52,6 @@ pub fn run() {
     .on_page_load(move |c, _| c.eval(accent).expect("Unable to evaluate script"))
     .plugin(tauri_plugin_http::init())
     .plugin(tauri_plugin_os::init())
-    .plugin(tauri_plugin_deep_link::init())
     .plugin(tauri_plugin_ahqstore::init())
     .setup(|_app| {
       #[cfg(desktop)]
@@ -65,6 +68,7 @@ pub fn run() {
       println!("[INFO] Running");
       Ok(())
     })
+    .plugin(tauri_plugin_deep_link::init())
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
 

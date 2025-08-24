@@ -83,7 +83,7 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
   }
 
   println!("Deep Linking");
-  #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
+  #[cfg(any(target_os = "linux", windows))]
   {
     use tauri_plugin_deep_link::DeepLinkExt;
     app.deep_link().register_all().expect("Unable to register");
