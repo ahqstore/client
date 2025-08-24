@@ -173,6 +173,8 @@ pub(crate) fn create_window(app: &mut tauri::AppHandle) {
     .min_inner_size(348.0, 700.0)
     .inner_size(1024.0, 760.0)
     .resizable(true)
+    .decorations(false)
+    .visible(false)
     .prevent_overflow()
     .title("AHQ Store Neo")
     .transparent(true)
