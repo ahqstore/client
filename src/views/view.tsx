@@ -31,8 +31,11 @@ import { useMemo, useState } from "react";
 import NavigationSidebar from "./nav";
 import { useExperiment } from "@/lib/experiment";
 import { useAuth } from "@/lib/auth/provider";
-import Changelog from "./changelogs";
+
 import { AppsHome } from "./apps";
+
+import Changelog from "./changelogs";
+import SettingsPage from "./settings";
 
 export const items: {
   name: string;
@@ -43,102 +46,102 @@ export const items: {
   iconMobileFilled: JSX.Element;
   hidden?: () => boolean;
 }[] = [
-  {
-    name: "Apps",
-    id: 0,
-    icon: <AppsRegular className="size-[1.5em]" />,
-    iconFilled: (
-      <AppsFilled
-        className="size-[1.5em]"
-        style={{ color: "var(--win32-accent)" }}
-      />
-    ),
-    iconMobile: <LayoutGrid size="1.5em" />,
-    iconMobileFilled: <LayoutGrid fill="currentcolor" size="1.5em" />,
-  },
-  {
-    name: "Library",
-    id: 1,
-    icon: <LibraryRegular className="size-[1.5em]" />,
-    iconFilled: (
-      <LibraryFilled
-        className="size-[1.5em]"
-        style={{ color: "var(--win32-accent)" }}
-      />
-    ),
-    iconMobile: <Library size="1.5em" />,
-    iconMobileFilled: <LibraryBig size="1.5em" />,
-  },
-  {
-    name: "Profile",
-    id: 2,
-    hidden: () => platform() != "android",
-    icon: <PersonRegular className="size-[1.5em]" />,
-    iconFilled: (
-      <PersonFilled
-        className="size-[1.5em]"
-        style={{ color: "var(--win32-accent)" }}
-      />
-    ),
-    iconMobile: <User size="1.5em" />,
-    iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
-  },
-  {
-    name: "Developer",
-    id: 3,
-    hidden: () => !(useAuth()?.dev || false),
-    icon: <ToolboxRegular className="size-[1.5em]" />,
-    iconFilled: (
-      <ToolboxFilled
-        className="size-[1.5em]"
-        style={{ color: "var(--win32-accent)" }}
-      />
-    ),
-    iconMobile: <ToolboxRegular className="size-[1.5em]" />,
-    iconMobileFilled: <ToolboxFilled className="size-[1.5em]" />,
-  },
-  {
-    name: "Lab",
-    id: 6,
-    hidden: () => !useExperiment(),
-    icon: <WindowDevToolsRegular className="size-[1.5em]" />,
-    iconFilled: (
-      <WindowDevToolsFilled
-        className="size-[1.5em]"
-        style={{ color: "var(--win32-accent)" }}
-      />
-    ),
-    iconMobile: <Code2Icon className="size-[1.5em]" />,
-    iconMobileFilled: <Code2Icon className="size-[1.5em]" />,
-  },
-  {
-    name: "Updates",
-    id: 7,
-    hidden: () => !useMediaQuery("(min-width: 640px)"),
-    icon: <MegaphoneLoudRegular className="size-[1.5em]" />,
-    iconFilled: (
-      <MegaphoneLoudFilled
-        className="size-[1.5em]"
-        style={{ color: "var(--win32-accent)" }}
-      />
-    ),
-    iconMobile: <Settings size="1.5em" />,
-    iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
-  },
-  {
-    name: "Settings",
-    id: 8,
-    icon: <SettingsRegular className="size-[1.5em]" />,
-    iconFilled: (
-      <SettingsFilled
-        className="size-[1.5em]"
-        style={{ color: "var(--win32-accent)" }}
-      />
-    ),
-    iconMobile: <Settings size="1.5em" />,
-    iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
-  },
-];
+    {
+      name: "Apps",
+      id: 0,
+      icon: <AppsRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <AppsFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <LayoutGrid size="1.5em" />,
+      iconMobileFilled: <LayoutGrid fill="currentcolor" size="1.5em" />,
+    },
+    {
+      name: "Library",
+      id: 1,
+      icon: <LibraryRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <LibraryFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <Library size="1.5em" />,
+      iconMobileFilled: <LibraryBig size="1.5em" />,
+    },
+    {
+      name: "Profile",
+      id: 2,
+      hidden: () => platform() != "android",
+      icon: <PersonRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <PersonFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <User size="1.5em" />,
+      iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
+    },
+    {
+      name: "Developer",
+      id: 3,
+      hidden: () => !(useAuth()?.dev || false),
+      icon: <ToolboxRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <ToolboxFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <ToolboxRegular className="size-[1.5em]" />,
+      iconMobileFilled: <ToolboxFilled className="size-[1.5em]" />,
+    },
+    {
+      name: "Lab",
+      id: 6,
+      hidden: () => !useExperiment(),
+      icon: <WindowDevToolsRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <WindowDevToolsFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <Code2Icon className="size-[1.5em]" />,
+      iconMobileFilled: <Code2Icon className="size-[1.5em]" />,
+    },
+    {
+      name: "Updates",
+      id: 7,
+      hidden: () => !useMediaQuery("(min-width: 640px)"),
+      icon: <MegaphoneLoudRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <MegaphoneLoudFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <Settings size="1.5em" />,
+      iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
+    },
+    {
+      name: "Settings",
+      id: 8,
+      icon: <SettingsRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <SettingsFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <Settings size="1.5em" />,
+      iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
+    },
+  ];
 
 export function ApplicationView() {
   const [item, setItem] = useState(0);
@@ -189,7 +192,7 @@ function GetJsx({ item }: Props) {
     case 7:
       return <Changelog />;
     case 8:
-      return <>Settings</>;
+      return <SettingsPage />;
     default:
       return <>Not Found</>;
   }
