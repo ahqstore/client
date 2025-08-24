@@ -36,7 +36,7 @@ fn get_accent() -> Option<String> {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-#[allow(dead_code)]
+#[allow(dead_code, unused)]
 pub fn run() {
   #[cfg(windows)]
   let accent: &'static str = get_accent().unwrap_or("window.accent = \"rgb(53,126,199)\"".into()).leak();
@@ -58,6 +58,9 @@ pub fn run() {
 
       #[cfg(desktop)]
       _app.handle().plugin(tauri_plugin_window_state::Builder::default().build())?;
+
+      #[cfg(mobile)]
+      create_window(_app);
 
       println!("[INFO] Running");
       Ok(())
@@ -81,13 +84,16 @@ pub(crate) fn create_window<T: Manager<R>, R: tauri::Runtime>(app: &T) {
     return;
   }
 
-  _ = WebviewWindowBuilder::new(
+  let builder = WebviewWindowBuilder::new(
     app,
     "main",
     tauri::WebviewUrl::App("/".into())
-  )
-    .center()
-    .min_inner_size(348.0, 700.0)
+  );
+
+  #[cfg(desktop)]
+  let builder = builder.center();
+  
+  builder.min_inner_size(348.0, 700.0)
     .inner_size(1024.0, 760.0)
     .resizable(true)
     .decorations(false)
