@@ -4,7 +4,7 @@ use tauri::menu::Menu;
 use tauri::menu::MenuItem;
 use tauri::menu::PredefinedMenuItem;
 use tauri::tray::TrayIconBuilder;
-use tauri::tray::TrayIconEvent;
+use tauri::tray::{TrayIconEvent, MouseButton};
 
 use tauri::App;
 use tauri::{Listener, Manager};
@@ -52,7 +52,10 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
   println!("Single Instance");
   handle.plugin(tauri_plugin_single_instance::init(|app, _, _| {
     // TODO: fix
-    show_window(app);
+    let app_c = app.clone();
+    std::thread::spawn(move || {
+      show_window(&app_c);
+    });
   }))?;
 
   let handle = app.handle().clone();
@@ -92,8 +95,10 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     .icon(Image::from_bytes(include_bytes!("../../icons/icon.png"))?)
     .show_menu_on_left_click(false)
     .on_tray_icon_event(move |app, event| match event {
-      TrayIconEvent::Click { .. } => {
-        show_window(app.app_handle());
+      TrayIconEvent::Click { button, .. } => {
+        if let MouseButton::Left = button {
+          show_window(app.app_handle());
+        }
       }
       _ => {}
     })
