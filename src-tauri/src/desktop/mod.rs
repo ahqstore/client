@@ -19,25 +19,25 @@ use tauri_plugin_updater::UpdaterExt;
 use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWINDOWATTRIBUTE};
 
 pub fn setup(app: &mut App) -> tauri::Result<()> {
-  #[cfg(windows)]
-  {
-    let hwnd = app
-      .get_webview_window("main")
-      .expect("Impossible error")
-      .hwnd()
-      .unwrap();
+//   #[cfg(windows)]
+//   {
+//     let hwnd = app
+//       .get_webview_window("main")
+//       .expect("Impossible error")
+//       .hwnd()
+//       .unwrap();
 
-    unsafe {
-      //2: Mica, 3: Acrylic, 4: Mica Alt
-      let attr = 2;
-      let _ = DwmSetWindowAttribute(
-        hwnd,
-        DWMWINDOWATTRIBUTE(38),
-        &attr as *const _ as _,
-        std::mem::size_of_val(&attr) as u32,
-      );
-    }
-  }
+//     unsafe {
+//       //2: Mica, 3: Acrylic, 4: Mica Alt
+//       let attr = 2;
+//       let _ = DwmSetWindowAttribute(
+//         hwnd,
+//         DWMWINDOWATTRIBUTE(38),
+//         &attr as *const _ as _,
+//         std::mem::size_of_val(&attr) as u32,
+//       );
+//     }
+//   }
 
   let handle = app.handle();
 
@@ -52,6 +52,7 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
 
   println!("Single Instance");
   handle.plugin(tauri_plugin_single_instance::init(|app, _, _| {
+    // TODO: fix
     let _ = app.get_webview_window("main").expect("Impossible").show();
   }))?;
 
@@ -93,6 +94,7 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     .show_menu_on_left_click(false)
     .on_tray_icon_event(move |app, event| match event {
       TrayIconEvent::Click { .. } => {
+        // TODO: Fix show
         let _ = app
           .app_handle()
           .get_webview_window("main")
