@@ -1,5 +1,14 @@
 import { ConfigSelect } from "@/components/select";
-import { Select, Switch } from "@fluentui/react-components";
+import { Switch } from "@fluentui/react-components";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 import { ZoomIn, Aperture } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
@@ -11,6 +20,7 @@ import { setScale } from "tauri-plugin-ahqstore-api"
 
 export default function Settings() {
   const pc = useMemo(() => platform() != "android", []);
+  const defaultZoom = useMemo(() => localStorage.getItem("defZoom") || "1", []);
 
   const [autostart, setAutoStart] = useState<null | boolean>(null);
 
@@ -34,19 +44,35 @@ export default function Settings() {
         description="Set your zoom level"
         Icon={ZoomIn}
       >
-        {autostart == null ?
-          <span className="loading loading-spinner text-primary"></span>
-          :
-          <Select
-            onClick={() => {
-              setScale(1.25);
-            }}
-          >
-            <option>125%</option>
-            <option>100%</option>
-            <option>75%</option>
-          </Select>
-        }
+        <Select
+          defaultValue={defaultZoom}
+          onValueChange={(val) => {
+            localStorage.setItem("defZoom", val);
+            setScale(Number(val));
+          }}
+        >
+          <SelectTrigger className="w-32 md:w-48">
+            <SelectValue placeholder="Select Zoom" />
+          </SelectTrigger>
+          <SelectContent className="dark:border-base-300 bg-accent">
+            <SelectItem value="0.5">50%</SelectItem>
+            <SelectItem value="0.75">75%</SelectItem>
+            <SelectItem value="1">100%</SelectItem>
+            <SelectItem value="1.25">125%</SelectItem>
+            <SelectItem value="1.5">150%</SelectItem>
+            <SelectItem value="1.75">175%</SelectItem>
+            <SelectItem value="2">200%</SelectItem>
+          </SelectContent>
+        </Select>
+        {/* <Select
+          onClick={() => {
+            setScale(1.25);
+          }}
+        >
+          <option>125%</option>
+          <option>100%</option>
+          <option>75%</option>
+        </Select> */}
       </ConfigSelect>
 
       {/* Autostart is PC only setting */}
@@ -75,6 +101,6 @@ export default function Settings() {
         }
       </ConfigSelect>}
 
-    </div>
+    </div >
   </>;
 }

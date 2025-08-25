@@ -189,6 +189,7 @@
 }
 
 @layer base {
+
   html,
   body {
     background: transparent !important;
@@ -209,6 +210,7 @@
 }
 
 html:not(.not-win) {
+
   body,
   #root,
   .fxugw4r {
@@ -218,11 +220,9 @@ html:not(.not-win) {
 
 .stylish {
   @apply shadow-lg;
-  background: color-mix(
-    in srgb,
-    transparent 5%,
-    var(--color-neutral-content) 5%
-  ) !important;
+  background: color-mix(in srgb,
+      transparent 5%,
+      var(--color-neutral-content) 5%) !important;
 }
 
 .animate * {
@@ -243,7 +243,7 @@ html:not(.not-win) {
   }
 }
 
-.readd > div {
+.readd>div {
   @apply flex flex-col gap-2;
 }
 

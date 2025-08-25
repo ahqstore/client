@@ -19,7 +19,7 @@ import {
   BugArrowCounterclockwiseRegular,
 } from "@fluentui/react-icons";
 
-import { open } from "tauri-plugin-ahqstore-api";
+import { open, setScale } from "tauri-plugin-ahqstore-api";
 import { startLogin } from "./lib/auth/github";
 import { authObject, useAuth } from "./lib/auth/provider";
 import { logOut } from "./lib/auth";
@@ -27,10 +27,15 @@ import { useExperiment } from "./lib/experiment";
 import { useHome } from "./lib/data";
 import { ApplicationView } from "./views/view";
 import { useMediaQuery } from "./hooks/use-media-query";
+import { useEffect } from "react";
 
 function App() {
   const auth = useAuth();
   const experiment = useExperiment();
+
+  useEffect(() => {
+    setScale(Number(localStorage.getItem("defZoom") || "1"));
+  }, []);
 
   return (
     <>
