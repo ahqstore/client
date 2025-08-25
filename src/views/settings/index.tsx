@@ -39,7 +39,7 @@ export default function Settings() {
 
   return <>
     <div className="flex flex-col gap-2 w-full justify-center items-center">
-      <ConfigSelect
+      {pc && <ConfigSelect
         title="Zoom"
         description="Set your zoom level"
         Icon={ZoomIn}
@@ -73,7 +73,7 @@ export default function Settings() {
           <option>100%</option>
           <option>75%</option>
         </Select> */}
-      </ConfigSelect>
+      </ConfigSelect>}
 
       {/* Autostart is PC only setting */}
       {pc && <ConfigSelect
@@ -89,10 +89,11 @@ export default function Settings() {
             onChange={async (_, data) => {
               const checked = data.checked;
 
+              // Now it'll be set
               if (checked) {
-                await disable()
+                await enable()
               } else {
-                await enable();
+                await disable();
               }
 
               loadAutostart();

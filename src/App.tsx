@@ -34,7 +34,9 @@ function App() {
   const experiment = useExperiment();
 
   useEffect(() => {
-    setScale(Number(localStorage.getItem("defZoom") || "1"));
+    const zoom = localStorage.getItem("defZoom");
+
+    if (zoom) setScale(Number(zoom));
   }, []);
 
   return (
