@@ -157,7 +157,7 @@ function App() {
           {useMediaQuery("(min-width: 400px)") && (
             <h1
               data-tauri-drag-region
-              className="my-auto ml-1 text-black dark:text-neutral-content text-md font-sans italic font-bold"
+              className="my-auto ml-1 text-black dark:!text-base-content text-md font-sans italic font-bold"
             >
               NEO
             </h1>

@@ -84,6 +84,8 @@ export default function Settings() {
           <SelectContent className="border-base-300 dark:border-base-300 bg-accent">
             <SelectItem value="0.5">50%</SelectItem>
             <SelectItem value="0.75">75%</SelectItem>
+            <SelectItem value="0.8">80%</SelectItem>
+            <SelectItem value="0.9">90%</SelectItem>
             <SelectItem value="1">100%</SelectItem>
             <SelectItem value="1.25">125%</SelectItem>
             <SelectItem value="1.5">150%</SelectItem>

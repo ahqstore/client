@@ -7,6 +7,7 @@ interface CategoryProps {
   description: string;
   Icon: typeof ChevronDown;
   children: React.ReactNode;
+  openable?: boolean;
   normallyOpen?: boolean;
 }
 
@@ -17,6 +18,7 @@ export function Category({
   description,
   Icon,
   children,
+  openable = true,
   normallyOpen,
 }: CategoryProps) {
   const [open, setOpen] = useState(normallyOpen || false);
@@ -26,8 +28,13 @@ export function Category({
       className={`bg-accent dark:bg-neutral-content/10 animate w-full rounded-lg`}
     >
       <div
-        className={`w-full flex cursor-pointer text-muted-content dark:text-foreground category p-3`}
-        onClick={() => setOpen((o) => !o)}
+        className={`category w-full flex cursor-pointer text-muted-content dark:text-foreground p-3`}
+        data-open={open ? "true" : "false"}
+        onClick={() => {
+          if (openable) {
+            setOpen((o) => !o)
+          }
+        }}
       >
         <div className="size-10 my-auto">
           <Icon size="2.25rem" className="m-auto" />
@@ -37,11 +44,11 @@ export function Category({
           <span className="select-none">{description}</span>
         </div>
         <div className="chv p-1 my-auto rounded-md">
-          <ChevronDown size="1.75em" style={open ? { rotate: "180deg" } : {}} />
+          {openable && <ChevronDown size="1.75em" style={open ? { rotate: "180deg" } : {}} />}
         </div>
       </div>
 
-      <Separator hidden={!open} />
+      {openable && <Separator hidden={!open} />}
 
       <div className="p-3" hidden={!open}>
         {children}

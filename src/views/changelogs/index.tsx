@@ -1,11 +1,13 @@
 import { Category } from "@/components/category";
 import { Megaphone, ScrollText } from "lucide-react";
 
+import { open } from "tauri-plugin-ahqstore-api"
+
 export default function Changelog() {
   return (
     <>
       <Category
-        title="This Update"
+        title="AHQ Store v0.0.1"
         description="Learn what's new in this version of AHQ Store"
         Icon={Megaphone}
         normallyOpen={true}
@@ -20,24 +22,20 @@ export default function Changelog() {
             <span>
               We're slowly starting to build the pages, starting with this one!
             </span>
+            <span>
+              1st class support for android!
+            </span>
           </div>
         </div>
       </Category>
 
       <Category
-        title="Mentionable Changes"
-        description="Learn what's changed over the updates"
+        title="Application Site is out"
+        description="Hurray! The applications site is now out!"
         Icon={ScrollText}
       >
         <div className="readd flex flex-col space-y-2">
-          <div>
-            <h1>2025.03.11</h1>
-            <span>UI redesign</span>
-          </div>
-          <div>
-            <h1>2025.01</h1>
-            <span>Initial Build</span>
-          </div>
+          <button className="mr-auto w-16 cursor-pointer underline" onClick={() => open("https://ahqstore.github.io/applications")}>Click here</button>
         </div>
       </Category>
     </>
