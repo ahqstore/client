@@ -207,6 +207,20 @@
   .content {
     @apply h-full w-full flex flex-col bg-transparent;
   }
+
+  /* Update the switch color */
+  .rsji9ng:enabled:checked~.fui-Switch__indicator {
+    background-color: color-mix(in srgb,
+        var(--win32-accent) 60%, var(--color-neutral) 10%) !important;
+  }
+
+  .dark {
+    .rsji9ng:enabled:checked~.fui-Switch__indicator {
+      background-color: color-mix(in srgb,
+          var(--win32-accent) 90%,
+          white 60%) !important;
+    }
+  }
 }
 
 html:not(.not-win) {

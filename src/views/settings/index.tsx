@@ -91,15 +91,6 @@ export default function Settings() {
             <SelectItem value="2">200%</SelectItem>
           </SelectContent>
         </Select>
-        {/* <Select
-          onClick={() => {
-            setScale(1.25);
-          }}
-        >
-          <option>125%</option>
-          <option>100%</option>
-          <option>75%</option>
-        </Select> */}
       </ConfigSelect>}
 
       {/* Autostart is PC only setting */}
