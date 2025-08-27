@@ -9,14 +9,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { ZoomIn, Aperture } from "lucide-react";
+import { ZoomIn, Aperture, Moon, Sparkles } from "lucide-react";
 
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart"
 import { platform } from "@tauri-apps/plugin-os";
 
 import { setScale } from "tauri-plugin-ahqstore-api"
+import { setUITheme, ThemeContext, VibrantWindows } from "@/lib";
 
 export default function Settings() {
   const pc = useMemo(() => platform() != "android", []);
@@ -39,6 +40,32 @@ export default function Settings() {
 
   return <>
     <div className="flex flex-col gap-2 w-full justify-center items-center">
+      <ConfigSelect
+        title="Dark"
+        description="Use the dark theme"
+        Icon={Moon}
+      >
+        <Switch
+          defaultChecked={useContext(ThemeContext)}
+          onChange={async (_, data) => {
+            const checked = data.checked;
+
+            setUITheme(checked);
+          }}
+        />
+      </ConfigSelect>
+
+      {
+        useContext(VibrantWindows) &&
+        <ConfigSelect
+          title="Vibrant UI"
+          description="Congrats! You're experiencing the vibrant version of AHQ Store UI (Exclusive to Win11)"
+          Icon={Sparkles}
+        >
+
+        </ConfigSelect>
+      }
+
       {pc && <ConfigSelect
         title="Zoom"
         description="Set your zoom level"

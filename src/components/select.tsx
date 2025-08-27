@@ -4,7 +4,7 @@ interface ConfigProps {
   title: string;
   description: string;
   Icon: typeof ChevronDown;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   pointer?: boolean;
 }
 
