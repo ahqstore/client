@@ -81,7 +81,7 @@ export default function Settings() {
           <SelectTrigger className="w-32 md:w-48">
             <SelectValue placeholder="Select Zoom" />
           </SelectTrigger>
-          <SelectContent className="dark:border-base-300 bg-accent">
+          <SelectContent className="border-base-300 dark:border-base-300 bg-accent">
             <SelectItem value="0.5">50%</SelectItem>
             <SelectItem value="0.75">75%</SelectItem>
             <SelectItem value="1">100%</SelectItem>
