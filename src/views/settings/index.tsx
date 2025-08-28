@@ -18,6 +18,8 @@ import { platform } from "@tauri-apps/plugin-os";
 
 import { setScale } from "tauri-plugin-ahqstore-api"
 import { setUITheme, ThemeContext, VibrantWindows } from "@/lib";
+import { Separator } from "@/components/ui/separator";
+import { Category } from "@/components/category";
 
 export default function Settings() {
   const pc = useMemo(() => platform() != "android", []);
@@ -122,6 +124,18 @@ export default function Settings() {
         }
       </ConfigSelect>}
 
+
+      <Separator />
+
+      <Category
+        title="About Us"
+        description="Making App Distribution Accessible to Everyone"
+        Icon={function (props: { size: string; }) {
+          return <img src="/icon.png" style={{ width: props.size, height: props.size }} />;
+        } as any}
+      >
+        <></>
+      </Category>
     </div >
   </>;
 }

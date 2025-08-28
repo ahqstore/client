@@ -11,17 +11,18 @@ import {
   FluentProvider,
 } from "@fluentui/react-components";
 import { isWindows11 } from "src-plugin/dist-js";
+import { useExperiments } from "./experiments";
 
 const def = String(window.matchMedia("(prefers-color-scheme: dark)").matches);
 
 export const VibrantWindows = createContext(false);
 
-export default function fnTheme(windows: boolean, micaApplied: (_: boolean) => void) {
+export default function fnTheme(windows: boolean, micaApplied: (_: boolean) => void, alwaysVibrant?: boolean) {
   const dark = (localStorage.getItem("dark") || def) == "true";
 
   document.querySelector("html")?.classList.toggle("dark", dark);
 
-  if (windows && ((def == "true") == dark)) {
+  if (alwaysVibrant || (windows && ((def == "true") == dark))) {
     document.querySelector("html")?.classList.remove("not-win");
     micaApplied(true);
   } else {
@@ -46,6 +47,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState(teamsDarkTheme);
   const [windows, setWindows] = useState(false);
   const [win32, setMICAApplied] = useState(false);
+
+  const exp = useExperiments();
 
   setUITheme = (theme: boolean) => setDark(theme);
 
@@ -76,8 +79,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setTheme(teamsLightTheme);
     }
 
-    fnTheme(windows, (value) => setMICAApplied(value));
-  }, [dark, windows]);
+    fnTheme(windows, (value) => setMICAApplied(value), exp.forceVibrant);
+  }, [exp, dark, windows]);
 
   return (
     <ThemeContext.Provider value={dark}>

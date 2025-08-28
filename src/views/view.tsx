@@ -5,7 +5,9 @@ import {
   AppsFilled,
   SettingsRegular,
   SettingsFilled,
+  // @ts-ignore
   PersonRegular,
+  // @ts-ignore
   PersonFilled,
   LibraryRegular,
   LibraryFilled,
@@ -22,6 +24,7 @@ import {
   Library,
   LayoutGrid,
   Settings,
+  // @ts-ignore
   User,
   LibraryBig,
   Code2Icon,
@@ -38,6 +41,7 @@ import Changelog from "./changelogs";
 import SettingsPage from "./settings";
 import LibraryPage from "./library";
 import DeveloperPage from "./developer";
+import LabPage from "./lab";
 
 export const items: {
   name: string;
@@ -74,20 +78,20 @@ export const items: {
       iconMobile: <Library size="1.5em" />,
       iconMobileFilled: <LibraryBig size="1.5em" />,
     },
-    {
-      name: "Profile",
-      id: 2,
-      hidden: () => platform() != "android",
-      icon: <PersonRegular className="size-[1.5em]" />,
-      iconFilled: (
-        <PersonFilled
-          className="size-[1.5em]"
-          style={{ color: "var(--win32-accent)" }}
-        />
-      ),
-      iconMobile: <User size="1.5em" />,
-      iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
-    },
+    // {
+    //   name: "Profile",
+    //   id: 2,
+    //   hidden: () => platform() != "android",
+    //   icon: <PersonRegular className="size-[1.5em]" />,
+    //   iconFilled: (
+    //     <PersonFilled
+    //       className="size-[1.5em]"
+    //       style={{ color: "var(--win32-accent)" }}
+    //     />
+    //   ),
+    //   iconMobile: <User size="1.5em" />,
+    //   iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
+    // },
     {
       name: "Developer",
       id: 3,
@@ -190,7 +194,7 @@ function GetJsx({ item }: Props) {
     case 3:
       return <DeveloperPage />;
     case 6:
-      return <>Lab</>;
+      return <LabPage />;
     case 7:
       return <Changelog />;
     case 8:

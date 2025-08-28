@@ -9,6 +9,7 @@ import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./lib/auth/provider";
 import { ExperimentProvider } from "./lib/experiment";
 import { HomeProvider } from "./lib/data";
+import { ExperimentsProvider } from "./lib/experiments";
 
 declare global {
   interface Window {
@@ -20,20 +21,22 @@ export const window = getCurrentWindow();
 (async () => {
   try {
     window.emit("loaded", "");
-  } catch (_) {}
+  } catch (_) { }
 })();
 
 if (getCurrentWebviewWindow().label == "main") {
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <ExperimentProvider>
-      <HomeProvider>
-        <AuthProvider>
-          <ThemeProvider>
-            <App />
-            <Toaster />
-          </ThemeProvider>
-        </AuthProvider>
-      </HomeProvider>
+      <ExperimentsProvider>
+        <HomeProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <App />
+              <Toaster />
+            </ThemeProvider>
+          </AuthProvider>
+        </HomeProvider>
+      </ExperimentsProvider>
     </ExperimentProvider>,
   );
 } else {
