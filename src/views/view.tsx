@@ -42,6 +42,7 @@ import SettingsPage from "./settings";
 import LibraryPage from "./library";
 import DeveloperPage from "./developer";
 import LabPage from "./lab";
+import { Disclaimer } from "./disclaimer";
 
 export const items: {
   name: string;
@@ -162,7 +163,8 @@ export function ApplicationView() {
         <div className="animate h-full w-24 flex flex-col gap-2 px-1 pb-2 items-center text-center overflow-hidden overflow-y-scroll">
           <NavigationSidebar item={item} setItem={setItem} />
         </div>
-        <div className="w-full h-full flex flex-col space-y-2 rounded-tl-xl p-3 bg-white/80 dark:!bg-secondary/50 border border-muted dark:border-none border-b-0 border-r-0 overflow-y-scroll">
+        <Disclaimer />
+        <div className="w-full h-full flex flex-col space-y-2 rounded-tl-xl p-3 bg-muted/30 border border-muted dark:border-none border-b-0 border-r-0 overflow-y-scroll">
           {ui}
         </div>
       </div>

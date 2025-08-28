@@ -39,7 +39,7 @@ export default function DeveloperPage() {
   return (
     (ready && dev && apps && auth) ? <>
       <div className="flex gap-1">
-        <h1 className="text-xl">Welcome, <strong className="text-base-300 dark:text-base-content">{dev?.name}</strong></h1>
+        <h1 className="text-xl">Welcome, <strong className="text-foreground">{dev?.name}</strong></h1>
         <img className="rounded-full my-auto w-[1.25rem] h-[1.25rem]" src={dev?.avatar_url} />
       </div>
 

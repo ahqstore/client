@@ -209,16 +209,34 @@
   }
 
   /* Update the switch color */
+  .ffp7eso,
   .rsji9ng:enabled:checked~.fui-Switch__indicator {
     background-color: color-mix(in srgb,
         var(--win32-accent) 60%, var(--color-neutral) 10%) !important;
   }
 
+  .ffp7eso:hover {
+    background-color: color-mix(in srgb,
+        var(--win32-accent) 40%, white 100%) !important;
+  }
+
+  /* Modal UI */
+  .r1u3t6p6 {
+    @apply !bg-[var(--colorNeutralBackground1)]/90;
+  }
+
   .dark {
+
+    .ffp7eso,
     .rsji9ng:enabled:checked~.fui-Switch__indicator {
       background-color: color-mix(in srgb,
           var(--win32-accent) 90%,
-          white 60%) !important;
+          white 75%) !important;
+    }
+
+    .ffp7eso:hover {
+      background-color: color-mix(in srgb,
+          var(--win32-accent) 40%, white 100%) !important;
     }
   }
 }

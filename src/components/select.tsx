@@ -29,7 +29,7 @@ export function ConfigSelect({
         </div>
         <div className="ml-2 w-full">
           <h1 className="text-lg select-none">{title}</h1>
-          <span className="select-none dark:!text-base-content/80">{description}</span>
+          <span className="select-none !text-foreground/80">{description}</span>
         </div>
         <div className="p-1 my-auto rounded-md">
           {children}
