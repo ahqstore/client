@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.glance.action.ActionParameters
 import androidx.glance.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.glance.appwidget.components.Scaffold
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -41,21 +42,23 @@ fun LibraryWidgetContent() {
 
     Log.d("GLANCE", "Glance Used")
 
-    Box(
-        modifier = GlanceModifier.fillMaxSize()
-    ) {
-        Text("Last Updated $fmtTime", modifier = GlanceModifier.padding(16.dp))
-
+    Scaffold {
         Box(
-            modifier = GlanceModifier.size(56.dp)
-                .padding(bottom = 16.dp, end = 16.dp)
-                .clickable(actionRunCallback<AddButtonAction>()),
-            contentAlignment = Alignment.BottomEnd
+            modifier = GlanceModifier.fillMaxSize()
         ) {
-            Image(
-                provider = ImageProvider(android.R.drawable.ic_input_add),
-                contentDescription = "Add Item"
-            )
+            Text("Last Updated $fmtTime", modifier = GlanceModifier.padding(16.dp))
+
+            Box(
+                modifier = GlanceModifier.size(56.dp)
+                    .padding(bottom = 16.dp, end = 16.dp)
+                    .clickable(actionRunCallback<AddButtonAction>()),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                Image(
+                    provider = ImageProvider(android.R.drawable.ic_input_add),
+                    contentDescription = "Add Item"
+                )
+            }
         }
     }
 }
