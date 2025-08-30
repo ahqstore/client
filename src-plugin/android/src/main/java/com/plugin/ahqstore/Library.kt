@@ -2,6 +2,7 @@ package com.plugin.ahqstore
 
 //import android.content.Context
 //import android.content.Intent
+import LibraryWidget
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 
