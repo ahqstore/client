@@ -16,6 +16,7 @@ import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.components.TitleBar
 import androidx.glance.appwidget.lazy.LazyColumn
+import androidx.glance.background
 import androidx.glance.layout.fillMaxWidth
 
 import com.plugin.ahqstore.R
@@ -41,13 +42,16 @@ fun LibraryWidgetContent() {
                             onClick = actionRunCallback<AddButtonAction>(),
                             contentDescription = "Check",
                             modifier = GlanceModifier.padding(8.dp),
-                            imageProvider = ImageProvider(R.drawable.favicon)
+                            imageProvider = ImageProvider(R.drawable.update)
                         )
                     }
                 )
             }
         ) {
-            LazyColumn(modifier = GlanceModifier.fillMaxWidth()) {
+            LazyColumn(
+                modifier = GlanceModifier.fillMaxWidth()
+                    .background(GlanceTheme.colors.surface)
+            ) {
                 item {
                     Text("First")
                 }
