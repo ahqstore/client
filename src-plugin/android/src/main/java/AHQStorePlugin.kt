@@ -10,6 +10,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import android.view.Window
+import android.view.WindowInsets
 import android.webkit.WebView
 import androidx.core.content.FileProvider
 import androidx.work.Constraints
@@ -50,6 +52,32 @@ class Data {
   var data: String = ""
 }
 
+fun windowInset(web: WebView, window: Window) {
+  val rootView = window.decorView
+
+  var top: Int
+  var bottom: Int
+
+  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    top = rootView.rootWindowInsets.getInsets(WindowInsets.Type.statusBars()).top
+    bottom = rootView.rootWindowInsets.getInsets(WindowInsets.Type.navigationBars()).bottom
+  } else {
+    val insets = rootView.rootWindowInsets
+
+    top = insets.systemWindowInsetTop
+    bottom = insets.systemWindowInsetBottom
+  }
+
+  web.evaluateJavascript(
+    """
+      window.topMargin = $top
+      window.bottomMargin = $bottom
+    """.trimIndent()
+  ) {
+
+  }
+}
+
 @TauriPlugin
 class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
   private var webView: WebView? = null
@@ -62,6 +90,8 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
 
   override fun load(webView: WebView) {
     this.webView = webView
+
+    windowInset(webView, activity.window)
 
     Log.w("Enqueued", "Periodic Work Running")
 
