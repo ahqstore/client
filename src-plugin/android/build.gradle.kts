@@ -42,7 +42,7 @@ android {
 }
 
 dependencies {
-    val ackpineVersion = "0.15.1"
+    val ackpineVersion = "0.15.3"
 
     implementation("ru.solrudev.ackpine:ackpine-core:$ackpineVersion")
     implementation("ru.solrudev.ackpine:ackpine-ktx:$ackpineVersion")
@@ -59,6 +59,9 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.1.1")
     //  For interop APIs with Material 3
     implementation("androidx.glance:glance-material3:1.1.1")
+
+    implementation("androidx.compose.ui:ui-tooling:1.9.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.9.0")
 
     implementation("com.google.android.material:material:1.12.0")
     testImplementation("junit:junit:4.13.2")
