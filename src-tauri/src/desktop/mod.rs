@@ -4,7 +4,7 @@ use tauri::menu::Menu;
 use tauri::menu::MenuItem;
 use tauri::menu::PredefinedMenuItem;
 use tauri::tray::TrayIconBuilder;
-use tauri::tray::{TrayIconEvent, MouseButton};
+use tauri::tray::{MouseButton, TrayIconEvent};
 
 use tauri::App;
 use tauri::{Listener, Manager};
@@ -23,25 +23,25 @@ use super::create_window;
 pub static STARTED: Mutex<bool> = Mutex::new(false);
 
 pub fn setup(app: &mut App) -> tauri::Result<()> {
-//   #[cfg(windows)]
-//   {
-//     let hwnd = app
-//       .get_webview_window("main")
-//       .expect("Impossible error")
-//       .hwnd()
-//       .unwrap();
+  //   #[cfg(windows)]
+  //   {
+  //     let hwnd = app
+  //       .get_webview_window("main")
+  //       .expect("Impossible error")
+  //       .hwnd()
+  //       .unwrap();
 
-//     unsafe {
-//       //2: Mica, 3: Acrylic, 4: Mica Alt
-//       let attr = 2;
-//       let _ = DwmSetWindowAttribute(
-//         hwnd,
-//         DWMWINDOWATTRIBUTE(38),
-//         &attr as *const _ as _,
-//         std::mem::size_of_val(&attr) as u32,
-//       );
-//     }
-//   }
+  //     unsafe {
+  //       //2: Mica, 3: Acrylic, 4: Mica Alt
+  //       let attr = 2;
+  //       let _ = DwmSetWindowAttribute(
+  //         hwnd,
+  //         DWMWINDOWATTRIBUTE(38),
+  //         &attr as *const _ as _,
+  //         std::mem::size_of_val(&attr) as u32,
+  //       );
+  //     }
+  //   }
 
   let handle = app.handle();
 
@@ -84,17 +84,6 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     use tauri_plugin_deep_link::DeepLinkExt;
     app.deep_link().register_all().expect("Unable to register");
   }
-  
-  thread::spawn(|| {
-    match STARTED.lock()  {
-      Ok(mut x) => {
-        *x = true
-      },
-      Err(mut x) => {
-        **x.get_mut() = true;
-      }
-    }
-  });
 
   println!("Building Tray Icon");
   TrayIconBuilder::with_id("main")
@@ -159,6 +148,14 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     })
     .build(app)
     .expect("Failed to build tray icon");
+
+  // Set STARTED as the last step
+  thread::spawn(|| match STARTED.lock() {
+    Ok(mut x) => *x = true,
+    Err(mut x) => {
+      **x.get_mut() = true;
+    }
+  });
 
   Ok(())
 }
