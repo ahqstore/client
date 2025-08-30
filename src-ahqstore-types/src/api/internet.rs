@@ -188,7 +188,7 @@ pub async fn get_devs_apps(commit: &Commits, dev_id: &str) -> Result<Vec<String>
       &commit.alt,
       match e {
         "w:" => &*WINGET_APPS_DEV,
-        "a:" => &*FDROID_APPS_DEV,
+        "f:" => &*FDROID_APPS_DEV,
         "l:" => &*LINUX_APPS_DEV,
         _ => unreachable!(),
       },
@@ -207,7 +207,7 @@ pub async fn get_dev_data(commit: &Commits, id: &str) -> Result<super::DevData> 
       &commit.alt,
       match e {
         "w:" => &*WINGET_DEV_DATA,
-        "a:" => &*FDROID_DEV_DATA,
+        "f:" => &*FDROID_DEV_DATA,
         "l:" => &*LINUX_DEV_DATA,
         _ => unreachable!(),
       },
@@ -226,7 +226,7 @@ pub async fn get_app_asset(commit: &Commits, app_id: &str, asset: &str) -> Optio
       &commit.alt,
       match e {
         "w:" => &*WINGET_APP_ASSET_URL,
-        "a:" => &*FDROID_APP_ASSET_URL,
+        "f:" => &*FDROID_APP_ASSET_URL,
         "l:" => &*LINUX_APP_ASSET_URL,
         _ => unreachable!(),
       },
@@ -243,7 +243,7 @@ pub async fn get_app(commit: &Commits, app_id: &str) -> Result<AHQStoreApplicati
       &commit.alt,
       match e {
         "w:" => &*WINGET_APP_URL,
-        "a:" => &*FDROID_APP_URL,
+        "f:" => &*FDROID_APP_URL,
         "l:" => &*LINUX_APP_URL,
         _ => unreachable!(),
       },

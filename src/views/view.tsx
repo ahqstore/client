@@ -173,6 +173,7 @@ export function ApplicationView() {
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
+      <Disclaimer />
       <div className="h-full w-full flex flex-col space-y-2 p-2 overflow-scroll">
         {ui}
       </div>

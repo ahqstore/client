@@ -1,11 +1,16 @@
 import { Category } from "@/components/category";
 import { useAuth } from "@/lib/auth/provider";
-import { UserCircle2, PackageCheckIcon } from "lucide-react";
+import { UserCircle2, PackageCheckIcon, PackagePlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getDevData, getDevsApps, open } from "tauri-plugin-ahqstore-api"
 
 import type { DevData } from "src-ahqstore-types/pkg/ahqstore_types";
+import { ConfigSelect } from "@/components/select";
+
+import { Button } from "@fluentui/react-components"
+import { generateGHUserHash } from "@/lib/auth/hash";
+
 export default function DeveloperPage() {
   const auth = useAuth();
 
@@ -16,14 +21,14 @@ export default function DeveloperPage() {
   useEffect(() => {
     (async () => {
       if (auth) {
-        const devid = auth.login == "ahqsoftwares" ? "1" : auth.login;
+        const devid = await generateGHUserHash(auth.login);
 
         // Correction for User Name
-        const devdata = await getDevData(`a:${devid}`);
+        const devdata = await getDevData(devid);
 
         setDD(devdata);
 
-        const apps = await getDevsApps(`a:${devid}`);
+        const apps = await getDevsApps(devid);
 
         if (apps[0] != "404: Not Found") {
           setDA(apps);
@@ -93,6 +98,16 @@ export default function DeveloperPage() {
           </div>
         </div>
       </Category>
+
+      <ConfigSelect
+        title="Publish"
+        description="Publish your application at AHQ Store"
+        Icon={PackagePlusIcon}
+      >
+        <Button>
+          Begin
+        </Button>
+      </ConfigSelect>
     </> : <div className="w-full h-full flex flex-col gap-4 text-center justify-center items-center">
       <span className="block loading loading-spinner w-[calc(var(--size-selector,0.25rem)*15)]"></span>
       <span className="md:text-3xl sm:text-xl text-lg">Just a moment...</span>

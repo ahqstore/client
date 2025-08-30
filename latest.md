@@ -31,15 +31,15 @@ AHQ Store has committed to the following OSes:
 - Android 12+ (armv7) [literally my phone]
 - Android 12+ (aarch64)
 
+### What about Windows 10?
+
+AHQ Store is **designed** to run on **Windows 10**. Windows 11 and 10 basically share the same core so if it works on Windows 11, you can expect it to work with Windows 10 as well. In case there is any problem, create an issue and it will be worked on.
+
 Also, we are trying our most to support:
 
 - Ubuntu 24.04 (x86_64)
 - Ubuntu 24.04 (aarch64)
 - Android 9+ (same arches; you must update your "Android System Webview" to latest available version)
-
-### What about Windows 10?
-
-We do not officialy support it, but it **should** work, we do not have hardwares to test on it. Issues will be worked on nonetheless.
 
 ## More exciting news 👌
 

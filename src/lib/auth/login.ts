@@ -2,8 +2,7 @@ import { fetch } from "@tauri-apps/plugin-http";
 import { Auth, User } from ".";
 import { decrypt, encrypt } from "tauri-plugin-ahqstore-api";
 
-//import { hashUsername as generateGHUserHash } from "tauri-plugin-ahqstore-api";
-//import { verifyDevExists } from "./hash";
+import { verifyDevExists, generateGHUserHash } from "./hash";
 
 export function onAuthChange(auth: Auth, callback: (auth?: User) => void) {
   auth.onAuthChange.push(callback);
@@ -18,7 +17,7 @@ export async function tryAutoLogin(auth: Auth) {
     const token = await decrypt(rawToken);
 
     await login(auth, token);
-  } catch (_) {}
+  } catch (_) { }
 }
 
 export async function login(auth: Auth, auth_tok: string): Promise<boolean> {
@@ -33,7 +32,7 @@ export async function login(auth: Auth, auth_tok: string): Promise<boolean> {
   if (ok) {
     auth.currentUser = {
       ...data,
-      dev: true /*await verifyDevExists(await generateGHUserHash(data.login))*/,
+      dev: await verifyDevExists(await generateGHUserHash(data.login)),
     };
     auth.loggedIn = true;
 

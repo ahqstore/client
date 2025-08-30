@@ -180,8 +180,8 @@ impl Fuseable for SearchEntry {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 pub struct DevData {
-  pub name: String,
+  pub name: Option<String>,
   pub id: String,
   pub github: String,
-  pub avatar_url: String,
+  pub avatar_url: Option<String>,
 }

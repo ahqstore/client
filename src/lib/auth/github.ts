@@ -36,7 +36,7 @@ export async function startLogin(auth: Auth) {
   toast(`Enter code: ${val.user_code}`, {
     cancel: {
       label: "Ok",
-      onClick: () => {},
+      onClick: () => { },
     },
     duration: 30_000,
   });
@@ -61,6 +61,8 @@ export async function startLogin(auth: Auth) {
     not_done += 1;
 
     if (response?.access_token != undefined) {
+      console.log(response);
+
       removeCode();
       clearInterval(time);
       if (await login(auth, response.access_token)) {

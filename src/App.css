@@ -236,7 +236,7 @@
 
     .ffp7eso:hover {
       background-color: color-mix(in srgb,
-          var(--win32-accent) 40%, white 100%) !important;
+          var(--win32-accent) 50%, white 80%) !important;
     }
   }
 }

@@ -8,12 +8,23 @@ import {
   DialogActions,
   Button,
 } from "@fluentui/react-components";
+import { useMemo } from "react";
 
 import { open } from "tauri-plugin-ahqstore-api"
 
 export const Disclaimer = () => {
+  const isOpen = useMemo(() => {
+    return Date.now() >= Number(localStorage.getItem("expireAgreed") || "0")
+  }, []);
+
   return (
-    <Dialog defaultOpen={true}>
+    <Dialog
+      defaultOpen={isOpen}
+      onOpenChange={() => {
+        // 30 days
+        localStorage.setItem("expireAgreed", String(Date.now() + 30 * 24 * 60 * 60 * 1000));
+      }}
+    >
       {/* <DialogTrigger disableButtonEnhancement>
         <></>
       </DialogTrigger> */}
@@ -22,7 +33,7 @@ export const Disclaimer = () => {
           <DialogTitle>Please be informed</DialogTitle>
           <DialogContent>
             <p>
-              AHQ Store distributes applications from the sources like
+              AHQ Store distributes applications from the sources such as
               <strong> Winget, FDroid, AppImageHub, AHQStore Repo </strong> this means that
               you should install the applications at your own discretion.
               Even though AHQ Store explicitly <strong>scans</strong> application with Windows Defender
@@ -35,8 +46,8 @@ export const Disclaimer = () => {
             <p className="mt-4">
               AHQ Store does not collect any data. No data is collected by
               AHQ Store whatsoever. Logging into an account is absolutely not
-              necessary or even required for the basic functionality with a few
-              exceptions (App Reporting, Issue Reporting)
+              necessary and not even required for the basic functionality with
+              a few exceptions (App Reporting, Issue Reporting)
             </p>
           </DialogContent>
           <DialogActions>

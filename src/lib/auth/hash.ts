@@ -1,16 +1,18 @@
-import { fetchAuthor } from "@/api/fetchApps";
-import { invoke } from "@tauri-apps/api/core";
+import { getDevData, hashUsername } from "tauri-plugin-ahqstore-api"
 
 export async function generateGHUserHash(username: string): Promise<string> {
-  if (username == "ahqsoftwares") return "1";
+  if (username == "ahqsoftwares") return "a:1";
 
-  const hash = await invoke<string>("hash_username", { username });
+  const hash = await hashUsername(username);
 
-  return hash;
+  return `a:${hash}`;
 }
 
+
 export async function verifyDevExists(hash: string) {
-  const resp = await fetchAuthor(hash).catch(() => undefined);
+  const resp = await getDevData(
+    hash
+  ).catch(() => undefined);
 
   return resp != undefined;
 }
