@@ -15,7 +15,12 @@ use tauri_plugin_updater::UpdaterExt;
 
 use crate::SHOULD_EXIT;
 
+use std::sync::Mutex;
+use std::thread;
+
 use super::create_window;
+
+pub static STARTED: Mutex<bool> = Mutex::new(false);
 
 pub fn setup(app: &mut App) -> tauri::Result<()> {
 //   #[cfg(windows)]
@@ -79,6 +84,17 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     use tauri_plugin_deep_link::DeepLinkExt;
     app.deep_link().register_all().expect("Unable to register");
   }
+  
+  thread::spawn(|| {
+    match STARTED.lock()  {
+      Ok(mut x) => {
+        *x = true
+      },
+      Err(mut x) => {
+        **x.get_mut() = true;
+      }
+    }
+  });
 
   println!("Building Tray Icon");
   TrayIconBuilder::with_id("main")

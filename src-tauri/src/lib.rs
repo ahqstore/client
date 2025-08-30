@@ -54,12 +54,23 @@ pub fn run() {
   #[cfg(desktop)]
   let app = app
     .plugin(tauri_plugin_single_instance::init(|app, _, _| {
-      // TODO: fix
       let app_c = app.clone();
       std::thread::spawn(move || {
         use crate::desktop::show_window;
 
-        show_window(&app_c);
+        let ready: bool = match crate::desktop::STARTED.lock()  {
+          Ok(x) => {
+            *x
+          },
+          Err(x) => {
+            **x.get_ref()
+          }
+        };
+
+        // Dont create a second window if the app is already working on it
+        if ready {
+          show_window(&app_c);
+        }
       });
     }));
     
