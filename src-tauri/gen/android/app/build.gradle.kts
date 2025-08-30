@@ -98,10 +98,15 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.1.1")
     //  For interop APIs with Material 3
     implementation("androidx.glance:glance-material3:1.1.1")
-  
+
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.material:material:1.12.0")
     testImplementation("junit:junit:4.13.2")
+
+    debugImplementation("androidx.compose.ui:ui-tooling")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 }
