@@ -12,6 +12,7 @@ import androidx.glance.ImageProvider
 import androidx.compose.ui.unit.dp
 import androidx.glance.action.ActionParameters
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.components.TitleBar
@@ -37,11 +38,12 @@ fun LibraryWidgetContent() {
                 TitleBar(
                     title = "Updates",
                     startIcon = ImageProvider(R.drawable.favicon),
+                    modifier = GlanceModifier.padding(horizontal = 4.dp, vertical = 2.dp),
                     actions = {
                         CircleIconButton(
                             onClick = actionRunCallback<AddButtonAction>(),
                             contentDescription = "Check",
-                            modifier = GlanceModifier.padding(8.dp),
+                            modifier = GlanceModifier.padding(8.dp).background(Color(255,255,255,255)),
                             imageProvider = ImageProvider(R.drawable.update)
                         )
                     }
@@ -50,7 +52,6 @@ fun LibraryWidgetContent() {
         ) {
             LazyColumn(
                 modifier = GlanceModifier.fillMaxWidth()
-                    .background(GlanceTheme.colors.surface)
             ) {
                 item {
                     Text("First")
