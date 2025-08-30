@@ -1,3 +1,5 @@
+package com.plugin.ahqstore
+
 //import android.content.Context
 //import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidget
