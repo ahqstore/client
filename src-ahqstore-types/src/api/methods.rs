@@ -25,10 +25,12 @@ pub struct GHRepoCommit {
 }
 
 pub enum OfficialManifestSource {
+  #[doc = "Official Community repository"]
   AHQStore,
 
   #[doc = "Third Party Manifest Repo Adapted for use"]
   WinGet,
+  #[doc = "Third Party Manifest Repo Adapted for use"]
   Linux,
   #[doc = "Third Party Manifest Repo Adapted for use"]
   FDroid,

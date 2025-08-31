@@ -41,12 +41,12 @@ pub struct InstallerOptionsWindows {
   ///
   /// [^1]: Only if you choose WindowsZip
   pub exec: Option<String>,
-  #[doc = "🎯 Introduced in v2.5\n\n"]
+  #[doc = "🎯 Introduced in v1\n\n"]
   /// The scope of the installer[^1]
   ///
   /// [^1]: Applicable for WindowsInstallerExe or WindowsZip only, WindowsInstallerMsi is treated as Machine
   pub scope: Option<WindowsInstallScope>,
-  #[doc = "🎯 Stable as of v2.5\n\n"]
+  #[doc = "🎯 Stable as of v3\n\n"]
   /// Args to pass to the custom exe installer[^1]
   ///
   /// [^1]: Only if you choose WindowsInstallerExe
