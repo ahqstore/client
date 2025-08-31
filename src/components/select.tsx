@@ -4,6 +4,7 @@ interface ConfigProps {
   title: string;
   description: string;
   Icon: typeof ChevronDown;
+  onClick?: () => void;
   children?: React.ReactNode;
   pointer?: boolean;
 }
@@ -15,11 +16,17 @@ export function ConfigSelect({
   description,
   Icon,
   children,
+  onClick,
   pointer
 }: ConfigProps) {
   return (
     <div
       className={`bg-accent dark:bg-neutral-content/10 animate w-full rounded-lg`}
+      onClick={() => {
+        if (onClick) {
+          onClick()
+        }
+      }}
     >
       <div
         className={`w-full flex ${pointer ? "cursor-pointer" : "cursor-default"} text-muted-content dark:text-foreground category p-3`}

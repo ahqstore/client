@@ -8,12 +8,14 @@ import { getDevData, getDevsApps, open } from "tauri-plugin-ahqstore-api"
 import type { DevData } from "src-ahqstore-types/pkg/ahqstore_types";
 import { ConfigSelect } from "@/components/select";
 
-import { Button } from "@fluentui/react-components"
+import { Dialog, DialogSurface, DialogTitle } from "@fluentui/react-components"
 import { generateGHUserHash } from "@/lib/auth/hash";
+import { ApplyForUpload } from "./applyApp";
 
 export default function DeveloperPage() {
   const auth = useAuth();
 
+  const [isOpen, setOpen] = useState(false);
   const [dev, setDD] = useState<DevData | null>(null);
   const [apps, setDA] = useState<string[] | null>(null);
   const [ready, setReady] = useState(false);
@@ -47,6 +49,20 @@ export default function DeveloperPage() {
         <h1 className="text-xl">Welcome, <strong className="text-foreground">{dev?.name}</strong></h1>
         <img className="rounded-full my-auto w-[1.25rem] h-[1.25rem]" src={dev?.avatar_url} />
       </div>
+
+      <Dialog
+        open={isOpen}
+        modalType="non-modal"
+        inertTrapFocus
+        onOpenChange={() =>
+          setOpen(false)
+        }
+      >
+        <DialogSurface>
+          <DialogTitle>Submit an AHQ Store Application</DialogTitle>
+          <ApplyForUpload />
+        </DialogSurface>
+      </Dialog>
 
       <Category
         title="Profile Details"
@@ -103,10 +119,11 @@ export default function DeveloperPage() {
         title="Publish"
         description="Publish your application at AHQ Store"
         Icon={PackagePlusIcon}
+        pointer
+        onClick={() =>
+          setOpen(true)
+        }
       >
-        <Button>
-          Begin
-        </Button>
       </ConfigSelect>
     </> : <div className="w-full h-full flex flex-col gap-4 text-center justify-center items-center">
       <span className="block loading loading-spinner w-[calc(var(--size-selector,0.25rem)*15)]"></span>
