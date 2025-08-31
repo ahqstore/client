@@ -143,7 +143,7 @@ export function ApplyForUpload() {
             }}
           />
 
-          {err != "" && <div role="alert" className="alert alert-warning alert-dash flex">
+          {err != "" && <div role="alert" className="alert alert-error alert-soft flex">
             {err == "Verifying..." && <ShowSpinner />}
             <span>{err}</span>
           </div>}
@@ -204,7 +204,7 @@ export function ApplyForUpload() {
       <p>
         Have a fabulous day ahead 👋!
       </p>
-      <div role="alert" className="alert alert-success alert-dash flex">
+      <div role="alert" className="alert alert-success alert-soft flex">
         <span>Tired of manually submitting apps and app updates? Learn to automate <span className="text-blue-700 dark:text-blue-400 cursor-pointer underline" onClick={() => open("https://ahqstore.github.io/guide/automate")}>by clicking here</span></span>
       </div>
     </>}
