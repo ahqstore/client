@@ -6,7 +6,8 @@ interface CategoryProps {
   title: string;
   description: string;
   Icon: typeof ChevronDown;
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  nearChevron?: React.ReactNode;
   openable?: boolean;
   normallyOpen?: boolean;
 }
@@ -18,6 +19,7 @@ export function Category({
   description,
   Icon,
   children,
+  nearChevron,
   openable = true,
   normallyOpen,
 }: CategoryProps) {
@@ -42,6 +44,9 @@ export function Category({
         <div className="ml-2 w-full">
           <h1 className="text-lg select-none">{title}</h1>
           <span className="select-none !text-foreground/80">{description}</span>
+        </div>
+        <div className="p-1 my-auto rounded-md">
+          {nearChevron}
         </div>
         <div className="chv p-1 my-auto rounded-md">
           {openable && <ChevronDown size="1.75em" style={open ? { rotate: "180deg" } : {}} />}
