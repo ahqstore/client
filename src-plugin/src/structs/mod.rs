@@ -45,7 +45,7 @@ impl<R: Runtime> Ahqstore<R> {
   pub async fn refresh(&self) -> crate::Result<()> {
     let mut lock = self.commits.lock().await;
 
-    *lock = async_runtime::block_on(async { get_all_commits(None).await })?;
+    *lock = get_all_commits(None).await?;
 
     Ok(())
   }

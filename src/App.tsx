@@ -1,4 +1,4 @@
-import { MenuDivider, MenuItem, MenuList } from "@fluentui/react-components";
+import { Dialog, DialogSurface, DialogTitle, MenuDivider, MenuItem, MenuList } from "@fluentui/react-components";
 import "./App.css";
 
 import { WindowTitlebar } from "./controls";
@@ -27,11 +27,17 @@ import { useExperiment } from "./lib/experiment";
 import { useHome } from "./lib/data";
 import { ApplicationView } from "./views/view";
 import { useMediaQuery } from "./hooks/use-media-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ApplyAsDeveloper } from "./views/developer/applySelf";
+import { initPluginDaemonService } from "./api/plugin";
 
 function App() {
+  initPluginDaemonService();
+
   const auth = useAuth();
   const experiment = useExperiment();
+
+  const [isOpen, setOpen] = useState(false);
 
   useEffect(() => {
     const zoom = localStorage.getItem("defZoom");
@@ -110,9 +116,11 @@ function App() {
                           auth.dev ? "Enabled" : "Register for developer mode"
                         }
                         style={{ background: "transparent" }}
-                        onClick={() =>
-                          open("https://github.com/ahqstore/repo_community")
-                        }
+                        onClick={() => {
+                          if (!auth.dev) {
+                            setOpen(true);
+                          }
+                        }}
                       >
                         Developer Mode
                       </MenuItem>
@@ -165,6 +173,19 @@ function App() {
         </WindowTitlebar>
       )}
 
+      <Dialog
+        open={isOpen}
+        modalType="non-modal"
+        inertTrapFocus
+        onOpenChange={() =>
+          setOpen(false)
+        }
+      >
+        <DialogSurface>
+          <DialogTitle>Apply as a developer</DialogTitle>
+          <ApplyAsDeveloper />
+        </DialogSurface>
+      </Dialog>
       {useHome() == undefined ? <Loading /> : <ApplicationView />}
     </>
   );

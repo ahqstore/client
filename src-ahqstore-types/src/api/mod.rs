@@ -183,12 +183,7 @@ pub struct DevData {
   pub name: Option<String>,
   pub id: String,
   pub github: String,
-  #[serde(default = "dummy_avatar")]
-  pub avatar_url: String,
+  pub avatar_url: Option<String>,
   #[serde(default)]
   pub verified: bool
-}
-
-fn dummy_avatar() -> String {
-  "https://ahqstore.github.io/logo.png".to_string()
 }

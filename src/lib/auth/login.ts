@@ -30,9 +30,11 @@ export async function login(auth: Auth, auth_tok: string): Promise<boolean> {
   }).then(async (d) => ({ ...d, ok: d.ok, data: await d.json() }));
 
   if (ok) {
+    const hash = await generateGHUserHash(data.login);
+
     auth.currentUser = {
       ...data,
-      dev: await verifyDevExists(await generateGHUserHash(data.login)),
+      dev: await verifyDevExists(hash),
     };
     auth.loggedIn = true;
 

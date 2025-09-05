@@ -1,5 +1,5 @@
 import { ConfigSelect } from "@/components/select";
-import { Switch } from "@fluentui/react-components";
+import { Label, Switch } from "@fluentui/react-components";
 
 import {
   Select,
@@ -9,14 +9,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { ZoomIn, Aperture, Moon, Sparkles } from "lucide-react";
+import { ZoomIn, Aperture, Moon, Sparkles, DatabaseBackup } from "lucide-react";
 
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart"
 import { platform } from "@tauri-apps/plugin-os";
 
-import { setScale } from "tauri-plugin-ahqstore-api"
+import { setScale, refreshCommit } from "tauri-plugin-ahqstore-api"
 import { setUITheme, ThemeContext, VibrantWindows } from "@/lib";
 import { Separator } from "@/components/ui/separator";
 import { Category } from "@/components/category";
@@ -124,8 +124,27 @@ export default function Settings() {
         }
       </ConfigSelect>}
 
+      <Separator />
+
+      <Label className="mr-auto !text-xl">Advanced</Label>
+
+      <ConfigSelect
+        title="Refetch Data"
+        description="Click this button to reload and refetch full data"
+        Icon={DatabaseBackup}
+        pointer
+        onClick={() => {
+          (async () => {
+            await refreshCommit();
+            window.location.reload();
+          })()
+        }}
+      >
+      </ConfigSelect>
 
       <Separator />
+
+      <Label className="mr-auto !text-xl">Attributions</Label>
 
       <Category
         title="About Us"
