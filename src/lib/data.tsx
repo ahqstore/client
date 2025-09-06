@@ -18,10 +18,18 @@ export function HomeProvider({ children }: { children: ReactNode }) {
   const [splash, setSplash] = useState<HomeInterface["splash"]>(undefined);
 
   useEffect(() => {
-    getHome().then((json) => {
-      setHome(json.home);
-      setSplash(json.splash);
-    });
+    console.log("Loading home...");
+
+    setTimeout(() => {
+      (async () => {
+        const json = await getHome();
+
+        setHome(json.home);
+        setSplash(json.splash);
+
+        console.log("Done");
+      })()
+    }, 1000);
   }, []);
 
   return (

@@ -51,6 +51,7 @@ export const items: {
   iconFilled: JSX.Element;
   iconMobile: JSX.Element;
   iconMobileFilled: JSX.Element;
+  active?: number[];
   hidden?: () => boolean;
 }[] = [
     {
@@ -63,6 +64,7 @@ export const items: {
           style={{ color: "var(--win32-accent)" }}
         />
       ),
+      active: [9, 10, 11],
       iconMobile: <LayoutGrid size="1.5em" />,
       iconMobileFilled: <LayoutGrid fill="currentcolor" size="1.5em" />,
     },
@@ -201,6 +203,15 @@ function GetJsx({ item }: Props) {
     case 7:
       return <Changelog />;
     case 8:
+      return <SettingsPage />;
+    case 9:
+      // Search
+      return <SettingsPage />;
+    case 10:
+      // AppList
+      return <SettingsPage />;
+    case 11:
+      // DevInfo
       return <SettingsPage />;
     default:
       return <>Not Found</>;

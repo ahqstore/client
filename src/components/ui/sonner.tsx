@@ -1,12 +1,13 @@
-import { useTheme } from "next-themes";
+import { useUITheme } from "@/lib";
+import { teamsLightTheme } from "@fluentui/react-components";
 import { Toaster as Sonner, ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const theme = useUITheme();
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={theme == teamsLightTheme ? "light" : "dark"}
       className="toaster group"
       toastOptions={{
         classNames: {

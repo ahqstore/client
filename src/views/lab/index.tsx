@@ -3,7 +3,7 @@ import { ConfigSelect } from "@/components/select";
 import { docs, setExperiment, useExperiments } from "@/lib/experiments";
 import { Button, Switch } from "@fluentui/react-components";
 
-import { FlaskRound, ListRestart } from "lucide-react";
+import { FlaskRound, ListRestart, ActivitySquareIcon } from "lucide-react";
 
 export default function LabPage() {
   const exp = useExperiments();
@@ -24,11 +24,25 @@ export default function LabPage() {
 
     <div className="w-full mt-2 h-auto flex flex-col justify-center items-center gap-2">
       <ConfigSelect
+        title={`Always show this tab`}
+        description={`Restart to notice the change`}
+        Icon={ActivitySquareIcon}
+      >
+        <Switch
+          // @ts-ignore
+          defaultChecked={localStorage.getItem("always-show-exp") == "true"}
+          onChange={async (_, data) => {
+            localStorage.setItem("always-show-exp", String(data.checked));
+          }}
+        />
+      </ConfigSelect>
+
+      <ConfigSelect
         title={`Restart`}
         description={`Restart to notice any changes done from here`}
         Icon={ListRestart}
       >
-        <Button onClick={() => window.location.reload()}>Restart</Button>
+        <Button size="medium" appearance="subtle" onClick={() => window.location.reload()}>Restart</Button>
       </ConfigSelect>
 
       <span className="text-lg">Configuration</span>

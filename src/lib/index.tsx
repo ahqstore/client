@@ -20,7 +20,11 @@ export const VibrantWindows = createContext(false);
 export default function fnTheme(windows: boolean, micaApplied: (_: boolean) => void, alwaysVibrant?: boolean) {
   const dark = (localStorage.getItem("dark") || def) == "true";
 
-  document.querySelector("html")?.classList.toggle("dark", dark);
+  if (dark) {
+    document.querySelector("html")?.classList.add("dark");
+  } else {
+    document.querySelector("html")?.classList.remove("dark");
+  }
 
   if (alwaysVibrant || (windows && ((def == "true") == dark))) {
     document.querySelector("html")?.classList.remove("not-win");

@@ -220,6 +220,11 @@
         var(--win32-accent) 40%, white 100%) !important;
   }
 
+  /* Toast */
+  [data-sonner-toast][data-styled=true] {
+    @apply !bg-[var(--colorNeutralBackground1)];
+  }
+
   /* Modal UI */
   .r1u3t6p6 {
     @apply !bg-[var(--colorNeutralBackground1)]/90;
