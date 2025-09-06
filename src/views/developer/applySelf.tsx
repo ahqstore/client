@@ -31,7 +31,7 @@ export function ApplyAsDeveloper({ edit = false }: { edit?: boolean }) {
 
   useEffect(() => {
     setTimeout(() => {
-      if (edit) {
+      if (!edit) {
         setStep(PageState.TOS);
       } else {
         setStep(PageState.Details);
