@@ -16,11 +16,14 @@ use tauri_plugin_updater::UpdaterExt;
 use crate::SHOULD_EXIT;
 
 use std::sync::Mutex;
+use std::sync::mpsc::{Sender, channel};
 use std::thread;
 
 use super::create_window;
 
-pub static STARTED: Mutex<bool> = Mutex::new(false);
+pub static TX: Mutex<Option<Sender<()>>> = Mutex::new(None);
+
+mod daemon;
 
 pub fn setup(app: &mut App) -> tauri::Result<()> {
   //   #[cfg(windows)]
@@ -90,10 +93,10 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     .tooltip("AHQ Store is running")
     .icon(Image::from_bytes(include_bytes!("../../icons/icon.png"))?)
     .show_menu_on_left_click(false)
-    .on_tray_icon_event(move |app, event| match event {
+    .on_tray_icon_event(move |_, event| match event {
       TrayIconEvent::Click { button, .. } => {
         if let MouseButton::Left = button {
-          show_window(app.app_handle());
+          show_window();
         }
       }
       _ => {}
@@ -141,7 +144,7 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
           });
         }
         "show" => {
-          show_window(app);
+          show_window();
         }
         _ => {}
       }
@@ -149,18 +152,41 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     .build(app)
     .expect("Failed to build tray icon");
 
+  let (tx, rx) = channel::<()>();
+
+  let handle = app.handle().clone();
+
   // Set STARTED as the last step
-  thread::spawn(|| match STARTED.lock() {
-    Ok(mut x) => *x = true,
-    Err(mut x) => {
-      **x.get_mut() = true;
+  thread::spawn(move || {
+    match TX.lock() {
+      Ok(mut x) => *x = Some(tx),
+      Err(mut x) => {
+        **x.get_mut() = Some(tx);
+      }
     }
+
+    daemon::run_daemon(handle, rx);
   });
 
   Ok(())
 }
 
-pub(crate) fn show_window(app: &tauri::AppHandle) {
+pub(crate) fn show_window() {
+  match TX.lock() {
+    Ok(x) => {
+      if let Some(x) = x.as_ref() {
+        _ = x.send(());
+      }
+    }
+    Err(x) => {
+      if let Some(x) = &**x.get_ref() {
+        _ = x.send(());
+      }
+    }
+  }
+}
+
+pub(crate) fn internal_show_window(app: &tauri::AppHandle) {
   if let Some(x) = app.get_webview_window("main") {
     _ = x.show();
     _ = x.set_focus();

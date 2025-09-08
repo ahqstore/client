@@ -56,20 +56,12 @@ pub fn run() {
     .on_page_load(move |c, _| c.eval(accent).expect("Unable to evaluate script"));
 
   #[cfg(desktop)]
-  let app = app.plugin(tauri_plugin_single_instance::init(|app, _, _| {
-    let app_c = app.clone();
+  let app = app.plugin(tauri_plugin_single_instance::init(|_, _, _| {
     std::thread::spawn(move || {
       use crate::desktop::show_window;
-
-      let ready: bool = match crate::desktop::STARTED.lock() {
-        Ok(x) => *x,
-        Err(x) => **x.get_ref(),
-      };
-
-      // Dont create a second window if the app is already working on it
-      if ready {
-        show_window(&app_c);
-      }
+      
+      // Lazy Working function
+      show_window();
     });
   }));
 
@@ -78,19 +70,19 @@ pub fn run() {
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_ahqstore::init())
     .plugin(tauri_plugin_deep_link::init())
-    .setup(|_app| {
+    .setup(|app| {
       #[cfg(desktop)]
       println!("[INFO] Running Desktop Setup");
       #[cfg(desktop)]
-      desktop::setup(_app)?;
+      desktop::setup(app)?;
 
       #[cfg(desktop)]
-      _app
+      app
         .handle()
         .plugin(tauri_plugin_window_state::Builder::default().build())?;
 
       #[cfg(mobile)]
-      create_window(_app);
+      create_window(app);
 
       println!("[INFO] Running");
       Ok(())
