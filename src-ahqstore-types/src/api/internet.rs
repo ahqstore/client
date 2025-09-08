@@ -62,7 +62,18 @@ pub async fn get_all_commits(token: Option<String>) -> Result<Commits> {
 
   Ok(Commits {
     ahqstore,
-    #[cfg(feature = "js")]
+    #[cfg(
+      any(
+        feature = "js",
+        not(
+          any(
+            windows,
+            target_os = "android",
+            target_os = "linux"
+          )
+        )
+      )
+    )]
     alt: "".to_string(),
     #[cfg(windows)]
     alt: winget,
