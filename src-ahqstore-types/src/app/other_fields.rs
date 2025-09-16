@@ -50,6 +50,7 @@ impl Display for InstallerFormat {
         InstallerFormat::WindowsZip => "Windows Zip",
         InstallerFormat::WindowsInstallerExe => "Windows Installer Exe",
         InstallerFormat::WindowsInstallerMsi => "Windows Installer Msi",
+        InstallerFormat::WindowsAHQDB => "Windows AHQDB Installer",
         InstallerFormat::WindowsUWPMsix => "UWP Windows Msix Package",
         InstallerFormat::LinuxAppImage => "Linux App Image",
         InstallerFormat::AndroidApkZip => "Universal Android Apk Zip Package",

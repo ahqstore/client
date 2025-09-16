@@ -208,6 +208,7 @@ impl AHQStoreApplication {
       InstallerFormat::WindowsZip
       | InstallerFormat::WindowsInstallerExe
       | InstallerFormat::WindowsInstallerMsi
+      | InstallerFormat::WindowsAHQDB
       | InstallerFormat::WindowsUWPMsix => Some(&url),
       _ => None,
     }
@@ -225,6 +226,7 @@ impl AHQStoreApplication {
       InstallerFormat::WindowsZip => Some(".zip"),
       InstallerFormat::WindowsInstallerExe => Some(".exe"),
       InstallerFormat::WindowsInstallerMsi => Some(".msi"),
+      InstallerFormat::WindowsAHQDB => Some(".ahqdb"),
       InstallerFormat::WindowsUWPMsix => Some(".msix"),
       _ => None,
     }
