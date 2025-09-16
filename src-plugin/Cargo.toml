@@ -25,7 +25,7 @@ reqwest = { version = "0.12", default-features = false, features = [
 tokio = { version = "1", features = ["time", "sync"] }
 
 [target.'cfg(windows)'.dependencies]
-msi = "0.8"
+msi = "0.9"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 lixploy = { git = "https://github.com/ahqstore/lixploy" }

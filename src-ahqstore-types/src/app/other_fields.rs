@@ -31,6 +31,9 @@ pub enum InstallerFormat {
   #[doc = "🔬 Planned in AHQ Store NEO\n\n"]
   WindowsUWPMsix,
 
+  #[doc = "🔬 Planned in AHQ Store NEO\n\n"]
+  WindowsAHQDB,
+
   #[doc = "🎯 Stable as of v2\n\n"]
   LinuxAppImage,
 
