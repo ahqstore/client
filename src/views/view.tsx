@@ -157,7 +157,7 @@ export function ApplicationView() {
 
   const desktop = useMediaQuery("(min-width: 640px)");
 
-  const ui = useMemo(() => <GetJsx item={item} />, [item]);
+  const ui = useMemo(() => <GetJsx item={item} setItem={setItem} />, [item, setItem]);
 
   if (desktop) {
     return (
@@ -186,12 +186,13 @@ export function ApplicationView() {
 
 interface Props {
   item: number;
+  setItem: React.Dispatch<React.SetStateAction<number>>;
 }
 
-function GetJsx({ item }: Props) {
+function GetJsx({ item, setItem }: Props) {
   switch (item) {
     case 0:
-      return <AppsHome />;
+      return <AppsHome set={(s) => setItem(s)} />;
     case 1:
       return <LibraryPage />;
     case 2:
