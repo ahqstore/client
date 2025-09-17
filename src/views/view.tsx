@@ -43,6 +43,8 @@ import LibraryPage from "./library";
 import DeveloperPage from "./developer";
 import LabPage from "./lab";
 import { Disclaimer } from "./disclaimer";
+import Application from "./app";
+import SearchInterface from "./search";
 
 export const items: {
   name: string;
@@ -64,7 +66,7 @@ export const items: {
           style={{ color: "var(--win32-accent)" }}
         />
       ),
-      active: [9, 10, 11],
+      active: [9, 10, 11, 12],
       iconMobile: <LayoutGrid size="1.5em" />,
       iconMobileFilled: <LayoutGrid fill="currentcolor" size="1.5em" />,
     },
@@ -207,13 +209,16 @@ function GetJsx({ item, setItem }: Props) {
       return <SettingsPage />;
     case 9:
       // Search
-      return <SettingsPage />;
+      return <SearchInterface set={setItem} />;
     case 10:
       // AppList
-      return <SettingsPage />;
+      return <Application />;
     case 11:
       // DevInfo
       return <SettingsPage />;
+    case 12:
+      // CategoryView
+      return <Application />
     default:
       return <>Not Found</>;
   }
@@ -230,24 +235,27 @@ function BottomNavigation({
     <div className="dock dock-xl bg-neutral/30" style={{ position: "initial" }}>
       {items
         .filter((s) => !(s.hidden && s.hidden()))
-        .map((s) => (
-          <button
+        .map((s) => {
+          const isActive = s.id == item || (s.active && s.active.includes(item));
+
+          return <button
             key={`${s.id}`}
             className={
-              s.id === item ? "dock-active transition-all" : "transition-all"
+              isActive ? "dock-active transition-all" : "transition-all"
             }
             onClick={() => setItem(s.id)}
           >
             {platform() == "android"
-              ? s.id === item
+              ? isActive
                 ? s.iconMobileFilled
                 : s.iconMobile
-              : s.id === item
+              : isActive
                 ? s.iconFilled
                 : s.icon}
             <span className="dock-label">{s.name}</span>
           </button>
-        ))}
-    </div>
+        })
+      }
+    </div >
   );
 }

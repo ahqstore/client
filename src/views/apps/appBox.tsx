@@ -38,19 +38,19 @@ export function AppBox({ appId, set }: { appId: string, set: (_: number) => void
   }, [appId]);
 
   if (application == "loading" || img == undefined) {
-    return <div className="w-full h-full flex items-center justify-centre text-center">
+    return <div className="w-full h-full flex items-center justify-center text-center">
       <ShowSpinner />
     </div>;
   }
 
-  return <div className="w-full h-full flex gap-2" onClick={() => {
+  return <div className="w-full h-full flex flex-col sm:flex-row sm:gap-2" onClick={() => {
     openApplicationState.data = appId;
     set(10);
   }}>
-    <img src={img} />
-    <div className="w-full flex flex-col overflow-hidden gap-2">
-      <h1 className="text-xl font-bold font-sans">{application.appDisplayName}</h1>
-      <h2>{application.description || "Click to view more"}</h2>
+    <img className="mx-auto sm:m-0 size-16 sm:size-auto" src={img} />
+    <div className="w-full h-full flex flex-col overflow-hidden gap-2">
+      <h1 className="mt-auto mx-auto sm:m-0 text-xl font-bold font-sans">{application.appDisplayName}</h1>
+      <h2 className="hidden sm:block">{application.description || "Click to view more"}</h2>
     </div>
   </div>
 }
