@@ -23,6 +23,9 @@
         },
         {
           "url": "https://github.com/login/*"
+        },
+        {
+          "url": "https://f-droid.org/repo/*"
         }
       ]
     }
