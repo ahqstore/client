@@ -66,27 +66,11 @@ export default function SearchInterface({ set }: { set: (_: number) => void }) {
           <ShowSpinner />
         </div>
         :
-        <div className="w-full h-full flex flex-col">
-          <div className="w-full h-auto search-results">
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
-            <DesktopVerticalPanel appId="1" set={set} />
+        <div className="w-full h-full flex flex-col overflow-y-scroll">
+          <div className="w-full search-results">
+            {searchData.map((appId) => (
+              <DesktopVerticalPanel key={appId} appId={appId} set={set} />
+            ))}
           </div>
         </div>
       }

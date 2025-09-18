@@ -1,8 +1,7 @@
 /* Mobile Version */
 /* TODO: Make it better */
 .search-results {
-  @apply grid gap-8;
-  @apply overflow-y-scroll overflow-x-hidden;
+  @apply grid gap-8 mb-32;
 
   grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
 }
