@@ -30,7 +30,7 @@ import {
   Code2Icon,
 } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NavigationSidebar from "./nav";
 import { useExperiment } from "@/lib/experiment";
 import { useAuth } from "@/lib/auth/provider";
@@ -156,10 +156,27 @@ export const items: {
 
 export function ApplicationView() {
   const [item, setItem] = useState(0);
+  const [mTop, setmtop] = useState(0);
+  const [mBot, setmBot] = useState(0);
 
   const desktop = useMediaQuery("(min-width: 640px)");
 
   const ui = useMemo(() => <GetJsx item={item} setItem={setItem} />, [item, setItem]);
+
+  const setMargins = () => {
+    // @ts-expect-error This is a custom fed data
+    if (window.topMargin) {
+      // @ts-expect-error This is a custom fed data
+      setmtop(window.topMargin);
+      // @ts-expect-error This is a custom fed data
+      setmBot(window.bottomMargin);
+    }
+  };
+
+  useEffect(() => {
+    setMargins();
+    setInterval(() => { setMargins() }, 5000);
+  }, []);
 
   if (desktop) {
     return (
@@ -176,13 +193,13 @@ export function ApplicationView() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden">
+    <div style={{ marginTop: mTop, marginBottom: mBot }} className="w-full h-full flex flex-col overflow-hidden" >
       <Disclaimer />
       <div className="h-full w-full flex flex-col space-y-2 p-2 overflow-scroll">
         {ui}
       </div>
       <BottomNavigation item={item} setItem={setItem} />
-    </div>
+    </div >
   );
 }
 
