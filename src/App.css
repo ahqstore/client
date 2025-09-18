@@ -10,6 +10,8 @@
 @import "./views/apps/app.css";
 @import "./views/apps/apps.css";
 
+@import "./views/search/search.css";
+
 /* Views */
 @import "./views/view.css";
 
