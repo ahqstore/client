@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react"
-import { getApp, getAppAsset } from "tauri-plugin-ahqstore-api";
 import ShowSpinner from "../spinner";
 import { AHQStoreApplication } from "src-ahqstore-types/pkg/ahqstore_types";
-import { getKeyFromCache, setKeyToCache } from "@/data/appCache";
 import { openApplicationState } from "@/data/implementations/appView";
+import { getAppWrapped } from "@/api/fetchApps";
 
 export function AppBox({ appId, set }: { appId: string, set: (_: number) => void }) {
   const [application, setApp] = useState<"loading" | AHQStoreApplication>("loading")
@@ -13,27 +12,10 @@ export function AppBox({ appId, set }: { appId: string, set: (_: number) => void
     (async () => {
       setApp("loading");
 
-      const data = await getKeyFromCache(appId);
+      const [a, img] = await getAppWrapped(appId);
 
-      if (data) {
-        setApp(data[0]);
-        setImg(data[1]);
-        return;
-      }
-
-      const [app, img] = await Promise.all([
-        getApp(appId),
-        getAppAsset(appId, "0")
-      ]);
-
-      setApp(app);
-
-      const blob = new Blob([img as unknown as any]);
-      const uri = URL.createObjectURL(blob);
-
-      setImg(uri);
-
-      await setKeyToCache(appId, [app, uri]);
+      setApp(a);
+      setImg(img);
     })()
   }, [appId]);
 
