@@ -14,7 +14,7 @@ use tauri::{command, AppHandle, Manager, Runtime};
 use crate::models::*;
 use crate::AhqstoreExt;
 
-use ahqstore_types::{internet, search, search::RespSearchEntry};
+use ahqstore_types::{internet, search};
 
 #[cfg(desktop)]
 use tauri::{
@@ -61,8 +61,8 @@ pub(crate) async fn refresh_commit(app: AppHandle) {
 }
 
 #[command(async)]
-pub(crate) async fn get_all_search(app: AppHandle, query: &str) -> Result<Vec<RespSearchEntry>> {
-  Ok(search::get_search(Some(&*app.ahqstore().commits.read().await), query).await?)
+pub(crate) async fn get_all_search(app: AppHandle, query: &str) -> Result<Vec<String>> {
+  Ok(search::get_search(&*app.ahqstore().commits.read().await, query).await?)
 }
 
 #[command(async)]

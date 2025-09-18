@@ -58,13 +58,14 @@ dependencies = [
 
 [[package]]
 name = "ahqstore-types"
-version = "3.17.2"
+version = "3.17.3"
 dependencies = [
  "anyhow",
  "fuse-rust",
  "reqwest",
  "serde",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]

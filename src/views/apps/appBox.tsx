@@ -29,9 +29,9 @@ export function AppBox({ appId, set }: { appId: string, set: (_: number) => void
     openApplicationState.data = appId;
     set(10);
   }}>
-    <img className="mx-auto sm:m-0 size-16 sm:size-auto" src={img} />
+    <img className="mx-auto sm:m-0 size-32 sm:size-auto border border-accent/30 sm:border-none dark:border-neutral-content/30 rounded-xl" src={img} />
     <div className="w-full h-full flex flex-col overflow-hidden gap-2">
-      <h1 className="mt-auto mx-auto sm:m-0 text-xl font-bold font-sans">{application.appDisplayName}</h1>
+      <h1 className="mt-auto mx-auto sm:m-0 text-sm sm:text-lg md:text-xl font-medium sm:font-bold font-sans">{application.appDisplayName}</h1>
       <h2 className="hidden sm:block">{application.description || "Click to view more"}</h2>
     </div>
   </div>

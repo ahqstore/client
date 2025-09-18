@@ -38,6 +38,7 @@ export function AppsHome({ set }: { set: (_: number) => void }) {
                 placeholder="Search for apps, games, and more"
                 className="w-full py-3 pl-9 pr-3 bg-primary/10 rounded-xl border border-border focus:outline-none focus:ring-1 focus:ring-muted transition duration-300"
                 ref={inputRef}
+                minLength={3}
               />
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
             </form>
@@ -52,6 +53,12 @@ export function AppsHome({ set }: { set: (_: number) => void }) {
                   className="hero"
                   style={{
                     background: `url("${splash.hero.background}") center/cover`,
+                  }}
+                  onClick={() => {
+                    if (!isTablet) {
+                      openApplicationState.data = splash.hero.appId;
+                      set(10);
+                    }
                   }}
                 >
                   <div></div>

@@ -7,6 +7,7 @@ use std::{
   sync::LazyLock,
   time::{SystemTime, UNIX_EPOCH},
 };
+use tokio::sync::{RwLock, RwLockReadGuard};
 
 fn now() -> u64 {
   SystemTime::now()
@@ -17,31 +18,26 @@ fn now() -> u64 {
 
 struct SCache {
   e: Vec<SearchEntry>,
-  t: u64,
+  commit: Commits,
 }
 
-static mut SEARCH: Option<SCache> = None;
+static SEARCH: LazyLock<RwLock<Option<SCache>>> = LazyLock::new(|| RwLock::new(None));
 static FUSE: LazyLock<Fuse> = LazyLock::new(|| Fuse::default());
 
-fn get_search_inner() -> Option<&'static Vec<SearchEntry>> {
-  let search = unsafe {
-    let addr = addr_of!(SEARCH);
-    let addr = &*addr;
+// async fn get_search_inner(commit: &Commits) -> Option<RwLockReadGuard<'static, Option<SCache>>> {
+//   let search = SEARCH.read().await;
+//   let search_ref = search.as_ref();
 
-    let addr = addr.as_ref();
-    addr
-  };
+//   let Some(x) = search_ref else {
+//     return None;
+//   };
 
-  let Some(x) = search else {
-    return None;
-  };
+//   if &x.commit == commit {
+//     return Some(search);
+//   }
 
-  if x.t > now() {
-    return Some(&x.e);
-  }
-
-  return None;
-}
+//   return None;
+// }
 
 #[derive(Debug)]
 pub enum RespSearchEntry {
@@ -81,39 +77,62 @@ impl Serialize for RespSearchEntry {
   }
 }
 
-pub async fn get_search(commit: Option<&Commits>, query: &str) -> Result<Vec<RespSearchEntry>> {
-  let search = get_search_inner();
+/// Responds with ids of applications selected
+/// Upto 500 results at a time
+pub async fn get_search(commit: &Commits, query: &str) -> Result<Vec<String>> {
+  let data = SEARCH.read().await;
+  let s_ref = data.as_ref();
 
-  let search = if search.is_none() {
-    let commit = if commit.is_none() {
-      &get_all_commits(None).await?
-    } else {
-      commit.unwrap()
-    };
+  let mut need_to_dwnl = false;
 
-    let search = get_all_search(commit).await?;
-
-    let addr = unsafe { &mut *addr_of_mut!(SEARCH) };
-    *addr = Some(SCache {
-      e: search,
-      t: now() + 6 * 60,
-    });
-
-    get_search_inner().unwrap()
+  if let Some(x) = s_ref {
+    if &x.commit != commit {
+      need_to_dwnl = true;
+    }
   } else {
-    search.unwrap()
-  };
-
-  let mut res = vec![];
-
-  for val in FUSE.search_text_in_fuse_list(query, search) {
-    res.push(RespSearchEntry::Static(&search[val.index]));
+    need_to_dwnl = true;
   }
 
-  // #[cfg(any(feature = "all_platforms", target_os = "linux"))]
-  // for val in linux::search(query).await.context("")? {
-  //   res.push(RespSearchEntry::Owned(val));
-  // }
+  // Drop read handle
+  drop(data);
+
+  if need_to_dwnl {
+    let search = get_all_search(commit).await?;
+
+    let mut s = SEARCH.write().await;
+    *s = Some(SCache {
+      e: search,
+      commit: commit.clone()
+    });
+
+    // Drop write handle
+    drop(s);
+  }
+
+  let search_obj: RwLockReadGuard<'static, Option<SCache>> = SEARCH.read().await;
+  let search = search_obj.as_ref();
+  let search: &[SearchEntry] = &search.unwrap().e;
+
+
+  let mut res = vec![];
+  let mut len: usize = 0;
+
+  let query_casted: &'static str = unsafe { std::mem::transmute(query) };
+  let search_casted: &'static [SearchEntry] = unsafe { std::mem::transmute(search) };
+
+  let result = tokio::task::spawn_blocking(|| {
+    FUSE.search_text_in_fuse_list(query_casted, search_casted)
+  }).await?;
+
+  for val in result {
+    if len < 500 {
+      res.push(search[val.index].id.clone());
+    } else {
+      break;
+    }
+
+    len += 1;
+  }
 
   Ok(res)
 }

@@ -28,8 +28,8 @@
 .home_apps>div:nth-child(2)>div {
   @apply break-inside-avoid rounded-xl p-4 cursor-pointer transition-all;
 
-  @apply bg-accent/15 dark:bg-neutral-content/15 hover:dark:bg-neutral-content/10;
-  @apply h-32;
+  @apply sm:bg-accent/15 dark:sm:bg-neutral-content/15 hover:dark:sm:bg-neutral-content/10;
+  @apply h-48 sm:h-32;
 }
 
 @media (min-width: 50rem) {
