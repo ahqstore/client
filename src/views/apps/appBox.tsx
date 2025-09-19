@@ -25,14 +25,14 @@ export function AppBox({ appId, set }: { appId: string, set: (_: number) => void
     </div>;
   }
 
-  return <div className="w-full h-full flex flex-col sm:flex-row sm:gap-2" onClick={() => {
+  return <div className="w-full h-full flex gap-1 sm:gap-2" onClick={() => {
     openApplicationState.data = appId;
     set(10);
   }}>
-    <img className="mx-auto sm:m-0 size-32 sm:size-auto border border-accent/30 sm:border-none dark:border-neutral-content/30 rounded-xl" src={img} />
-    <div className="w-full h-full flex flex-col overflow-hidden gap-2">
-      <h1 className="mt-auto mx-auto sm:m-0 text-sm sm:text-lg md:text-xl font-medium sm:font-bold font-sans">{application.appDisplayName}</h1>
-      <h2 className="hidden sm:block">{application.description || "Click to view more"}</h2>
+    <img className="m-0 size-auto border-none rounded-xl" src={img} />
+    <div className="w-full h-full flex flex-col overflow-hidden gap-1 sm:gap-2">
+      <h1 className="mt-1 sm:mt-2 sm:mb-1 mr-auto sm:m-0 text-sm sm:text-lg md:text-xl font-medium sm:font-bold font-sans">{application.appDisplayName}</h1>
+      <h2 className="overflow-hidden line-clamp-1 sm:line-clamp-2">{application.description || "Click to view more"}</h2>
     </div>
   </div>
 }
