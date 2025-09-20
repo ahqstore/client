@@ -14,11 +14,7 @@
 }
 
 .home_apps>div:nth-child(1) .all {
-  @apply flex text-sm ml-auto px-2 py-1 rounded-md cursor-pointer;
-
-  background: color-mix(in srgb,
-      var(--color-neutral-content) 10%,
-      var(--win32-accent) 5%) !important;
+  @apply ml-auto p-1 bg-accent/5 dark:bg-neutral-content/5 rounded-full cursor-pointer;
 }
 
 .home_apps>div:nth-child(2) {

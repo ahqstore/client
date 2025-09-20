@@ -1,4 +1,6 @@
-use tauri::webview::WebviewWindowBuilder;
+use std::sync::LazyLock;
+use tauri::async_runtime::Mutex;
+use tauri::webview::{WebviewWindow, WebviewWindowBuilder};
 
 #[cfg(desktop)]
 use tauri::utils::config::WindowEffectsConfig;
@@ -9,6 +11,9 @@ use tauri::Manager;
 
 #[cfg(desktop)]
 mod desktop;
+
+#[cfg(desktop)]
+mod plugin;
 
 pub static SHOULD_EXIT: i32 = 20;
 
@@ -59,7 +64,7 @@ pub fn run() {
   let app = app.plugin(tauri_plugin_single_instance::init(|_, _, _| {
     std::thread::spawn(move || {
       use crate::desktop::show_window;
-      
+
       // Lazy Working function
       show_window();
     });
@@ -87,6 +92,75 @@ pub fn run() {
       println!("[INFO] Running");
       Ok(())
     })
+    .register_uri_scheme_protocol("ahqstoreplugin", |_ctx, request| {
+      use tauri::http::Response;
+
+      let _hwnd = _ctx.app_handle();
+
+      let uri = request.uri();
+      let path = uri.path();
+
+      let _pt1 = path.get(1..=5).unwrap_or("");
+      let _plugin_id = path.get(6..).unwrap_or("");
+
+
+      let mut html = "".to_string();
+
+      #[cfg(desktop)]
+      match _pt1 {
+        "conf/" => {
+          html = plugin::get_html(_hwnd, _plugin_id, true);
+        }
+        "view/" => {
+          html = plugin::get_html(_hwnd, _plugin_id, false);
+        }
+        perm => {
+          if _ctx.webview_label() == "main" {
+            match perm {
+              "meta/" => {
+                html = plugin::get_meta(_hwnd, _plugin_id);
+              }
+              "scri/" => {
+                html = plugin::get_script(_hwnd, _plugin_id, "main.js");
+              }
+              "sear/" => {
+                html = plugin::get_script(_hwnd, _plugin_id, "search.js");
+              }
+              "apps/" => {
+                html = plugin::get_script(_hwnd, _plugin_id, "getApp.js");
+              }
+              "plug/" => {
+                html = plugin::get_plugin_names(_hwnd);
+              }
+              "inst/" => {
+                let (id, path) = _plugin_id.split_once("}::{").unwrap_or(("", ""));
+
+                if let Some(_) = plugin::install_plugin(_hwnd, id, path) {
+                  html = "OK".to_string();
+                } else {
+                  html = "NOK".to_string();
+                }
+              }
+              _ => {}
+            }
+          }
+        }
+      }
+
+      if &html == "" {
+        Response::builder()
+          .status(404)
+          .body("Not Found".to_string().into_bytes())
+          .unwrap()
+      } else {
+        Response::builder()
+          .status(200)
+          .header("Content-Type", "text/html")
+          .body(html.into_bytes())
+          .unwrap()
+      }
+    })
+    .invoke_handler(tauri::generate_handler![open_plugin])
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
 
@@ -100,6 +174,60 @@ pub fn run() {
     }
     _ => {}
   });
+}
+
+static PLOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+#[tauri::command]
+async fn open_plugin(app: WebviewWindow, plugin: String, title: String, settings: bool) {
+  let lock = PLOCK.lock().await;
+
+  if app.label() != "main" {
+    return;
+  }
+
+  #[cfg(desktop)]
+  {
+    use tauri::Url;
+
+    let label = if settings {
+      format!("settings-plugin-{plugin}")
+    } else {
+      format!("plugin-{plugin}")
+    };
+
+    let url = if settings {
+      format!("conf/{plugin}")
+    } else {
+      format!("view/{plugin}")
+    };
+
+    // Ignore errors
+    _ = WebviewWindowBuilder::new(
+      &app,
+      label,
+      (||{
+        #[cfg(windows)]
+        return tauri::WebviewUrl::CustomProtocol(Url::parse(
+          format!("http://ahqstoreplugin.localhost/{url}").as_str()
+        ).unwrap());
+
+        #[cfg(not(windows))]
+        return tauri::WebviewUrl::CustomProtocol(Url::parse(
+          format!("ahqstoreplugin://{url}").as_str()
+        ).unwrap());
+      })()
+    )
+    .initialization_script(include_str!("./init.js"))
+    .min_inner_size(348.0, 700.0)
+    .inner_size(1024.0, 760.0)
+    .resizable(true)
+    .title(title)
+    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
+    .build();
+  }
+
+  drop(lock);
 }
 
 pub(crate) fn create_window<T: Manager<R>, R: tauri::Runtime>(app: &T) {

@@ -13,10 +13,10 @@ import {
   LibraryFilled,
   WindowDevToolsFilled,
   WindowDevToolsRegular,
-  MegaphoneLoudRegular,
-  MegaphoneLoudFilled,
   ToolboxRegular,
   ToolboxFilled,
+  PlugConnectedSettingsRegular,
+  PlugConnectedSettingsFilled
 } from "@fluentui/react-icons";
 
 import { platform } from "@tauri-apps/plugin-os";
@@ -37,7 +37,6 @@ import { useAuth } from "@/lib/auth/provider";
 
 import { AppsHome } from "./apps";
 
-import Changelog from "./changelogs";
 import SettingsPage from "./settings";
 import LibraryPage from "./library";
 import DeveloperPage from "./developer";
@@ -45,6 +44,8 @@ import LabPage from "./lab";
 import { Disclaimer } from "./disclaimer";
 import Application from "./app";
 import SearchInterface from "./search";
+import { useExperiments } from "@/lib/experiments";
+import PluginPage from "./plugins";
 
 export const items: {
   name: string;
@@ -98,6 +99,20 @@ export const items: {
     //   iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
     // },
     {
+      name: "Plugins",
+      id: 800,
+      hidden: () => (platform() == "android") || (useExperiments().plugins != true),
+      icon: <PlugConnectedSettingsRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <PlugConnectedSettingsFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <ToolboxRegular className="size-[1.5em]" />,
+      iconMobileFilled: <ToolboxFilled className="size-[1.5em]" />,
+    },
+    {
       name: "Developer",
       id: 3,
       hidden: () => !(useAuth()?.dev || false),
@@ -124,20 +139,6 @@ export const items: {
       ),
       iconMobile: <Code2Icon className="size-[1.5em]" />,
       iconMobileFilled: <Code2Icon className="size-[1.5em]" />,
-    },
-    {
-      name: "Updates",
-      id: 7,
-      hidden: () => !useMediaQuery("(min-width: 640px)"),
-      icon: <MegaphoneLoudRegular className="size-[1.5em]" />,
-      iconFilled: (
-        <MegaphoneLoudFilled
-          className="size-[1.5em]"
-          style={{ color: "var(--win32-accent)" }}
-        />
-      ),
-      iconMobile: <Settings size="1.5em" />,
-      iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
     },
     {
       name: "Settings",
@@ -220,8 +221,6 @@ function GetJsx({ item, setItem }: Props) {
       return <DeveloperPage />;
     case 6:
       return <LabPage />;
-    case 7:
-      return <Changelog />;
     case 8:
       return <SettingsPage />;
     case 9:
@@ -236,6 +235,8 @@ function GetJsx({ item, setItem }: Props) {
     case 12:
       // CategoryView
       return <Application />
+    case 800:
+      return <PluginPage />
     default:
       return <>Not Found</>;
   }

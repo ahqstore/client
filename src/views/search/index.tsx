@@ -8,6 +8,7 @@ import { search } from "src-plugin/dist-js";
 
 import ShowSpinner from "../spinner";
 import DesktopVerticalPanel from "./Desktop";
+import MobileVerticalPanel from "./Mobile";
 
 export default function SearchInterface({ set }: { set: (_: number) => void }) {
   const value = useStore(searchQueryData);
@@ -59,17 +60,21 @@ export default function SearchInterface({ set }: { set: (_: number) => void }) {
     </div>
 
     <div className="mt-5 w-full h-full flex flex-col">
-      <h1 className="text-xl font-sans mb-5">"{value?.substring(0, isTablet ? 30 : 10).trim()}{(value?.length || 0) > (isTablet ? 30 : 10) ? "..." : ""}"</h1>
-
       {searchData == "loading" ?
         <div className="w-full h-full items-center">
           <ShowSpinner />
         </div>
         :
         <div className="w-full h-full flex flex-col overflow-y-scroll">
+          <h1 className="text-xl font-sans mb-1">"{value?.substring(0, isTablet ? 30 : 10).trim()}{(value?.length || 0) > (isTablet ? 30 : 10) ? "..." : ""}"</h1>
+          <h1 className="mb-5">{searchData.length} results</h1>
+
           <div className="w-full search-results">
             {searchData.map((appId) => (
-              <DesktopVerticalPanel key={appId} appId={appId} set={set} />
+              isTablet ?
+                <DesktopVerticalPanel key={appId} appId={appId} set={set} />
+                :
+                <MobileVerticalPanel key={appId} appId={appId} set={set} />
             ))}
           </div>
         </div>

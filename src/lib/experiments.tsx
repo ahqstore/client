@@ -1,4 +1,4 @@
-import { Bug, SearchIcon } from "lucide-react";
+import { Bug, Cable, SearchIcon } from "lucide-react";
 import {
   createContext,
   ReactNode,
@@ -8,20 +8,20 @@ import {
 } from "react";
 
 export interface Experiments {
-  search?: boolean;
+  plugins?: boolean;
   forceVibrant?: boolean;
 }
 
 export const docs: { [key: string]: { docs: string, title: string, Icon: typeof SearchIcon } } = {
-  search: {
-    docs: "This experiment enables support of the dummy search box in the Apps screen",
-    title: "Search",
-    Icon: SearchIcon
-  },
   forceVibrant: {
     docs: "Forces Vibrant UI in any OS (danger: May lead to very broken UI)",
     title: "Force Vibrant UI",
     Icon: Bug
+  },
+  plugins: {
+    docs: "Enables plugins for Desktop Build for AHQ Store",
+    title: "Enable Plugins",
+    Icon: Cable
   }
 }
 

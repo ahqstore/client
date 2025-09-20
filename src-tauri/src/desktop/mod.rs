@@ -15,8 +15,8 @@ use tauri_plugin_updater::UpdaterExt;
 
 use crate::SHOULD_EXIT;
 
+use std::sync::mpsc::{channel, Sender};
 use std::sync::Mutex;
-use std::sync::mpsc::{Sender, channel};
 use std::thread;
 
 use super::create_window;

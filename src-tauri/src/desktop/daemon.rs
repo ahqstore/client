@@ -1,5 +1,5 @@
-use tauri::AppHandle;
 use std::sync::mpsc::Receiver;
+use tauri::AppHandle;
 
 use super::internal_show_window;
 

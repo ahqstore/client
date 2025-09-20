@@ -1,5 +1,5 @@
 import { useHome, useSplash } from "@/lib/data";
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 
 import { ChevronRight } from "lucide-react";
 import { AppBox } from "./appBox";
@@ -147,8 +147,7 @@ export function AppsHome({ set }: { set: (_: number) => void }) {
                     set(11);
                   }}
                 >
-                  <span>All</span>
-                  <ChevronRight className="arrow" />
+                  <ArrowRight className="arrow" />
                 </button>
               </div>
               <div>

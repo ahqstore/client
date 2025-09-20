@@ -30,12 +30,18 @@ import { useMediaQuery } from "./hooks/use-media-query";
 import { useEffect, useState } from "react";
 import { ApplyAsDeveloper } from "./views/developer/applySelf";
 import { initPluginDaemonService } from "./api/plugin";
+import { useExperiments } from "./lib/experiments";
 
 function App() {
-  initPluginDaemonService();
-
   const auth = useAuth();
   const experiment = useExperiment();
+  const experiments = useExperiments();
+
+  useEffect(() => {
+    if (experiments.plugins) {
+      initPluginDaemonService();
+    }
+  }, []);
 
   const [isOpen, setOpen] = useState(false);
 
