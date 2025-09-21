@@ -1,0 +1,32 @@
+{
+  "name": "@ahqstore/env-types",
+  "version": "0.0.1-alpha.0",
+  "description": "Types to declare extended js runtime types for ahq store plugin configuration pages",
+  "keywords": [
+    "types",
+    "ahqstore",
+    "environment",
+    "plugin"
+  ],
+  "homepage": "https://github.com/ahqstore/client#readme",
+  "bugs": {
+    "url": "https://github.com/ahqstore/client/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahqstore/client.git"
+  },
+  "license": "MIT",
+  "author": "A. Chakraborty <ahqsecret@gmail.com> (@ahqsoftwares)",
+  "types": "./exports.d.ts",
+  "scripts": {
+    "build:docs": "typedoc"
+  },
+  "exports": {
+    "ahqstore": "./ahqstore.js"
+  },
+  "devDependencies": {
+    "typedoc": "^0.28.13",
+    "typescript": "^5.9.2"
+  }
+}
