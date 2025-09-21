@@ -1,0 +1,7 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "lang": "en",
+  "entryPoints": ["./src/index.ts"],
+  "includeHierarchySummary": true,
+  "includeVersion": true
+}

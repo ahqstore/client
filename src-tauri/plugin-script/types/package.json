@@ -1,6 +1,6 @@
 {
   "name": "@ahqstore/env-types",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.0",
   "description": "Types to declare extended js runtime types for ahq store plugin configuration pages",
   "keywords": [
     "types",

@@ -135,7 +135,7 @@ jobs:
         continue-on-error: true
 
   publish-types-npm:
-    name: Publish ahqstore-types to npmjs
+    name: Publish packages to npmjs
 
     runs-on: ubuntu-latest
 
@@ -165,8 +165,32 @@ jobs:
         working-directory: src-ahqstore-types
 
       - name: Publish NPM Binaries
-        run: npm publish
+        run: npm publish --access public
         working-directory: src-ahqstore-types/pkg
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AHQSTORE_TYPES }}
+
+      - name: Publish plugin api
+        run: |
+          npm install
+          npm publish --access public
+        working-directory: pkg-ahqstore
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AHQSTORE_TYPES }}
+
+      - name: Publish environment types
+        run: |
+          npm install
+          npm run build
+          npm run build:types
+
+          cd types
+            npm install
+            npm publish --access public
+          cd ..
+        working-directory: src-tauri/plugin-script
         continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AHQSTORE_TYPES }}
