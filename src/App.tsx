@@ -37,11 +37,19 @@ function App() {
   const experiment = useExperiment();
   const experiments = useExperiments();
 
+  const [ready, setReady] = useState(false);
+
+  const [init, setInit] = useState(false);
+
   useEffect(() => {
-    if (experiments.plugins) {
-      initPluginDaemonService();
+    if (experiments.plugins && !init) {
+      initPluginDaemonService()
+        .then(() => setReady(true));
+      setInit(true);
+    } else {
+      setReady(true);
     }
-  }, []);
+  }, [experiments, init]);
 
   const [isOpen, setOpen] = useState(false);
 
@@ -192,7 +200,7 @@ function App() {
           <ApplyAsDeveloper />
         </DialogSurface>
       </Dialog>
-      {useHome() == undefined ? <Loading /> : <ApplicationView />}
+      {useHome() == undefined && ready ? <Loading /> : <ApplicationView />}
     </>
   );
 

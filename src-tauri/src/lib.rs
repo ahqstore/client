@@ -1,6 +1,7 @@
 use std::sync::LazyLock;
 use tauri::async_runtime::Mutex;
 use tauri::webview::{WebviewWindow, WebviewWindowBuilder};
+use tauri::{Emitter, EventTarget};
 
 #[cfg(desktop)]
 use tauri::utils::config::WindowEffectsConfig;
@@ -98,7 +99,10 @@ pub fn run() {
       let _hwnd = _ctx.app_handle();
 
       let uri = request.uri();
+
       let path = uri.path();
+      let path = percent_encoding::percent_decode_str(path).decode_utf8_lossy();
+      let path: &str = path.as_ref();
 
       let _pt1 = path.get(1..=5).unwrap_or("");
       let _plugin_id = path.get(6..).unwrap_or("");
@@ -120,20 +124,20 @@ pub fn run() {
               "meta/" => {
                 html = plugin::get_meta(_hwnd, _plugin_id);
               }
-              "scri/" => {
-                html = plugin::get_script(_hwnd, _plugin_id, "main.js");
-              }
-              "sear/" => {
-                html = plugin::get_script(_hwnd, _plugin_id, "search.js");
-              }
-              "apps/" => {
-                html = plugin::get_script(_hwnd, _plugin_id, "getApp.js");
+              "asst/" => {
+                // Trusted process
+                let (id, path) = _plugin_id.split_once("}::{").unwrap_or(("", ""));
+
+                html = plugin::get_script(_hwnd, id, path);
               }
               "plug/" => {
                 html = plugin::get_plugin_names(_hwnd);
               }
               "inst/" => {
                 let (id, path) = _plugin_id.split_once("}::{").unwrap_or(("", ""));
+
+                #[cfg(debug_assertions)]
+                println!("[INFO] Installing {path} (parsed {_plugin_id:?})");
 
                 if let Some(_) = plugin::install_plugin(_hwnd, id, path) {
                   html = "OK".to_string();
@@ -150,17 +154,19 @@ pub fn run() {
       if &html == "" {
         Response::builder()
           .status(404)
+          .header("Access-Control-Allow-Origin", "*")
           .body("Not Found".to_string().into_bytes())
           .unwrap()
       } else {
         Response::builder()
           .status(200)
           .header("Content-Type", "text/html")
+          .header("Access-Control-Allow-Origin", "*")
           .body(html.into_bytes())
           .unwrap()
       }
     })
-    .invoke_handler(tauri::generate_handler![open_plugin])
+    .invoke_handler(tauri::generate_handler![get_state, set_state, open_plugin])
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
 
@@ -177,6 +183,50 @@ pub fn run() {
 }
 
 static PLOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+fn get_plugin_name(input: &str) -> &str {
+  if let Some(rest) = input.strip_prefix("settings-plugin-") {
+    rest
+  } else if let Some(rest) = input.strip_prefix("plugin-") {
+    rest
+  } else {
+    "None"
+  }
+}
+
+fn is_alphanumeric(s: &str) -> bool {
+  s.chars().all(|c| c.is_ascii_alphanumeric())
+}
+
+#[tauri::command]
+async fn get_state(app: WebviewWindow, state: String) -> String {
+  if app.label() == "main" {
+    return "".into();
+  }
+  if !is_alphanumeric(&state) {
+    return "".into();
+  }
+
+  let plugin = get_plugin_name(app.label());
+
+  plugin::get_state(app.app_handle(), plugin, &state)
+}
+
+#[tauri::command]
+async fn set_state(app: WebviewWindow, state: String, data: String) {
+  if app.label() == "main" {
+    return;
+  }
+  if !is_alphanumeric(&state) {
+    return;
+  }
+
+  let plugin = get_plugin_name(app.label());
+
+  _ = app.emit_to(EventTarget::webview_window("main"), "state-update", plugin);
+
+  plugin::set_state(app.app_handle(), plugin, &state, data);
+}
 
 #[tauri::command]
 async fn open_plugin(app: WebviewWindow, plugin: String, title: String, settings: bool) {

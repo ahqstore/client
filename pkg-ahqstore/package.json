@@ -1,6 +1,6 @@
 {
   "name": "@ahqstore/plugin-api",
-  "version": "0.0.0",
+  "version": "0.0.5",
   "description": "A utility package to use AHQ Store Plugin API that doesn't break like the fragile internal low level ipc",
   "keywords": [
     "plugin",
@@ -34,8 +34,8 @@
     }
   },
   "scripts": {
-    "build": "tsdown",
-    "dev": "tsdown --watch",
+    "build": "tsdown --options typedoc.json",
+    "dev": "tsdown --options typedoc.json --watch",
     "build:docs": "typedoc",
     "dev:docs": "typedoc --watch"
   },

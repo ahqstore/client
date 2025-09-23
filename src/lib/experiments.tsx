@@ -13,15 +13,15 @@ export interface Experiments {
 }
 
 export const docs: { [key: string]: { docs: string, title: string, Icon: typeof SearchIcon } } = {
-  forceVibrant: {
-    docs: "Forces Vibrant UI in any OS (danger: May lead to very broken UI)",
-    title: "Force Vibrant UI",
-    Icon: Bug
-  },
   plugins: {
     docs: "Enables plugins for Desktop Build for AHQ Store",
     title: "Enable Plugins",
     Icon: Cable
+  },
+  forceVibrant: {
+    docs: "Forces Vibrant UI in any OS (danger: May lead to very broken UI)",
+    title: "Force Vibrant UI",
+    Icon: Bug
   }
 }
 

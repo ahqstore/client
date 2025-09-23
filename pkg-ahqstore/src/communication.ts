@@ -13,12 +13,15 @@ export enum EventName {
   AppFetch,
   AppAssetFetch,
 
+  OnThemeUpdate,
+  CommonStateUpdated,
 
   RequestInitialization,
   RequestState,
   RequestInjectCSS,
+  RequestThemeData,
   RequestRestart,
-  RequestHTTP
+  RequestFetch
 }
 
 /**
@@ -29,6 +32,7 @@ export enum EventName {
  */
 export enum EventType {
   Request,
+  Event,
   Response
 }
 
@@ -76,6 +80,22 @@ export type CommunicationInterface =
      * A reference id
      */
     refId: number;
+    /**
+     * Data to be attested
+     */
+    data: unknown;
+  } |
+  {
+    /**
+     * Event Name {@link EventName}
+     */
+    event: EventName;
+    /**
+     * Event Type {@link EventType}
+     * 
+     * Set to {@link EventType.Request}
+     */
+    eventType: EventType.Event;
     /**
      * Data to be attested
      */

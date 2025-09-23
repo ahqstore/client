@@ -3,5 +3,10 @@
   "lang": "en",
   "entryPoints": ["./src/index.ts"],
   "includeHierarchySummary": true,
-  "includeVersion": true
+  "includeVersion": true,
+  "externalSymbolLinkMappings": {
+    "typescript": {
+      "fetch": "https://developer.mozilla.org/en-US/docs/Web/API/fetch"
+    }
+  }
 }

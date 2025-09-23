@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ahqstore/plugin-api':
+        specifier: link:pkg-ahqstore
+        version: link:pkg-ahqstore
       '@fluentui/react-icons':
         specifier: ^2.0.310
         version: 2.0.310(react@18.3.1)

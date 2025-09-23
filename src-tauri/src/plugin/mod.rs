@@ -47,9 +47,18 @@ pub fn get_script(hwnd: &AppHandle, plugin: &str, script: &str) -> String {
 
   dir.push(plugin);
 
+  let root = dir.clone();
+
   dir.push(script);
 
-  fs::read_to_string(&dir).unwrap_or_default()
+  let path = dir.canonicalize().unwrap_or_default();
+
+  if !path.starts_with(&root) {
+    // An attacker is trying to perform a directory traversal.
+    return String::default();
+  }
+
+  fs::read_to_string(&path).unwrap_or_default()
 }
 
 pub fn get_plugin_names(hwnd: &AppHandle) -> String {
@@ -68,6 +77,36 @@ pub fn get_plugin_names(hwnd: &AppHandle) -> String {
     .collect::<Vec<_>>();
 
   serde_json::to_string(&vect).unwrap_or_default()
+}
+
+pub fn get_state(hwnd: &AppHandle, plugin: &str, state_name: &str) -> String {
+  let resolver = hwnd.path();
+
+  let mut dir = resolver.app_local_data_dir().unwrap();
+
+  dir.push("plugins");
+  dir.push(plugin);
+  dir.push("state");
+  _ = fs::create_dir_all(&dir);
+
+  dir.push(state_name);
+
+  fs::read_to_string(&dir).unwrap_or_default()
+}
+
+pub fn set_state(hwnd: &AppHandle, plugin: &str, state_name: &str, state_data: String) {
+  let resolver = hwnd.path();
+
+  let mut dir = resolver.app_local_data_dir().unwrap();
+
+  dir.push("plugins");
+  dir.push(plugin);
+  dir.push("state");
+  _ = fs::create_dir_all(&dir);
+
+  dir.push(state_name);
+
+  _ = fs::write(&dir, &state_data);
 }
 
 pub fn install_plugin(hwnd: &AppHandle, plugin: &str, path: &str) -> Option<()> {

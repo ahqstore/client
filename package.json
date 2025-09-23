@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@ahqstore/plugin-api": "link:pkg-ahqstore",
     "@fluentui/react-icons": "^2.0.310",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",

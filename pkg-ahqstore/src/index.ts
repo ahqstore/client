@@ -16,6 +16,15 @@ export const PLUGIN_IPC_INTERFACE_VERSION = 0 as const;
  */
 export enum Capability {
   /**
+   * This allows your app to get events related to
+   * lifecycle of your plugin.
+   * 
+   * The events are :-
+   *  - **CommonStateUpdated:** Emitted when the common state gets updated
+   *  - **ThemeUpdate:** Emitted when the theme updates
+   */
+  RequestsEvents,
+  /**
    * This defines that this plugin also acts as an external
    * app installation source.
    * 
@@ -39,8 +48,12 @@ export enum Capability {
    * like theme updates
    * 
    * This allows you to style the UI
+   * 
+   * This also allows you to get the current **Theme** preference
+   * 
+   * like, if its dark mode or light mode, if vibrant visuals (transparency) is enabled etc
    */
-  InjectCss,
+  UsesTheming,
   /**
    * This allows your application to request Client (i.e. Application)
    * frontend restart.
@@ -98,6 +111,80 @@ export type InternalCallback = (data: CommunicationInterface) => void;
 export type OnMessageCallback = ((data: MessageEvent<CommunicationInterface>) => void)
   | ((data: MessageEvent<CommunicationInterface>) => Promise<void>);
 
+export interface ThemeData {
+  dark: boolean;
+  vibrant: boolean;
+}
+
+export interface FetchOptions {
+  url: string;
+  method: "GET" | "HEAD" | "OPTIONS" | "TRACE" | "PUT" | "DELETE" | "POST" | "PATCH" | "CONNECT";
+  /**
+   * # WARNING 🚨
+   * - We recommend a body smaller than `20MB`
+   * - Our wrapper will exclipitly deny a body longer than `50MB`
+   * 
+   * ## Why?
+   * The structure gets cloned over to the other end of the process. That means
+   * that too big body can cause a good deal of memory usage and memory leak
+   */
+  body?: ArrayBuffer | Blob;
+  cache?: "default" | "no-store" | "reload" | "no-cache" | "force-cache";
+  headers?: Headers;
+  redirect?: "follow" | "error" | "manual";
+}
+
+export interface HTTPOutputData {
+  ok: boolean;
+  status: number;
+  statusText: number;
+  body: ArrayBuffer;
+}
+
+export class HTTPOutput implements HTTPOutputData {
+  ok: boolean;
+  status: number;
+  statusText: number;
+  body: ArrayBuffer;
+
+  constructor(data: HTTPOutputData) {
+    this.ok = data.ok;
+    this.status = data.status;
+    this.statusText = data.statusText;
+    this.body = data.body;
+  }
+
+  /**
+   * Converts the data into string
+   * @param encoding The encoding of the string, default `utf-8`
+   * @returns string output of the data
+   */
+  text(encoding: string = "utf-8") {
+    const decoder = new TextDecoder(encoding);
+
+    return decoder.decode(this.body)
+  }
+
+  /**
+   * Converts the data into json
+   * @param encoding The encoding of the string, default `utf-8`
+   * @returns Type of data
+   */
+  json<T>(encoding: string = "utf-8"): T {
+    return JSON.parse(this.text(encoding))
+  }
+
+  /**
+   * Converts the data to object URL
+   * @returns Object URL of the data
+   */
+  toObjectURL(): string {
+    return URL.createObjectURL(
+      new Blob([this.body])
+    );
+  }
+}
+
 export interface Metadata {
   capabilities: Capability[],
   newSourceName?: string;
@@ -129,6 +216,11 @@ export class Plugin {
   static #constructed: boolean = false;
   static #registered = false;
   static #counter = 0;
+
+  private emitters: {
+    [key: string]: ((data: any) => void)[]
+  } = {};
+  private fetchSizeLimitInBytes = 50 * 1024 * 1024;
 
   private capabilities: Set<Capability> = new Set();
   private newSourceName?: string;
@@ -189,11 +281,24 @@ export class Plugin {
       if (payload.eventType == EventType.Response) {
         const ref = this.responseHandlingQueue.get(payload.refId);
 
-        ref && (
+        typeof (ref) == "function" && (
           ref(payload)
         )
 
         this.responseHandlingQueue.delete(payload.refId);
+      } else if (payload.eventType == EventType.Event) {
+        const ev: EmittedEvent = (() => {
+          switch (payload.event) {
+            case EventName.CommonStateUpdated:
+              return "commonStateUpdate";
+            case EventName.CommonStateUpdated:
+              return "themeUpdate";
+            default:
+              throw new Error("Impossible");
+          }
+        })();
+
+        this.emit(ev, payload.data);
       } else {
         const promise = (() => {
           switch (payload.event) {
@@ -245,12 +350,12 @@ export class Plugin {
     this.responseHandlingQueue.set(refId, callback);
   }
 
-  private sendAsyncRequest(data: CommunicationInterface) {
+  private sendAsyncRequest<T = unknown>(data: CommunicationInterface): Promise<T> {
     return new Promise((resolve, reject) => {
       this.sendRequest(data, (response) => {
         if (response.eventType == EventType.Response) {
           if (response.status == ResponseStatus.Ok) {
-            resolve(data.data);
+            resolve(data.data as unknown as T);
           } else {
             reject(`Error: ${response.status}. Outputs: ${response.data}`);
           }
@@ -294,18 +399,39 @@ export class Plugin {
    * Injects the provided css into the client gui application
    * 
    * ## NOTE
-   * This does not change already injected css
-   * You must request Client Restart for that
+   * This modifies the already injected css to the new css data
+   *
+   * Please note the above
    * 
    * @param css The css string to inject
    */
   async injectCustomCss(css: string) {
-    this.ensure([Capability.InjectCss]);
+    this.ensure([Capability.UsesTheming]);
 
     await this.sendAsyncRequest({
       eventType: EventType.Request,
       event: EventName.RequestInjectCSS,
       data: css,
+      refId: 0
+    });
+  }
+
+  /**
+   * Gets the AHQ Store Theme Data
+   * 
+   * ## NOTE
+   * The returned data does not automatically
+   * update with theme changes
+   * 
+   * @returns The theme data {@link ThemeData}
+   */
+  async getThemeData(): Promise<ThemeData> {
+    this.ensure([Capability.UsesTheming]);
+
+    return await this.sendAsyncRequest({
+      eventType: EventType.Request,
+      event: EventName.RequestThemeData,
+      data: null,
       refId: 0
     });
   }
@@ -327,6 +453,42 @@ export class Plugin {
       data: desc,
       refId: 0
     });
+  }
+
+
+  /**
+   * Performs an HTTP request like the {@link originalFetch} api
+   * 
+   * @param data Please read the information at {@link FetchOptions}
+   * @returns the {@link HTTPOutput} data type
+   */
+  async fetch(data: FetchOptions) {
+    const tooBigErr = "The provided body is too big. The hard limit is 50MB";
+
+    if (data.body) {
+      const d = data.body;
+
+      if (d instanceof ArrayBuffer) {
+        if (d.byteLength > this.fetchSizeLimitInBytes) {
+          throw new Error(tooBigErr);
+        }
+      } else if (d instanceof Blob) {
+        if (d.size > this.fetchSizeLimitInBytes) {
+          throw new Error(tooBigErr);
+        }
+      } else {
+        throw new Error("Invalid data type provided. Expected ArrayBuffer or Blob");
+      }
+    }
+
+    return new HTTPOutput(
+      await this.sendAsyncRequest({
+        eventType: EventType.Request,
+        event: EventName.RequestFetch,
+        data,
+        refId: 0
+      })
+    );
   }
 
   /**
@@ -422,6 +584,32 @@ export class Plugin {
   hasCapability(capability: Capability): boolean {
     return this.capabilities.has(capability)
   }
+
+  on<T>(event: EmittedEvent, handler: (data: T) => {}): UnregisterFn {
+    this.ensure([Capability.RequestsEvents]);
+
+    if (!this.emitters[event]) {
+      this.emitters[event] = [];
+    }
+
+    this.emitters[event].push(handler);
+
+    return () => {
+      this.emitters[event] = this.emitters[event]!!.filter((d) => d != handler);
+    }
+  }
+
+  private emit<T>(event: EmittedEvent, data: T) {
+    if (!this.emitters[event]) {
+      this.emitters[event] = [];
+    }
+
+    this.emitters[event].forEach((f) => f(data));
+  }
 }
 
+export type EmittedEvent = "themeUpdate" | "commonStateUpdate";
+export type UnregisterFn = () => void;
+
 export type { EventType, ResponseStatus, CommunicationInterface, EventName }
+export const originalFetch = window.fetch;
