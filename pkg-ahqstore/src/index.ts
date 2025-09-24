@@ -128,7 +128,7 @@ export interface FetchOptions {
    * The structure gets cloned over to the other end of the process. That means
    * that too big body can cause a good deal of memory usage and memory leak
    */
-  body?: ArrayBuffer | Blob;
+  body?: ArrayBuffer;
   cache?: "default" | "no-store" | "reload" | "no-cache" | "force-cache";
   headers?: Headers;
   redirect?: "follow" | "error" | "manual";
@@ -337,7 +337,7 @@ export class Plugin {
     }
   }
 
-  private sendRequest(data: CommunicationInterface, callback: InternalCallback) {
+  private sendRequest(data: CommunicationInterface, callback: InternalCallback, transfer: Transferable[] = []) {
     Plugin.#counter += 1;
 
     const refId = Plugin.#counter;
@@ -345,12 +345,14 @@ export class Plugin {
     self.postMessage({
       ...data,
       refId
-    } as CommunicationInterface);
+    } as CommunicationInterface, {
+      transfer
+    });
 
     this.responseHandlingQueue.set(refId, callback);
   }
 
-  private sendAsyncRequest<T = unknown>(data: CommunicationInterface): Promise<T> {
+  private sendAsyncRequest<T = unknown>(data: CommunicationInterface, transfer: Transferable[] = []): Promise<T> {
     return new Promise((resolve, reject) => {
       this.sendRequest(data, (response) => {
         if (response.eventType == EventType.Response) {
@@ -472,12 +474,8 @@ export class Plugin {
         if (d.byteLength > this.fetchSizeLimitInBytes) {
           throw new Error(tooBigErr);
         }
-      } else if (d instanceof Blob) {
-        if (d.size > this.fetchSizeLimitInBytes) {
-          throw new Error(tooBigErr);
-        }
       } else {
-        throw new Error("Invalid data type provided. Expected ArrayBuffer or Blob");
+        throw new Error("Invalid data type provided. Expected ArrayBuffer");
       }
     }
 
@@ -487,7 +485,7 @@ export class Plugin {
         event: EventName.RequestFetch,
         data,
         refId: 0
-      })
+      }, data.body ? [data.body] : [])
     );
   }
 
