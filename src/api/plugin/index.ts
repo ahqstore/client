@@ -1,4 +1,5 @@
 import { platform } from "@tauri-apps/plugin-os";
+import { AStorePluginManager, Manifest } from "./mgnt";
 
 export const root = () => {
   if (platform() == "windows") {
@@ -28,13 +29,39 @@ export async function plugins(): Promise<string[]> {
   return data;
 }
 
+export async function meta(plugin: string): Promise<Manifest> {
+  const data = await fetch(`${base}/meta/${plugin}`)
+    .then((d) => d.text())
+    .then((txt) => {
+      if (txt == "") {
+        throw new Error("Invalid");
+      }
+
+      return JSON.parse(txt);
+    });
+
+  return data;
+}
+
+/**
+ * Only string assets
+ * @param plugin 
+ * @param asset 
+ * @returns 
+ */
+export async function getAsset(plugin: string, asset: string): Promise<ArrayBuffer> {
+  const data = await fetch(`${base}/inst/${plugin}}::{${asset}`)
+    .then((d) => d.arrayBuffer());
+
+  return data;
+}
+
 export let dataPlugins: string[] = [];
 
 export async function initPluginDaemonService() {
   if (platform() != "android") {
     const plug = await plugins();
 
-    dataPlugins = plug;
-    console.log(dataPlugins);
+    await AStorePluginManager.create(plug);
   }
 }

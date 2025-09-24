@@ -188,7 +188,6 @@ export class HTTPOutput implements HTTPOutputData {
 export interface Metadata {
   capabilities: Capability[],
   newSourceName?: string;
-  pluginName: string;
 }
 
 /**
@@ -233,11 +232,6 @@ export class Plugin {
   private getAppAsset?: GetApplicationAssetFn;
 
   /**
-   * The plugin name defined during creation of the {@link Plugin} instance
-   */
-  name: string;
-
-  /**
    * This abstracts away the complexities of the AHQStore Plugin api
    * 
    * This constructor also handles the IPC communication and gives you a quick way to community
@@ -253,7 +247,6 @@ export class Plugin {
   constructor(
     meta: Metadata
   ) {
-    this.name = meta.pluginName;
     if (Plugin.#constructed) {
       throw new Error("Cannot reconstruct the Plugin constructor multiple times.");
     }
@@ -389,8 +382,7 @@ export class Plugin {
       refId: 0,
       data: {
         capabilities: this.capabilities,
-        newSourceName: this.newSourceName,
-        name: this.name
+        newSourceName: this.newSourceName
       }
     });
 
@@ -609,5 +601,5 @@ export class Plugin {
 export type EmittedEvent = "themeUpdate" | "commonStateUpdate";
 export type UnregisterFn = () => void;
 
-export type { EventType, ResponseStatus, CommunicationInterface, EventName }
-export const originalFetch = window.fetch;
+export { EventType, ResponseStatus, type CommunicationInterface, EventName }
+export const originalFetch = self.fetch;

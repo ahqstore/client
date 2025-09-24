@@ -344,6 +344,12 @@ jobs:
           pnpm build
         working-directory: src-ahqstore-types
 
+      - name: Build plugin api
+        run: |
+          npm install
+          npm run build
+        working-directory: pkg-ahqstore
+
       - name: Build Tauri App
         run: |
           export JAVA_HOME="$JAVA_HOME_21_X64"
