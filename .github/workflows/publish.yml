@@ -441,6 +441,18 @@ jobs:
           pnpm build
         working-directory: src-ahqstore-types
 
+      - name: Build plugin api
+        run: |
+          npm install
+          npm run build
+        working-directory: pkg-ahqstore
+
+      - name: Build plugin script
+        run: |
+          npm install
+          npm run build
+        working-directory: src-tauri/plugin-script
+
       - name: install Vite dependencies and Build React App
         run: pnpm install; pnpm build
         env:

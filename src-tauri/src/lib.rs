@@ -124,6 +124,11 @@ pub fn run() {
               "meta/" => {
                 html = plugin::get_meta(_hwnd, _plugin_id);
               }
+              "stat/" => {
+                let (id, state) = _plugin_id.split_once("}::{").unwrap_or(("", ""));
+                
+                html = plugin::get_state(_hwnd, id, state);
+              }
               "asst/" => {
                 // Trusted process
                 let (id, path) = _plugin_id.split_once("}::{").unwrap_or(("", ""));

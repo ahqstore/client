@@ -85,8 +85,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
 
     fnTheme(windows, (value) => setMICAApplied(value), exp.forceVibrant);
+
     AStorePluginManager.sendThemeUpdate();
   }, [exp, dark, windows]);
+
+  useEffect(() => {
+    // @ts-ignore
+    globalThis.themeData = {
+      dark,
+      vibrant: win32
+    };
+  }, [dark, win32]);
 
   return (
     <ThemeContext.Provider value={dark}>

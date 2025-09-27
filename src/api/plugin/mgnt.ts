@@ -1,6 +1,7 @@
 import { Capability, CommunicationInterface, EventName, EventType, Metadata, ResponseStatus } from "@ahqstore/plugin-api"
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow"
 import { existsUI, getAsset, meta } from ".";
+import { toast } from "sonner";
 
 const winda = getCurrentWebviewWindow();
 
@@ -210,6 +211,7 @@ export class AStorePlugin {
   capability: Capability[];
   sourceRepoName: string | undefined;
 
+  id: string = "";
   registered = false;
 
   constructor(cap: Capability[]) {
@@ -219,6 +221,7 @@ export class AStorePlugin {
 
   async getInstance(plugin: string): Promise<{ registersSource: boolean; sourceName: string | undefined; }> {
     // ArrayBuffer by design
+    this.id = plugin;
     const data = await getAsset(plugin, "worker.js");
 
     return new Promise((res, rej) => {
@@ -233,7 +236,9 @@ export class AStorePlugin {
       this.worker.onmessage = (data: MessageEvent<CommunicationInterface>) => {
         const dat = data.data;
 
+        // Type Request
         if (dat.eventType == EventType.Request) {
+          // Handle Initialization
           if (dat.event == EventName.RequestInitialization && !this.registered) {
             const meta = dat.data as Metadata;
 
@@ -281,9 +286,109 @@ export class AStorePlugin {
             } as CommunicationInterface);
             return;
           }
+
+          try {
+            // Processing
+            switch (dat.event) {
+              case EventName.RequestInjectCSS:
+                this.verify(Capability.UsesTheming, dat.refId);
+
+                this.typeCheck(dat.data, "string", dat.refId);
+
+                this.injectCss(dat.data as string);
+
+                this.worker.postMessage({
+                  eventType: EventType.Response,
+                  status: ResponseStatus.Ok,
+                  data: "OK",
+                  refId: dat.refId
+                } as CommunicationInterface);
+
+                return;
+              case EventName.RequestThemeData:
+                this.verify(Capability.UsesTheming, dat.refId);
+
+                this.worker.postMessage({
+                  eventType: EventType.Response,
+                  status: ResponseStatus.Ok,
+                  // @ts-ignore
+                  data: globalThis.themeData,
+                  refId: dat.refId
+                } as CommunicationInterface);
+
+                return;
+              case EventName.RequestRestart:
+                this.verify(Capability.RequestClientRestart, dat.refId);
+
+                toast(
+                  "A plugin has requested you to restart AHQ Store. Would you like to restart?",
+                  {
+                    action: {
+                      label: "Yes",
+                      onClick: () => {
+                        window.location.reload();
+                      }
+                    },
+                    duration: 3000
+                  }
+                );
+
+                return;
+              case EventName.RequestState:
+                this.verify(Capability.UsesState, dat.refId);
+
+                // TODO: Soon
+
+                return;
+              default:
+                return;
+            }
+          } catch (e) {
+            console.warn(`Plugin tried to perform unauthorized action. ${e}`);
+          }
         }
       };
     });
+  }
+
+  private verify(cap: Capability, refId: number) {
+    if (!this.capability.includes(cap)) {
+      this.worker.postMessage({
+        eventType: EventType.Response,
+        status: ResponseStatus.Unauthorized,
+        data: "Unauthorized",
+        refId
+      } as CommunicationInterface);
+      throw new Error("Capability Failure!");
+    }
+  }
+
+  private typeCheck<T>(data: T, typeToCheck: "bigint" | "boolean" | "function" | "number" | "object" | "string" | "symbol" | "undefined", refId: number) {
+    if (typeof (data) != typeToCheck) {
+      this.worker.postMessage({
+        eventType: EventType.Response,
+        status: ResponseStatus.Unauthorized,
+        data: "Unauthorized",
+        refId
+      } as CommunicationInterface);
+      throw new Error("Typecheck Failure!");
+    }
+  }
+
+  injectCss(css: string) {
+    let e = document.getElementById(this.id);
+
+    if (!e) {
+      const node = document.createElement("style");
+
+      node.id = this.id;
+
+      e = document.head.appendChild(
+        node
+      );
+    }
+
+    e.textContent = css;
   }
 
   emit<T>(ev: EventName, data?: T) {
