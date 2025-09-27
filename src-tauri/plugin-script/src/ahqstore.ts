@@ -1,5 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
 
+export interface Commits {
+  ahqstore: string,
+  alt: string,
+}
+
 export class AHQStore {
   constructor() {
     console.log("AHQStore instance created!");
@@ -22,9 +27,11 @@ export class AHQStore {
    * 
    * Do not store it since it might get outdated
    * 
-   * @returns {Promise<string>}
+   * @returns {Promise<Commits>}
    */
-  async getCurrentAHQStoreCommit(): Promise<string> {
-    return await invoke<string>("plugin:ahqstore|get_Commit");
+  async getCurrentAHQStoreCommit(): Promise<Commits> {
+    const data = await invoke<ArrayBuffer>("plugin:ahqstore|get_commit")
+
+    return JSON.parse((new TextDecoder()).decode(data));
   }
 }

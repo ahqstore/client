@@ -128,6 +128,9 @@ pub fn run() {
                 // Trusted process
                 let (id, path) = _plugin_id.split_once("}::{").unwrap_or(("", ""));
 
+                #[cfg(debug_assertions)]
+                println!("[INFO] Getting {path} (parsed {_plugin_id:?})");
+
                 html = plugin::get_script(_hwnd, id, path);
               }
               "plug/" => {
@@ -240,6 +243,16 @@ async fn open_plugin(app: WebviewWindow, plugin: String, title: String, settings
   {
     use tauri::Url;
 
+    #[cfg(not(debug_assertions))]
+    let init_script = include_str!("../plugin-script/dist/bundle.js");
+
+    #[cfg(debug_assertions)]
+    let init_script = {
+      use std::fs;
+
+      fs::read_to_string(env!("PLUGIN_SCRIPT_PATH")).unwrap()
+    };
+
     let label = if settings {
       format!("settings-plugin-{plugin}")
     } else {
@@ -268,7 +281,7 @@ async fn open_plugin(app: WebviewWindow, plugin: String, title: String, settings
         ).unwrap());
       })()
     )
-    .initialization_script(include_str!("./init.js"))
+    .initialization_script(init_script)
     .min_inner_size(348.0, 700.0)
     .inner_size(1024.0, 760.0)
     .resizable(true)

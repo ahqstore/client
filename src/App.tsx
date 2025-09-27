@@ -39,17 +39,16 @@ function App() {
 
   const [ready, setReady] = useState(false);
 
-  const [init, setInit] = useState(false);
-
   useEffect(() => {
-    if (experiments.plugins && !init) {
+    if (platform() == "android") {
+      setReady(true)
+    } else if (experiments.plugins) {
       initPluginDaemonService()
         .then(() => setReady(true));
-      setInit(true);
     } else {
       setReady(true);
     }
-  }, [experiments, init]);
+  }, [experiments]);
 
   const [isOpen, setOpen] = useState(false);
 
@@ -200,7 +199,7 @@ function App() {
           <ApplyAsDeveloper />
         </DialogSurface>
       </Dialog>
-      {useHome() == undefined && ready ? <Loading /> : <ApplicationView />}
+      {useHome() == undefined || !ready ? <Loading /> : <ApplicationView />}
     </>
   );
 

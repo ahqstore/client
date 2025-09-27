@@ -4,6 +4,7 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -32,20 +33,22 @@ export const useExperiments = () => useContext(Experiments);
 export let setExperiment: (n: Experiments) => void;
 
 export function ExperimentsProvider({ children }: { children: ReactNode }) {
-  const [val, setVal] = useState<Experiments>({});
-
-  useEffect(() => {
+  // const [val, setVal] = useState<Experiments>({});
+  const val = useMemo(() => {
     try {
       const item = localStorage.getItem("experiments")!;
       const d = JSON.parse(item);
 
       if (d != null) {
-        setVal(d);
+        return d;
       }
     } catch (_) { }
 
+    return {}
+  }, []);
+
+  useEffect(() => {
     setExperiment = (d) => {
-      setVal(d)
       localStorage.setItem("experiments", JSON.stringify(d));
     };
   }, []);

@@ -50,18 +50,32 @@ export async function meta(plugin: string): Promise<Manifest> {
  * @returns 
  */
 export async function getAsset(plugin: string, asset: string): Promise<ArrayBuffer> {
-  const data = await fetch(`${base}/inst/${plugin}}::{${asset}`)
+  const data = await fetch(`${base}/asst/${plugin}}::{${asset}`)
     .then((d) => d.arrayBuffer());
 
   return data;
 }
 
-export let dataPlugins: string[] = [];
+/**
+ * Checks if the file exists
+ * @param plugin 
+ * @param asset 
+ * @returns 
+ */
+export async function existsUI(plugin: string, asset: string): Promise<boolean> {
+  const data = await fetch(`${base}/asst/${plugin}}::{${asset}`)
+    .then((d) => d.ok);
+
+  return data;
+}
 
 export async function initPluginDaemonService() {
   if (platform() != "android") {
-    const plug = await plugins();
+    if (!AStorePluginManager.hasInstance()) {
+      console.log("Creating instance");
+      const plug = await plugins();
 
-    await AStorePluginManager.create(plug);
+      await AStorePluginManager.create(plug);
+    }
   }
 }

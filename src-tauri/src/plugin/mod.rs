@@ -47,16 +47,9 @@ pub fn get_script(hwnd: &AppHandle, plugin: &str, script: &str) -> String {
 
   dir.push(plugin);
 
-  let root = dir.clone();
-
   dir.push(script);
 
   let path = dir.canonicalize().unwrap_or_default();
-
-  if !path.starts_with(&root) {
-    // An attacker is trying to perform a directory traversal.
-    return String::default();
-  }
 
   fs::read_to_string(&path).unwrap_or_default()
 }

@@ -1,6 +1,8 @@
 import { Capability, CommunicationInterface, EventName, EventType, Metadata, ResponseStatus } from "@ahqstore/plugin-api"
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow"
+import { existsUI, getAsset, meta } from ".";
 
-import { getAsset, meta } from ".";
+const winda = getCurrentWebviewWindow();
 
 export interface Manifest {
   displayName: string;
@@ -8,37 +10,125 @@ export interface Manifest {
   worker: boolean;
 }
 
+export enum PluginFlags {
+  WorkerPlugin = 0b0001,
+  PluginUI = 0b0010,
+  SettingsUI = 0b0100,
+  Disabled = 0b1000
+}
+
+export class Flags {
+  flags: number;
+
+  constructor(flags: number) {
+    this.flags = flags;
+  }
+
+  has(flag: PluginFlags) {
+    return (this.flags & flag) > 0
+  }
+
+  add(flag: PluginFlags) {
+    this.flags |= flag
+  }
+
+  remove(flag: PluginFlags) {
+    this.flags &= ~flag;
+  }
+
+  toggle(flag: PluginFlags) {
+    this.flags ^= flag;
+  }
+}
+
 export interface PluginMngtData {
   man: Manifest;
   id: string;
+  hInstance: AStorePlugin
+  registersSource: boolean;
+  sourceName: string | undefined;
 }
 
-interface PluginInnerData {
+export interface BasicPluginData {
+  man: Manifest;
+  flags: Flags;
   displayName: string;
-  hInstance: AStorePlugin
 }
 
 export class AStorePluginManager {
   static #instance: AStorePluginManager | undefined;
 
-  map: Map<string, PluginInnerData> = new Map();
-  others: Set<string> = new Set();
+  // Defines worker plugins that need special care
+  workerPlugins: Map<string, PluginMngtData> = new Map();
 
-  private constructor(plugins: PluginMngtData[], others: Set<string>) {
-    this.others = others;
+  registeredSources: Map<string, string> = new Map();
 
-    console.log(plugins, others);
+  // Defines UI plugins
+  // UI plugins can also be worker plugins
+  uiPlugins: Map<string, BasicPluginData> = new Map();
 
-    AStorePluginManager.#instance = this;
+  private constructor() {
+    winda.listen<string>("state-update", (ev) => {
+      const plugin = this.workerPlugins.get(ev.payload);
+
+      if (plugin && plugin.hInstance.capability.includes(Capability.RequestsEvents)) {
+        plugin.hInstance.emit(EventName.CommonStateUpdated);
+      }
+    });
   }
 
-  static getInstance() {
-    return AStorePluginManager.#instance!!;
+  static sendThemeUpdate() {
+    try {
+      const me = AStorePluginManager.getInstance(true);
+
+      const plugin = [...me.workerPlugins.entries()];
+
+      for (let i = 0; i < plugin.length; i++) {
+        const [, mnt] = plugin[i];
+
+        if (mnt.man.capabilities.includes(Capability.RequestsEvents)) {
+          mnt.hInstance.emit(EventName.OnThemeUpdate);
+        }
+      }
+    } catch (e) {
+      // Ignore since that means plugins not enabled
+    }
+  }
+
+  static getInstance(strict = false) {
+    if (!AStorePluginManager.#instance) {
+      if (strict) {
+        throw new Error("Strict mode is on, instance not instantiated");
+      }
+      AStorePluginManager.#instance = new AStorePluginManager();
+    }
+
+    return AStorePluginManager.#instance;
+  }
+
+  static hasInstance() {
+    return AStorePluginManager.#instance !== undefined;
   }
 
   static async create(plugins: string[]) {
-    const final: PluginMngtData[] = [];
-    const normalPlugins: Set<string> = new Set();
+    const me = AStorePluginManager.getInstance();
+
+    const final: Promise<PluginMngtData | null>[] = [];
+    const uiPlugins: Map<string, BasicPluginData> = new Map();
+    const enabled = (() => {
+      try {
+        const data = JSON.parse(localStorage.getItem("enabled-plugins")!!);
+
+        if (data == null) {
+          throw new Error("");
+        }
+
+        return data as string[];
+      } catch (e) {
+        localStorage.setItem("enabled-plugins", "[]");
+        return [];
+      }
+    })();
 
     for (let i = 0; i < plugins.length; i++) {
       const id = plugins[i];
@@ -46,30 +136,78 @@ export class AStorePluginManager {
       try {
         const data = await meta(id);
 
+        const flags = new Flags(0);
+
         if (data && data.displayName && Array.isArray(data.capabilities)) {
-          if (data.worker) {
-            final.push({
-              man: data,
-              id
-            });
-          } else {
-            normalPlugins.add(id);
+          if (!enabled.includes(id)) {
+            flags.add(PluginFlags.Disabled);
           }
-          console.log(data);
+          if (data.worker) {
+            flags.flags |= PluginFlags.WorkerPlugin;
+          }
+
+          if (await existsUI(id, "pluginUI.html")) {
+            flags.flags |= PluginFlags.PluginUI;
+          }
+
+          if (await existsUI(id, "settings.html")) {
+            flags.flags |= PluginFlags.SettingsUI;
+          }
+
+          if (data.worker && enabled.includes(id)) {
+            final.push((async () => {
+              const inst = new AStorePlugin(data.capabilities);
+
+              let manifest: {
+                registersSource: boolean;
+                sourceName: string | undefined;
+              };
+              try {
+                manifest = await inst.getInstance(id);
+              } catch (e) {
+                console.log("---- ERROR ------");
+                console.warn(e);
+                console.log("-----------------");
+                return null;
+              }
+
+              return {
+                man: data,
+                id,
+                displayName: data.displayName,
+                hInstance: inst,
+                registersSource: manifest.registersSource,
+                sourceName: manifest.sourceName
+              } as PluginMngtData;
+            })());
+          }
+
+          uiPlugins.set(id, {
+            flags,
+            man: data,
+            displayName: data.displayName
+          });
+          console.log(uiPlugins);
         }
       } catch (e) {
-
+        console.log(e);
       }
     }
 
-    return new AStorePluginManager(final, normalPlugins);
+    const finalResolved = await Promise.all(final);
+
+    finalResolved
+      .filter((x) => x != null)
+      .forEach((d) => {
+        me.workerPlugins.set(d.id, d);
+      });
+    me.uiPlugins = uiPlugins;
   }
 }
 
 export class AStorePlugin {
   worker: Worker;
   capability: Capability[];
-  enabled: boolean = false;
   sourceRepoName: string | undefined;
 
   registered = false;
@@ -79,58 +217,84 @@ export class AStorePlugin {
     this.capability = cap;
   }
 
-  async getInstance(plugin: string) {
-    this.enabled = true;
-
+  async getInstance(plugin: string): Promise<{ registersSource: boolean; sourceName: string | undefined; }> {
+    // ArrayBuffer by design
     const data = await getAsset(plugin, "worker.js");
 
-    this.worker.postMessage(data, [data]);
+    return new Promise((res, rej) => {
+      this.worker.postMessage(data, [data]);
 
-    // Auto disable after 3 secs unless registered
-    const closer = setTimeout(() => {
-      this.worker.terminate();
-    }, 3 * 1000);
+      // Auto disable after 3 secs unless registered
+      const closure = setTimeout(() => {
+        this.worker.terminate();
+        rej("Timed Out");
+      }, 3 * 1000);
 
-    this.worker.onmessage = (data: MessageEvent<CommunicationInterface>) => {
-      const dat = data.data;
+      this.worker.onmessage = (data: MessageEvent<CommunicationInterface>) => {
+        const dat = data.data;
 
-      if (dat.eventType == EventType.Request) {
-        if (dat.event == EventName.RequestInitialization && !this.registered) {
-          const meta = dat.data as Metadata;
+        if (dat.eventType == EventType.Request) {
+          if (dat.event == EventName.RequestInitialization && !this.registered) {
+            const meta = dat.data as Metadata;
 
-          if (!meta.capabilities.every((c) => this.capability.includes(c))) {
+            console.log(meta);
+
+            if (![...meta.capabilities].every((c) => this.capability.includes(c))) {
+              this.worker.postMessage({
+                eventType: EventType.Response,
+                status: ResponseStatus.Unauthorized,
+                data: "Invalid Capabilities",
+                refId: dat.refId
+              } as CommunicationInterface);
+              return;
+            }
+
+            if (meta.capabilities.has(Capability.AppInstallationSource)) {
+              this.sourceRepoName = meta.newSourceName;
+            }
+
+            // Change capability to what it registered as
+            // To prevent possible issues down the line
+            this.capability = [...meta.capabilities];
+
+            this.worker.postMessage({
+              eventType: EventType.Response,
+              status: ResponseStatus.Ok,
+              data: "Successful",
+              refId: dat.refId
+            } as CommunicationInterface);
+            clearTimeout(closure);
+
+            res({
+              registersSource: this.sourceRepoName != null,
+              sourceName: this.sourceRepoName
+            });
+            return;
+          }
+
+          if (!this.registered) {
             this.worker.postMessage({
               eventType: EventType.Response,
               status: ResponseStatus.Unauthorized,
-              data: "Invalid Capabilities",
+              data: "Register",
               refId: dat.refId
             } as CommunicationInterface);
             return;
           }
-
-          if (meta.capabilities.includes(Capability.AppInstallationSource)) {
-            this.sourceRepoName = meta.newSourceName;
-          }
-
-          this.worker.postMessage({
-            eventType: EventType.Response,
-            status: ResponseStatus.Unauthorized,
-            data: "Invalid Capabilities",
-            refId: dat.refId
-          } as CommunicationInterface);
-          return;
         }
+      };
+    });
+  }
 
-        if (!this.registered) {
-          this.worker.postMessage({
-            eventType: EventType.Response,
-            status: ResponseStatus.Unauthorized,
-            data: "Register",
-            refId: dat.refId
-          } as CommunicationInterface);
-          return;
-        }
-      }
-    };
+  emit<T>(ev: EventName, data?: T) {
+    this.worker.postMessage({
+      eventType: EventType.Event,
+      event: ev,
+      data
+    } as CommunicationInterface);
+  }
+
+  destroy() {
+    this.worker.terminate();
   }
 }

@@ -124,9 +124,13 @@ export interface FetchOptions {
    * - We recommend a body smaller than `20MB`
    * - Our wrapper will exclipitly deny a body longer than `50MB`
    * 
+   * Both of them are a recommendation can is not enforced from the ahq store side
+   * 
    * ## Why?
-   * The structure gets cloned over to the other end of the process. That means
-   * that too big body can cause a good deal of memory usage and memory leak
+   * The usecase of plugins should be thought of. They are to provide search and
+   * manifests. Which means from the request side you'll need to send minimal data.
+   * 
+   * If the server sends too much data, we'll 100% get it back to you.
    */
   body?: ArrayBuffer;
   cache?: "default" | "no-store" | "reload" | "no-cache" | "force-cache";
@@ -186,7 +190,7 @@ export class HTTPOutput implements HTTPOutputData {
 }
 
 export interface Metadata {
-  capabilities: Capability[],
+  capabilities: Set<Capability>,
   newSourceName?: string;
 }
 
@@ -451,7 +455,9 @@ export class Plugin {
 
 
   /**
-   * Performs an HTTP request like the {@link originalFetch} api
+   * Performs an HTTP request like the `fetch` api
+   * 
+   * The maximum size of the body is 50MB
    * 
    * @param data Please read the information at {@link FetchOptions}
    * @returns the {@link HTTPOutput} data type
@@ -602,4 +608,3 @@ export type EmittedEvent = "themeUpdate" | "commonStateUpdate";
 export type UnregisterFn = () => void;
 
 export { EventType, ResponseStatus, type CommunicationInterface, EventName }
-export const originalFetch = self.fetch;

@@ -350,6 +350,12 @@ jobs:
           npm run build
         working-directory: pkg-ahqstore
 
+      - name: Build plugin script
+        run: |
+          npm install
+          npm run build
+        working-directory: src-tauri/plugin-script
+
       - name: Build Tauri App
         run: |
           export JAVA_HOME="$JAVA_HOME_21_X64"
