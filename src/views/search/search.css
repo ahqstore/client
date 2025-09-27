@@ -1,0 +1,21 @@
+/* Mobile Version */
+/* TODO: Make it better */
+.search-results {
+  @apply grid gap-2 md:gap-4 mb-32 grid-cols-1;
+}
+
+
+.search-results div {
+  @apply w-full h-24;
+}
+
+@media (min-width: 800px) {
+  .search-results {
+    @apply gap-8;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)) !important;
+  }
+
+  .search-results div {
+    @apply h-[20rem];
+  }
+}

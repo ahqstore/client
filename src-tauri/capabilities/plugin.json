@@ -1,0 +1,24 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop-plugin",
+  "description": "Permissions for AHQ Store Desktop Plugins",
+  "platforms": ["macOS", "windows", "linux"],
+  "windows": ["plugin-*", "settings-plugin-*"],
+  "permissions": [
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://*"
+        },
+        {
+          "url": "https://**"
+        },
+        {
+          "url": "https://**/*"
+        }
+      ]
+    },
+    "ahqstore:allow-get-commit"
+  ]
+}

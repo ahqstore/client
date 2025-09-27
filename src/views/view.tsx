@@ -13,10 +13,10 @@ import {
   LibraryFilled,
   WindowDevToolsFilled,
   WindowDevToolsRegular,
-  MegaphoneLoudRegular,
-  MegaphoneLoudFilled,
   ToolboxRegular,
   ToolboxFilled,
+  PlugConnectedSettingsRegular,
+  PlugConnectedSettingsFilled
 } from "@fluentui/react-icons";
 
 import { platform } from "@tauri-apps/plugin-os";
@@ -30,19 +30,22 @@ import {
   Code2Icon,
 } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NavigationSidebar from "./nav";
 import { useExperiment } from "@/lib/experiment";
 import { useAuth } from "@/lib/auth/provider";
 
 import { AppsHome } from "./apps";
 
-import Changelog from "./changelogs";
 import SettingsPage from "./settings";
 import LibraryPage from "./library";
 import DeveloperPage from "./developer";
 import LabPage from "./lab";
 import { Disclaimer } from "./disclaimer";
+import Application from "./app";
+import SearchInterface from "./search";
+import { useExperiments } from "@/lib/experiments";
+import PluginPage from "./plugins";
 
 export const items: {
   name: string;
@@ -64,7 +67,7 @@ export const items: {
           style={{ color: "var(--win32-accent)" }}
         />
       ),
-      active: [9, 10, 11],
+      active: [9, 10, 11, 12],
       iconMobile: <LayoutGrid size="1.5em" />,
       iconMobileFilled: <LayoutGrid fill="currentcolor" size="1.5em" />,
     },
@@ -96,6 +99,20 @@ export const items: {
     //   iconMobileFilled: <User fill="currentcolor" size="1.5em" />,
     // },
     {
+      name: "Plugins",
+      id: 800,
+      hidden: () => (platform() == "android") || (useExperiments().plugins != true),
+      icon: <PlugConnectedSettingsRegular className="size-[1.5em]" />,
+      iconFilled: (
+        <PlugConnectedSettingsFilled
+          className="size-[1.5em]"
+          style={{ color: "var(--win32-accent)" }}
+        />
+      ),
+      iconMobile: <ToolboxRegular className="size-[1.5em]" />,
+      iconMobileFilled: <ToolboxFilled className="size-[1.5em]" />,
+    },
+    {
       name: "Developer",
       id: 3,
       hidden: () => !(useAuth()?.dev || false),
@@ -124,20 +141,6 @@ export const items: {
       iconMobileFilled: <Code2Icon className="size-[1.5em]" />,
     },
     {
-      name: "Updates",
-      id: 7,
-      hidden: () => !useMediaQuery("(min-width: 640px)"),
-      icon: <MegaphoneLoudRegular className="size-[1.5em]" />,
-      iconFilled: (
-        <MegaphoneLoudFilled
-          className="size-[1.5em]"
-          style={{ color: "var(--win32-accent)" }}
-        />
-      ),
-      iconMobile: <Settings size="1.5em" />,
-      iconMobileFilled: <Settings className="rotate-12" size="1.5em" />,
-    },
-    {
       name: "Settings",
       id: 8,
       icon: <SettingsRegular className="size-[1.5em]" />,
@@ -154,10 +157,27 @@ export const items: {
 
 export function ApplicationView() {
   const [item, setItem] = useState(0);
+  const [mTop, setmtop] = useState(0);
+  const [mBot, setmBot] = useState(0);
 
   const desktop = useMediaQuery("(min-width: 640px)");
 
-  const ui = useMemo(() => <GetJsx item={item} />, [item]);
+  const ui = useMemo(() => <GetJsx item={item} setItem={setItem} />, [item, setItem]);
+
+  const setMargins = () => {
+    // @ts-expect-error This is a custom fed data
+    if (window.topMargin) {
+      // @ts-expect-error This is a custom fed data
+      setmtop(window.topMargin);
+      // @ts-expect-error This is a custom fed data
+      setmBot(window.bottomMargin);
+    }
+  };
+
+  useEffect(() => {
+    setMargins();
+    setInterval(() => { setMargins() }, 5000);
+  }, []);
 
   if (desktop) {
     return (
@@ -174,24 +194,25 @@ export function ApplicationView() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden">
+    <div style={{ marginTop: mTop, marginBottom: mBot }} className="w-full h-full flex flex-col overflow-hidden" >
       <Disclaimer />
       <div className="h-full w-full flex flex-col space-y-2 p-2 overflow-scroll">
         {ui}
       </div>
       <BottomNavigation item={item} setItem={setItem} />
-    </div>
+    </div >
   );
 }
 
 interface Props {
   item: number;
+  setItem: React.Dispatch<React.SetStateAction<number>>;
 }
 
-function GetJsx({ item }: Props) {
+function GetJsx({ item, setItem }: Props) {
   switch (item) {
     case 0:
-      return <AppsHome />;
+      return <AppsHome set={(s) => setItem(s)} />;
     case 1:
       return <LibraryPage />;
     case 2:
@@ -200,19 +221,22 @@ function GetJsx({ item }: Props) {
       return <DeveloperPage />;
     case 6:
       return <LabPage />;
-    case 7:
-      return <Changelog />;
     case 8:
       return <SettingsPage />;
     case 9:
       // Search
-      return <SettingsPage />;
+      return <SearchInterface set={setItem} />;
     case 10:
       // AppList
-      return <SettingsPage />;
+      return <Application />;
     case 11:
       // DevInfo
       return <SettingsPage />;
+    case 12:
+      // CategoryView
+      return <Application />
+    case 800:
+      return <PluginPage />
     default:
       return <>Not Found</>;
   }
@@ -229,24 +253,27 @@ function BottomNavigation({
     <div className="dock dock-xl bg-neutral/30" style={{ position: "initial" }}>
       {items
         .filter((s) => !(s.hidden && s.hidden()))
-        .map((s) => (
-          <button
+        .map((s) => {
+          const isActive = s.id == item || (s.active && s.active.includes(item));
+
+          return <button
             key={`${s.id}`}
             className={
-              s.id === item ? "dock-active transition-all" : "transition-all"
+              isActive ? "dock-active transition-all" : "transition-all"
             }
             onClick={() => setItem(s.id)}
           >
             {platform() == "android"
-              ? s.id === item
+              ? isActive
                 ? s.iconMobileFilled
                 : s.iconMobile
-              : s.id === item
+              : isActive
                 ? s.iconFilled
                 : s.icon}
             <span className="dock-label">{s.name}</span>
           </button>
-        ))}
-    </div>
+        })
+      }
+    </div >
   );
 }

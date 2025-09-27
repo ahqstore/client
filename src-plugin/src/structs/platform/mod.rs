@@ -17,7 +17,7 @@ macro_rules! import {
 
 macro_rules! get_commit {
   ($x:ident) => {
-    &*$x.ahqstore().commits.lock().await
+    &*$x.ahqstore().commits.read().await
   };
 }
 

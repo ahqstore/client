@@ -12,6 +12,7 @@ import {
 } from "@fluentui/react-components";
 import { isWindows11 } from "src-plugin/dist-js";
 import { useExperiments } from "./experiments";
+import { AStorePluginManager } from "@/api/plugin/mgnt";
 
 const def = String(window.matchMedia("(prefers-color-scheme: dark)").matches);
 
@@ -84,7 +85,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
 
     fnTheme(windows, (value) => setMICAApplied(value), exp.forceVibrant);
+
+    AStorePluginManager.sendThemeUpdate();
   }, [exp, dark, windows]);
+
+  useEffect(() => {
+    // @ts-ignore
+    globalThis.themeData = {
+      dark,
+      vibrant: win32
+    };
+  }, [dark, win32]);
 
   return (
     <ThemeContext.Provider value={dark}>

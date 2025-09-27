@@ -10,6 +10,7 @@ interface CategoryProps {
   nearChevron?: React.ReactNode;
   openable?: boolean;
   normallyOpen?: boolean;
+  forceOpen?: boolean;
 }
 
 import { ChevronDown } from "lucide-react";
@@ -22,6 +23,7 @@ export function Category({
   nearChevron,
   openable = true,
   normallyOpen,
+  forceOpen = false
 }: CategoryProps) {
   const [open, setOpen] = useState(normallyOpen || false);
 
@@ -33,7 +35,7 @@ export function Category({
         className={`category w-full flex cursor-pointer text-muted-content dark:text-foreground p-3`}
         data-open={open ? "true" : "false"}
         onClick={() => {
-          if (openable) {
+          if (openable && !forceOpen) {
             setOpen((o) => !o)
           }
         }}
@@ -49,7 +51,7 @@ export function Category({
           {nearChevron}
         </div>
         <div className="chv p-1 my-auto rounded-md">
-          {openable && <ChevronDown size="1.75em" style={open ? { rotate: "180deg" } : {}} />}
+          {!forceOpen && (openable && <ChevronDown size="1.75em" style={open ? { rotate: "180deg" } : {}} />)}
         </div>
       </div>
 

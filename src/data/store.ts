@@ -65,6 +65,7 @@ export function useStore<T>(store: Store<T>): T {
     const sub = store.listen(listenFn);
 
     return () => {
+      console.info("Unregistering...");
       sub.unregister();
     };
   }, []);

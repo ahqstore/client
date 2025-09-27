@@ -12,7 +12,7 @@
   "app": {
     "windows": [],
     "security": {
-      "csp": null
+      "csp": "connect-src 'self' http://ipc.localhost ipc:;"
     }
   },
   "plugins": {

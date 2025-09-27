@@ -3,7 +3,7 @@
 use ahqstore_types::{get_all_commits, Commits};
 use serde::de::DeserializeOwned;
 use tauri::{
-  async_runtime::{self, Mutex},
+  async_runtime::{self, RwLock},
   plugin::PluginApi,
   AppHandle, Runtime,
 };
@@ -19,7 +19,7 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<Ahqstore<R>> {
-  let commits = Mutex::new(async_runtime::block_on(async {
+  let commits = RwLock::new(async_runtime::block_on(async {
     get_all_commits(None).await
   })?);
 
@@ -38,12 +38,12 @@ pub struct Ahqstore<R: Runtime> {
   pub(crate) handle: AppHandle<R>,
   #[cfg(mobile)]
   pub(crate) handle: PluginHandle<R>,
-  pub commits: Mutex<Commits>,
+  pub commits: RwLock<Commits>,
 }
 
 impl<R: Runtime> Ahqstore<R> {
   pub async fn refresh(&self) -> crate::Result<()> {
-    let mut lock = self.commits.lock().await;
+    let mut lock = self.commits.write().await;
 
     *lock = get_all_commits(None).await?;
 

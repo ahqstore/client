@@ -30,12 +30,25 @@ import { useMediaQuery } from "./hooks/use-media-query";
 import { useEffect, useState } from "react";
 import { ApplyAsDeveloper } from "./views/developer/applySelf";
 import { initPluginDaemonService } from "./api/plugin";
+import { useExperiments } from "./lib/experiments";
 
 function App() {
-  initPluginDaemonService();
-
   const auth = useAuth();
   const experiment = useExperiment();
+  const experiments = useExperiments();
+
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (platform() == "android") {
+      setReady(true)
+    } else if (experiments.plugins) {
+      initPluginDaemonService()
+        .then(() => setReady(true));
+    } else {
+      setReady(true);
+    }
+  }, [experiments]);
 
   const [isOpen, setOpen] = useState(false);
 
@@ -186,7 +199,7 @@ function App() {
           <ApplyAsDeveloper />
         </DialogSurface>
       </Dialog>
-      {useHome() == undefined ? <Loading /> : <ApplicationView />}
+      {useHome() == undefined || !ready ? <Loading /> : <ApplicationView />}
     </>
   );
 

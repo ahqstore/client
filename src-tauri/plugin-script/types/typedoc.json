@@ -1,0 +1,12 @@
+{
+  "entryPoints": ["./exports.d.ts"],
+  "out": "./docs",
+  "theme": "default",
+  "searchInComments": true,
+  "githubPages": true,
+  "gitRemote": "origin",
+  "favicon": "./icon.png",
+  "navigationLinks": {
+    "GitHub": "https://github.com/ahqstore"
+  }
+}

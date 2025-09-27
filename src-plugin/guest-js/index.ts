@@ -1,5 +1,5 @@
 import { Channel, invoke } from '@tauri-apps/api/core'
-import { AHQStoreApplication, DevData, type SearchEntry } from "ahqstore-types"
+import type { AHQStoreApplication, DevData } from "ahqstore-types"
 
 interface Commits {
   ahqstore: string,
@@ -95,7 +95,7 @@ export async function refreshCommit() {
 export const getCommit = async () => await invoke<Commits>("plugin:ahqstore|get_commit");
 
 export const search = async (query: string) => {
-  return await invoke<SearchEntry[]>("plugin:ahqstore|get_all_search", { query });
+  return await invoke<string[]>("plugin:ahqstore|get_all_search", { query });
 }
 
 export interface Home {
