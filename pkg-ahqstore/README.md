@@ -1,8 +1,8 @@
 # AHQ Store Plugin API
 
-This is an Plugin API Wrapper
+This is an Plugin API Wrapper. As you'd know AHQ Store Worker Plugins run in a specialized containerized environment called AHQStoreJS.
 
-Traditionally, AHQ Store Plugin API is based on **Web Workers** messages which are tedious to parse and the format keeps changing over time.
+This whole plugin is written using the runtimes and interfaces available in AHQStoreJS and will not work in environments like **NodeJS, Deno, Bun**.
 
 You only have to import the `Plugin` interface from `@ahqstore/plugin-api`
 

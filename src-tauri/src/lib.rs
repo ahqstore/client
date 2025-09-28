@@ -129,6 +129,16 @@ pub fn run() {
                 
                 html = plugin::get_state(_hwnd, id, state);
               }
+              "sett/" => {
+                let (id, state) = _plugin_id.split_once("}::{").unwrap_or(("", ""));
+                
+                let data: Vec<u8> = request.body().clone();
+                let data = String::from_utf8(data).unwrap();
+
+                plugin::set_state(_hwnd, id, state, data);
+
+                html = "OK".into();
+              }
               "asst/" => {
                 // Trusted process
                 let (id, path) = _plugin_id.split_once("}::{").unwrap_or(("", ""));

@@ -1,6 +1,6 @@
 {
   "name": "@ahqstore/plugin-api",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "A utility package to use AHQ Store Plugin API that doesn't break like the fragile internal low level ipc",
   "keywords": [
     "plugin",

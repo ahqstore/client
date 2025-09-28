@@ -206,6 +206,8 @@ export class AStorePluginManager {
   }
 }
 
+const AHQSTORE_PLUGIN_API_CURRENT = 0 as const;
+
 export class AStorePlugin {
   worker: Worker;
   capability: Capability[];
@@ -265,7 +267,7 @@ export class AStorePlugin {
             this.worker.postMessage({
               eventType: EventType.Response,
               status: ResponseStatus.Ok,
-              data: "Successful",
+              data: AHQSTORE_PLUGIN_API_CURRENT,
               refId: dat.refId
             } as CommunicationInterface);
             clearTimeout(closure);
@@ -339,6 +341,8 @@ export class AStorePlugin {
 
                 // TODO: Soon
 
+                return;
+              case EventName.RequestFetch:
                 return;
               default:
                 return;

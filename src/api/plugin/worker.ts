@@ -7,7 +7,7 @@ lockdown();
 let logs = 0;
 let lastLogAt = 0;
 
-const log = (c: any) => {
+const log = (...c: any) => {
   const now = Date.now();
 
   // Max 1 log every 200ms
@@ -22,7 +22,7 @@ const log = (c: any) => {
   logs += 1;
   lastLogAt = now;
 
-  console.log(c);
+  console.log(...c);
 }
 
 const c = new Compartment({
@@ -55,6 +55,11 @@ const c = new Compartment({
   Uint16Array,
   Int32Array,
   Float32Array,
+  URL,
+
+  // Decoding
+  TextDecoder,
+  TextEncoder,
 
   // Crypto
   crypto: self.crypto,
@@ -66,6 +71,13 @@ const c = new Compartment({
 });
 
 c.evaluate(`
+  globalThis.handleHostMessage = (messageEventData) => {
+    // The plugin's standard 'onmessage' handler is called here
+    globalThis.self.onmessage && globalThis.self.onmessage({ data: messageEventData });
+  };
+
+  console.log("Worker: Testing", URL);
+
   globalThis.self = globalThis;
 
   Object.assign(globalThis, { onmessage, postMessage, atob, btoa });
@@ -73,9 +85,14 @@ c.evaluate(`
 
 // main worker (host)
 const handlePluginMessage = (dat: any) => {
-  const data = JSON.stringify(dat);
+  const pluginHandler = c.globalThis.handleHostMessage;
 
-  c.evaluate(`self.onmessage && self.onmessage(${data})`);
+  if (typeof pluginHandler === 'function') {
+    pluginHandler(dat);
+  } else {
+    // Error handling if the plugin failed to initialize its handler
+    console.error("Plugin message handler is not available.");
+  }
 };
 
 self.onmessage = (d: MessageEvent<ArrayBuffer>) => {

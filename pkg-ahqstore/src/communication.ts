@@ -21,7 +21,11 @@ export enum EventName {
   RequestInjectCSS,
   RequestThemeData,
   RequestRestart,
-  RequestFetch
+  RequestFetch,
+  /**
+   * @requires v1
+   */
+  RequestUpdateState
 }
 
 /**

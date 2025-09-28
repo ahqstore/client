@@ -2,13 +2,11 @@ import { EventType, ResponseStatus, EventName, type CommunicationInterface } fro
 import type { AHQStoreApplication, RefId } from "ahqstore-types";
 
 /**
- * This declares the IPC version that this api is compatible with
+ * This declares the maximum IPC version that this api is compatible with
  * 
- * If this does not match with the one being emitted from the AHQ Store app
- * 
- * It'll error out
+ * This means that all the functions upto this api version is implemented
  */
-export const PLUGIN_IPC_INTERFACE_VERSION = 0 as const;
+export const PLUGIN_IPC_INTERFACE_VERSION = 1 as const;
 
 /**
  * An enum that defines capabilities that 
@@ -67,7 +65,19 @@ export enum Capability {
    * 
    * You can `HTTP` fetch any url, provided its https://
    */
-  HTTP
+  HTTP,
+  /**
+   * Allows HTTP Request to set timeouts longer than `10_000`ms
+   * 
+   * @requires API v1 else its a NOOP
+   */
+  InfiniteTimeout,
+  /**
+   * Allows to update the Plugin State.
+   * 
+   * @requires API v1 else its a NOOP
+   */
+  UpdatesState
 }
 
 /**
@@ -134,27 +144,41 @@ export interface FetchOptions {
    */
   body?: ArrayBuffer;
   cache?: "default" | "no-store" | "reload" | "no-cache" | "force-cache";
-  headers?: Headers;
+  headers?: Map<String, String>;
   redirect?: "follow" | "error" | "manual";
+  /**
+   * The time (in milliseconds) to wait before timing out the whole request
+   * 
+   * If omitted, defaults to `5000`ms
+   * If set to `Infinity`, waits for the whole request to respond no matter how long it takes
+   * 
+   * Must have `InfiniteTimeout` capability to set this to a number greater than `10_000`ms
+   * 
+   * @requires API v1 or else its NOOP and ignored
+   */
+  timeout?: number;
 }
 
 export interface HTTPOutputData {
   ok: boolean;
   status: number;
-  statusText: number;
+  statusText: string;
+  headers: Map<String, String>;
   body: ArrayBuffer;
 }
 
 export class HTTPOutput implements HTTPOutputData {
   ok: boolean;
   status: number;
-  statusText: number;
+  statusText: string;
+  headers: Map<String, String>;
   body: ArrayBuffer;
 
   constructor(data: HTTPOutputData) {
     this.ok = data.ok;
     this.status = data.status;
     this.statusText = data.statusText;
+    this.headers = data.headers;
     this.body = data.body;
   }
 
@@ -234,6 +258,7 @@ export class Plugin {
   private search?: SearchFn;
   private getApp?: GetApplicationFn;
   private getAppAsset?: GetApplicationAssetFn;
+  private interfaceApi: number = -1;
 
   /**
    * This abstracts away the complexities of the AHQStore Plugin api
@@ -288,7 +313,7 @@ export class Plugin {
           switch (payload.event) {
             case EventName.CommonStateUpdated:
               return "commonStateUpdate";
-            case EventName.CommonStateUpdated:
+            case EventName.OnThemeUpdate:
               return "themeUpdate";
             default:
               throw new Error("Impossible");
@@ -354,14 +379,14 @@ export class Plugin {
       this.sendRequest(data, (response) => {
         if (response.eventType == EventType.Response) {
           if (response.status == ResponseStatus.Ok) {
-            resolve(data.data as unknown as T);
+            resolve(response.data as unknown as T);
           } else {
             reject(`Error: ${response.status}. Outputs: ${response.data}`);
           }
         } else {
           reject("Unknown response");
         }
-      });
+      }, transfer);
     });
   }
 
@@ -380,7 +405,7 @@ export class Plugin {
    * @throws If it failed to initialize
    */
   async initialize() {
-    await this.sendAsyncRequest({
+    const apiVer = await this.sendAsyncRequest<number>({
       eventType: EventType.Request,
       event: EventName.RequestInitialization,
       refId: 0,
@@ -389,6 +414,12 @@ export class Plugin {
         newSourceName: this.newSourceName
       }
     });
+
+    if (typeof (apiVer) != "number") {
+      throw new Error("Unknown api version returned");
+    }
+
+    this.interfaceApi = apiVer;
 
     Plugin.#registered = true;
   }
@@ -404,6 +435,7 @@ export class Plugin {
    * @param css The css string to inject
    */
   async injectCustomCss(css: string) {
+    this.needsApi(0);
     this.ensure([Capability.UsesTheming]);
 
     await this.sendAsyncRequest({
@@ -424,6 +456,8 @@ export class Plugin {
    * @returns The theme data {@link ThemeData}
    */
   async getThemeData(): Promise<ThemeData> {
+    this.needsApi(0);
+
     this.ensure([Capability.UsesTheming]);
 
     return await this.sendAsyncRequest({
@@ -443,6 +477,8 @@ export class Plugin {
   * @param desc Explain why you would like to restart (optional, a template is already provided)
   */
   async requestRestart(desc: string = "A restart is required to apply custom theme data. Are you ready?") {
+    this.needsApi(0);
+
     this.ensure([Capability.RequestClientRestart]);
 
     await this.sendAsyncRequest({
@@ -463,6 +499,19 @@ export class Plugin {
    * @returns the {@link HTTPOutput} data type
    */
   async fetch(data: FetchOptions) {
+    this.needsApi(0);
+    this.ensure([Capability.HTTP]);
+
+    if (this.interfaceApi >= 1) {
+      if (!data.timeout) {
+        data.timeout = 5000;
+      }
+
+      if (data.timeout > 10_000) {
+        this.ensure([Capability.InfiniteTimeout]);
+      }
+    }
+
     const tooBigErr = "The provided body is too big. The hard limit is 50MB";
 
     if (data.body) {
@@ -509,6 +558,12 @@ export class Plugin {
     return c!!;
   }
 
+  private needsApi(api: number) {
+    if (api > this.interfaceApi) {
+      throw new Error(`This function requires a newer version of AHQStoreJS. Current version is ${this.interfaceApi} and at least AHQStoreJS ${api} is required`);
+    }
+  }
+
   private ensure(c: Capability[]) {
     if (!Plugin.#registered) {
       throw new Error(`Please register your plugin before you run any functions`);
@@ -524,7 +579,9 @@ export class Plugin {
 
     const error = errors.join(", ");
 
-    throw new Error(`${error} is not provided`)
+    if (unsatisfied.length != 0) {
+      throw new Error(`${error} is not provided`)
+    }
   }
 
   /**
@@ -547,6 +604,7 @@ export class Plugin {
    * @param fn The search fn itself
    */
   registerSearchFn(fn: SearchFn) {
+    this.needsApi(0);
     this.ensure([Capability.AppInstallationSource]);
 
     this.search = fn;
@@ -557,6 +615,7 @@ export class Plugin {
    * @param fn The fn itself
    */
   registerAppFetchFn(fn: GetApplicationFn) {
+    this.needsApi(0);
     this.ensure([Capability.AppInstallationSource]);
 
     this.getApp = fn;
@@ -567,6 +626,7 @@ export class Plugin {
    * @param fn The fn itself
    */
   registerAppAssetFetchFn(fn: GetApplicationAssetFn) {
+    this.needsApi(0);
     this.ensure([Capability.AppInstallationSource]);
 
     this.getAppAsset = fn;
@@ -581,7 +641,10 @@ export class Plugin {
     return this.capabilities.has(capability)
   }
 
-  on<T>(event: EmittedEvent, handler: (data: T) => {}): UnregisterFn {
+  on(event: "themeUpdate", handler: (data: ThemeData) => void): UnregisterFn;
+  on(event: "commonStateUpdate", handler: (data: undefined) => void): UnregisterFn;
+
+  on<T>(event: EmittedEvent, handler: (data: T) => void): UnregisterFn {
     this.ensure([Capability.RequestsEvents]);
 
     if (!this.emitters[event]) {
