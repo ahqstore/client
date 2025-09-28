@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ahqstore/plugin-api": "link:pkg-ahqstore",
-    "@fluentui/react-icons": "^2.0.310",
+    "@fluentui/react-icons": "^2.0.311",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.7",
@@ -40,9 +40,9 @@
   },
   "devDependencies": {
     "@fluentui/react-components": "^9.70.0",
-    "@rsbuild/core": "^1.5.9",
-    "@rsbuild/plugin-react": "^1.4.0",
-    "@rspack/core": "^1.5.5",
+    "@rsbuild/core": "^1.5.12",
+    "@rsbuild/plugin-react": "^1.4.1",
+    "@rspack/core": "^1.5.7",
     "@tauri-apps/cli": "^2.8.4",
     "@types/node": "^24.5.2",
     "@types/react": "^18.3.24",
