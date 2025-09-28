@@ -21,7 +21,7 @@ export enum Capability {
    *  - **CommonStateUpdated:** Emitted when the common state gets updated
    *  - **ThemeUpdate:** Emitted when the theme updates
    */
-  RequestsEvents,
+  RequestsEvents = 0,
   /**
    * This defines that this plugin also acts as an external
    * app installation source.
@@ -32,7 +32,7 @@ export enum Capability {
    * Please note that apps installed from external sources will never
    * be updated by AHQ Store
    */
-  AppInstallationSource,
+  AppInstallationSource = 1,
   /**
    * This means that the application is allowed to use state data that
    * is set by the `pluginUI.html` or `settings.html`
@@ -40,7 +40,7 @@ export enum Capability {
    * Generally Worker Plugins aren't allowed to access this state. But this
    * capability allows them to
    */
-  UsesState,
+  UsesState = 2,
   /**
    * This allows the app to inject custom css
    * like theme updates
@@ -51,7 +51,7 @@ export enum Capability {
    * 
    * like, if its dark mode or light mode, if vibrant visuals (transparency) is enabled etc
    */
-  UsesTheming,
+  UsesTheming = 3,
   /**
    * This allows your application to request Client (i.e. Application)
    * frontend restart.
@@ -59,25 +59,25 @@ export enum Capability {
    * This is useful for cases like CSS Theming, or CSS Injection
    * You can restart the client and then request `CSS Injection`
    */
-  RequestClientRestart,
+  RequestClientRestart = 4,
   /**
    * This gives access to the fetch api (no any other fancy api)
    * 
    * You can `HTTP` fetch any url, provided its https://
    */
-  HTTP,
+  HTTP = 5,
   /**
    * Allows HTTP Request to set timeouts longer than `10_000`ms
    * 
    * @requires API v1 else its a NOOP
    */
-  InfiniteTimeout,
+  InfiniteTimeout = 6,
   /**
    * Allows to update the Plugin State.
    * 
    * @requires API v1 else its a NOOP
    */
-  UpdatesState
+  UpdatesState = 7
 }
 
 /**
@@ -86,6 +86,13 @@ export enum Capability {
  * In AHQ Store these are just `string`s
  */
 export type AppId = string;
+
+/**
+ * Represents a version
+ * 
+ * In AHQ Store these are just `string`s
+ */
+export type Version = string;
 
 /**
  * Application Interface
@@ -102,9 +109,14 @@ export type App = AHQStoreApplication;
 export type SearchFn = (term: String) => Promise<AppId[]>;
 
 /**
+ * The function takes an appId to return the versions that are available
+ */
+export type GetApplicationVersionsFn = (appId: AppId) => Promise<Version[]>;
+
+/**
  * The function takes an appId to return the `Application` manifest that AHQ Store Uses
  */
-export type GetApplicationFn = (appId: AppId) => Promise<App>;
+export type GetApplicationFn = (appId: AppId, version: string) => Promise<App>;
 
 /**
  * The function takes the user's query as string and returns a list of AppId
@@ -144,7 +156,7 @@ export interface FetchOptions {
    */
   body?: ArrayBuffer;
   cache?: "default" | "no-store" | "reload" | "no-cache" | "force-cache";
-  headers?: Map<String, String>;
+  headers?: Record<string, string>;
   redirect?: "follow" | "error" | "manual";
   /**
    * The time (in milliseconds) to wait before timing out the whole request
@@ -163,7 +175,7 @@ export interface HTTPOutputData {
   ok: boolean;
   status: number;
   statusText: string;
-  headers: Map<String, String>;
+  headers: Record<string, string>;
   body: ArrayBuffer;
 }
 
@@ -171,7 +183,7 @@ export class HTTPOutput implements HTTPOutputData {
   ok: boolean;
   status: number;
   statusText: string;
-  headers: Map<String, String>;
+  headers: Record<string, string>;
   body: ArrayBuffer;
 
   constructor(data: HTTPOutputData) {
@@ -256,6 +268,7 @@ export class Plugin {
   private responseHandlingQueue: Map<RefId, InternalCallback> = new Map();
 
   private search?: SearchFn;
+  private getAppVer?: GetApplicationVersionsFn;
   private getApp?: GetApplicationFn;
   private getAppAsset?: GetApplicationAssetFn;
   private interfaceApi: number = -1;
@@ -266,7 +279,7 @@ export class Plugin {
    * This constructor also handles the IPC communication and gives you a quick way to community
    * via async wrappers
    * 
-   * Use {@link registerSearchFn}, {@link registerAppFetchFn}, {@link registerAppAssetFetchFn} to register
+   * Use {@link registerSearchFn}, {@link registerAppFetchFn}, {@link registerAppAssetFetchFn}, {@link registerAppVersionFetchFn} to register
    * handlers for the capability
    * 
    * ## You must call {@link initialize} afterwards
@@ -309,25 +322,32 @@ export class Plugin {
 
         this.responseHandlingQueue.delete(payload.refId);
       } else if (payload.eventType == EventType.Event) {
-        const ev: EmittedEvent = (() => {
+        const ev: EmittedEvent | null = (() => {
           switch (payload.event) {
             case EventName.CommonStateUpdated:
               return "commonStateUpdate";
             case EventName.OnThemeUpdate:
               return "themeUpdate";
             default:
-              throw new Error("Impossible");
+              console.warn(`Unknown event with id \`${payload.event}\``);
+              return null;
           }
         })();
 
-        this.emit(ev, payload.data);
+        if (ev !== null) {
+          this.emit(ev, payload.data);
+        }
       } else {
         const promise = (() => {
           switch (payload.event) {
             case EventName.Search:
               return this.nonNullPromise(this.search)(payload.data as string)
+            case EventName.AppVerFetch:
+              return this.nonNullPromise(this.getAppVer)(payload.data as string);
             case EventName.AppFetch:
-              return this.nonNullPromise(this.getApp)(payload.data as string)
+              const dataf: [string, string] = payload.data as any;
+
+              return this.nonNullPromise(this.getApp)(dataf[0] as string, dataf[1] as string);
             case EventName.AppAssetFetch:
               const data: [string, string] = payload.data as any;
 
@@ -425,6 +445,41 @@ export class Plugin {
   }
 
   /**
+   * Gets the capabilities that your worker plugin is registered with
+   * 
+   * This requires you to get the plugin initialized
+   * 
+   * @returns A list of capabilities
+   */
+  getCapabilities(): Set<Capability> {
+    this.ensure([]);
+
+    return this.capabilities;
+  }
+
+  /**
+   * Gets the api version that AHQ Store Supports
+   * 
+   * This requires you to get the plugin initialized
+   * 
+   * @returns API Version as number
+   */
+  getHostApi(): number {
+    this.ensure([]);
+
+    return this.interfaceApi;
+  }
+
+  /**
+   * Gets the target api that the plugin is **intended** to work with.
+   * @returns API Version as number
+   */
+  getTargetApi(): number {
+    return PLUGIN_IPC_INTERFACE_VERSION;
+  }
+
+
+  /**
    * Injects the provided css into the client gui application
    * 
    * ## NOTE
@@ -443,6 +498,44 @@ export class Plugin {
       event: EventName.RequestInjectCSS,
       data: css,
       refId: 0
+    });
+  }
+
+  /**
+   * Gets the state under the stateId specified
+   * @param stateId ID (file of the state)
+   * @returns The string data of the state
+   */
+  async getState(stateId: string): Promise<string> {
+    this.needsApi(0);
+    this.ensure([Capability.UsesState]);
+
+    return await this.sendAsyncRequest<string>({
+      eventType: EventType.Request,
+      refId: 0,
+      event: EventName.RequestState,
+      data: stateId
+    });
+  }
+
+  /**
+   * Sets the state under the stateId specified
+   * @param stateId ID (file of the state)
+   * @param stateData Data of the state to update it with
+   * @returns The string data of the state
+   */
+  async setState(stateId: string, stateData: string): Promise<string> {
+    this.needsApi(1);
+    this.ensure([Capability.UpdatesState]);
+
+    return await this.sendAsyncRequest<string>({
+      eventType: EventType.Request,
+      refId: 0,
+      event: EventName.RequestUpdateState,
+      data: {
+        stateId,
+        stateData
+      }
     });
   }
 
@@ -494,6 +587,9 @@ export class Plugin {
    * Performs an HTTP request like the `fetch` api
    * 
    * The maximum size of the body is 50MB
+   * 
+   * ## Note
+   * - This function consumes the body and you don't get the array buffer back
    * 
    * @param data Please read the information at {@link FetchOptions}
    * @returns the {@link HTTPOutput} data type
@@ -566,10 +662,13 @@ export class Plugin {
 
   private ensure(c: Capability[]) {
     if (!Plugin.#registered) {
-      throw new Error(`Please register your plugin before you run any functions`);
+      throw new Error(`Plugin not registered. Did you forget to run \`await register()\`?`);
     }
 
-    const unsatisfied = c.filter((cap) => !this.capabilities.has(cap));
+    const unsatisfied = c
+      .filter((cap) => !this.capabilities.has(cap))
+      .map((cap) => Capability[cap])
+      .filter((cap): cap is string => cap !== undefined);
 
     let errors: string[] = [];
 
@@ -611,7 +710,7 @@ export class Plugin {
   }
 
   /**
-   * Register a function and overrides the current function meant to prove application metadata
+   * Register a function and overrides the current function meant to provide application metadata
    * @param fn The fn itself
    */
   registerAppFetchFn(fn: GetApplicationFn) {
@@ -622,7 +721,18 @@ export class Plugin {
   }
 
   /**
-   * Register a function and overrides the current function meant to prove application metadata
+   * Register a function and overrides the current function meant to provide application versions
+   * @param fn The fn itself
+   */
+  registerAppVersionFetchFn(fn: GetApplicationVersionsFn) {
+    this.needsApi(0);
+    this.ensure([Capability.AppInstallationSource]);
+
+    this.getAppVer = fn;
+  }
+
+  /**
+   * Register a function and overrides the current function meant to provide application metadata
    * @param fn The fn itself
    */
   registerAppAssetFetchFn(fn: GetApplicationAssetFn) {

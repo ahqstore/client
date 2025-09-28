@@ -9,23 +9,24 @@
  * @experimental
  */
 export enum EventName {
-  Search,
-  AppFetch,
-  AppAssetFetch,
+  Search = 0,
+  AppFetch = 1,
+  AppVerFetch = 12,
+  AppAssetFetch = 2,
 
-  OnThemeUpdate,
-  CommonStateUpdated,
+  OnThemeUpdate = 3,
+  CommonStateUpdated = 4,
 
-  RequestInitialization,
-  RequestState,
-  RequestInjectCSS,
-  RequestThemeData,
-  RequestRestart,
-  RequestFetch,
+  RequestInitialization = 5,
+  RequestState = 6,
+  RequestInjectCSS = 7,
+  RequestThemeData = 8,
+  RequestRestart = 9,
+  RequestFetch = 10,
   /**
    * @requires v1
    */
-  RequestUpdateState
+  RequestUpdateState = 11
 }
 
 /**
@@ -35,9 +36,9 @@ export enum EventName {
  * @experimental
  */
 export enum EventType {
-  Request,
-  Event,
-  Response
+  Request = 0,
+  Event = 1,
+  Response = 2
 }
 
 /**
@@ -48,13 +49,13 @@ export enum EventType {
  * @experimental
  */
 export enum ResponseStatus {
-  Unauthorized,
-  ServerError,
+  Unauthorized = 0,
+  ServerError = 1,
   /**
    * Request to terminate the plugin
    */
-  Error_Terminate,
-  Ok
+  Error_Terminate = 2,
+  Ok = 3
 }
 
 /**
