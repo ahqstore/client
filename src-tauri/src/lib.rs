@@ -236,7 +236,9 @@ async fn set_state(app: WebviewWindow, state: String, data: String) {
   let plugin = get_plugin_name(app.label());
 
   #[cfg(desktop)]
-  _ = app.emit_to(EventTarget::webview_window("main"), "state-update", plugin);
+  {
+    _ = app.emit_to(EventTarget::webview_window("main"), "state-update", plugin);
+  }
 
   #[cfg(desktop)]
   plugin::set_state(app.app_handle(), plugin, &state, data);
