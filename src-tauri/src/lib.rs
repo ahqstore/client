@@ -217,7 +217,11 @@ async fn get_state(app: WebviewWindow, state: String) -> String {
 
   let plugin = get_plugin_name(app.label());
 
-  plugin::get_state(app.app_handle(), plugin, &state)
+  #[cfg(desktop)]
+  return plugin::get_state(app.app_handle(), plugin, &state);
+
+  #[cfg(not(desktop))]
+  return "".into();
 }
 
 #[tauri::command]
@@ -231,8 +235,10 @@ async fn set_state(app: WebviewWindow, state: String, data: String) {
 
   let plugin = get_plugin_name(app.label());
 
+  #[cfg(desktop)]
   _ = app.emit_to(EventTarget::webview_window("main"), "state-update", plugin);
 
+  #[cfg(desktop)]
   plugin::set_state(app.app_handle(), plugin, &state, data);
 }
 
