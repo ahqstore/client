@@ -20,6 +20,7 @@
   "author": "A. Chakraborty <ahqsecret@gmail.com> (@ahqsoftwares)",
   "types": "./exports.d.ts",
   "scripts": {
+    "build:docs:legacy": "typedoc --options typedoc-legacy.json --out legacy",
     "build:docs": "typedoc"
   },
   "exports": {

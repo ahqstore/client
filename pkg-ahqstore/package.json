@@ -37,8 +37,9 @@
     "./dist/**/*"
   ],
   "scripts": {
-    "build": "tsdown --options typedoc.json",
-    "dev": "tsdown --options typedoc.json --watch",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "build:docs:legacy": "typedoc --options typedoc-legacy.json --out legacy",
     "build:docs": "typedoc",
     "dev:docs": "typedoc --watch"
   },
