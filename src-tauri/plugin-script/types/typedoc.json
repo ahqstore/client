@@ -1,6 +1,5 @@
 {
   "entryPoints": ["./exports.d.ts"],
-  "out": "./docs",
   "theme": "default",
   "searchInComments": true,
   "githubPages": true,
@@ -8,5 +7,14 @@
   "favicon": "./icon.png",
   "navigationLinks": {
     "GitHub": "https://github.com/ahqstore"
+  },
+  "out": "./docs/@ahqstore/plugin-script",
+  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
+  "docsRoot": "./docs",
+  "sidebar": {
+    "autoConfiguration": true,
+    "format": "vitepress",
+    "pretty": false,
+    "collapsed": true
   }
 }
