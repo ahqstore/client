@@ -17,5 +17,12 @@
     "format": "vitepress",
     "pretty": false,
     "collapsed": true
+  },
+  "searchInComments": true,
+  "githubPages": true,
+  "gitRemote": "origin",
+  "favicon": "./icon.png",
+  "navigationLinks": {
+    "GitHub": "https://github.com/ahqstore"
   }
 }

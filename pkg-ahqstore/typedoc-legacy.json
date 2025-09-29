@@ -8,5 +8,12 @@
     "typescript": {
       "fetch": "https://developer.mozilla.org/en-US/docs/Web/API/fetch"
     }
+  },
+  "searchInComments": true,
+  "githubPages": true,
+  "gitRemote": "origin",
+  "favicon": "./icon.png",
+  "navigationLinks": {
+    "GitHub": "https://github.com/ahqstore"
   }
 }
