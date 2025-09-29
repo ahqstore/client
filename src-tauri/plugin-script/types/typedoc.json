@@ -8,7 +8,7 @@
   "navigationLinks": {
     "GitHub": "https://github.com/ahqstore"
   },
-  "out": "./docs/@ahqstore/plugin-script",
+  "out": "./docs/@ahqstore/env-types",
   "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
   "docsRoot": "./docs",
   "sidebar": {
