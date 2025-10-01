@@ -23,8 +23,6 @@ export async function setKeyToCache(key: string, val: [AHQStoreApplication, stri
   if (commit != ahqstoreCommit) {
     commit = ahqstoreCommit;
     cache.clear();
-
-    return undefined;
   }
 
   cache.set(key, val);
