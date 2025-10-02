@@ -22,7 +22,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.6.0",
+    "@tauri-apps/api": "^2.8.0",
     "ahqstore-types": "link:..\\src-ahqstore-types\\pkg"
   },
   "devDependencies": {
