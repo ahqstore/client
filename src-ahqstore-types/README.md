@@ -1,7 +1,6 @@
-# ahqstore-types
+# AHQ Store Types
 
-Types used by AHQ Store app
+This is an internal crate and does not follow **SemVer** and any release is likely
+to break.
 
-**NOTE:** This crate is used internally by AHQ Store Organisation projects for sharing the unified app schema and protocol signatures
-
-THIS CRATE DOES NOT FOLLOW SEMANTIC VERSIONING
+> For internal use only
