@@ -88,7 +88,7 @@ impl AHQStoreApplication {
 
     result.push_str(&self.validate_resource());
 
-    if let Some(ver) = self.usrVersion {
+    if let Some(ver) = &self.usrVersion {
       if !ver.is_ascii() {
         result.push_str("❌ Version of not plain ascii\n");
       }
