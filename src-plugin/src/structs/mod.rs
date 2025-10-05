@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use std::sync::Arc;
+
 use ahqstore_types::{get_all_commits, Commits};
 use serde::de::DeserializeOwned;
 use tauri::{
@@ -10,18 +12,20 @@ use tauri::{
 
 #[cfg(mobile)]
 use tauri::plugin::PluginHandle;
+use tokio::sync::Mutex;
 
-use crate::models::*;
+use crate::{models::*, structs::daemon::{IPCSend, initialize}};
 
 pub(crate) mod platform;
+pub(crate) mod daemon;
 
 pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<Ahqstore<R>> {
-  let commits = RwLock::new(async_runtime::block_on(async {
+  let commits = Arc::new(RwLock::new(async_runtime::block_on(async {
     get_all_commits(None).await
-  })?);
+  })?));
 
   Ok(Ahqstore {
     #[cfg(desktop)]
@@ -29,6 +33,7 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
     #[cfg(mobile)]
     handle: _api.register_android_plugin("com.plugin.ahqstore", "AHQStorePlugin")?,
     commits,
+    send_to_ipc: Mutex::new(None),
   })
 }
 
@@ -38,10 +43,19 @@ pub struct Ahqstore<R: Runtime> {
   pub(crate) handle: AppHandle<R>,
   #[cfg(mobile)]
   pub(crate) handle: PluginHandle<R>,
-  pub commits: RwLock<Commits>,
+  pub commits: Arc<RwLock<Commits>>,
+  pub send_to_ipc: Mutex<Option<IPCSend>>,
 }
 
 impl<R: Runtime> Ahqstore<R> {
+  pub fn init(&self, hwnd: AppHandle<R>) {
+    let mut lock = self.send_to_ipc.blocking_lock();
+
+    if lock.is_none() {
+      *lock = Some(initialize(hwnd, self.commits.clone()));
+    }
+  }
+
   pub async fn refresh(&self) -> crate::Result<()> {
     let mut lock = self.commits.write().await;
 

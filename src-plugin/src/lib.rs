@@ -65,6 +65,9 @@ pub fn init() -> TauriPlugin<tauri::Wry> {
 
       app.manage(ahqstore);
 
+      app.ahqstore()
+        .init(app.clone());
+
       Ok(())
     })
     .build()
