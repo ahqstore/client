@@ -85,7 +85,9 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
   #[cfg(any(target_os = "linux", windows))]
   {
     use tauri_plugin_deep_link::DeepLinkExt;
-    app.deep_link().register_all().expect("Unable to register");
+    if app.deep_link().register_all().is_err() {
+      println!("[ERR] Could not register DEEP Link");
+    }
   }
 
   println!("Building Tray Icon");
