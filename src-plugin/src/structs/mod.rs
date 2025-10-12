@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use ahqstore_types::{get_all_commits, Commits};
-use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use tauri::{
   async_runtime::{self, RwLock},
   plugin::PluginApi,
@@ -34,7 +34,48 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
     handle: _api.register_android_plugin("com.plugin.ahqstore", "AHQStorePlugin")?,
     commits,
     send_to_ipc: Mutex::new(None),
+    preferences: Arc::new(RwLock::new(Preferences::init(app)))
   })
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum AutoUpdate {
+  Never,
+  CheckOnly,
+  UpdateDuringWifi,
+  Always
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Preferences {
+  #[serde(rename = "autoUpdate")]
+  pub auto_update: AutoUpdate
+}
+
+impl Preferences {
+  pub fn init<R: Runtime>(h: &AppHandle<R>) -> Self {
+    #[cfg(desktop)]
+    {
+      use std::fs::read_to_string;
+      use tauri::Manager;
+
+      let mut set_path = h.path().app_local_data_dir().expect("Impossible error");
+      
+      set_path.push("config.json");
+
+      return serde_json::from_str(&read_to_string(&set_path).unwrap_or_default()).unwrap_or(
+        Self {
+          auto_update: AutoUpdate::CheckOnly
+        }
+      );
+    }
+
+    #[cfg(mobile)]
+    // Only a polyfill
+    return Self {
+      auto_update: AutoUpdate::CheckOnly
+    };
+  }
 }
 
 /// Access to the ahqstore APIs.
@@ -43,6 +84,7 @@ pub struct Ahqstore<R: Runtime> {
   pub(crate) handle: AppHandle<R>,
   #[cfg(mobile)]
   pub(crate) handle: PluginHandle<R>,
+  pub preferences: Arc<RwLock<Preferences>>,
   pub commits: Arc<RwLock<Commits>>,
   pub send_to_ipc: Mutex<Option<IPCSend>>,
 }

@@ -2,6 +2,9 @@ use tauri::AppHandle;
 
 use ahqstore_types::{AHQStoreApplication, DownloadUrl};
 
+pub mod notify;
+pub mod install;
+
 pub fn is_supported(_: &AppHandle, app: &AHQStoreApplication) -> crate::Result<bool> {
   Ok(app.is_supported())
 }
