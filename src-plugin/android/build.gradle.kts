@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.10"
+    kotlin("plugin.serialization") version "2.2.20"
 }
 
 android {
@@ -42,6 +43,7 @@ android {
 }
 
 dependencies {
+    val ktor_version = "3.3.0"
     val ackpineVersion = "0.15.3"
 
     implementation("ru.solrudev.ackpine:ackpine-core:$ackpineVersion")
@@ -51,6 +53,10 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.work:work-runtime-ktx:2.10.3")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
+
+    implementation("io.ktor:ktor-client-core:${ktor_version}")
+    implementation("io.ktor:ktor-client-cio:${ktor_version}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
     // Get Full Compose
     implementation("androidx.compose.material3:material3")

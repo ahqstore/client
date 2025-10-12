@@ -13,6 +13,8 @@ import android.util.Log
 import android.view.Window
 import android.view.WindowInsets
 import android.webkit.WebView
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -91,6 +93,18 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
   override fun load(webView: WebView) {
     this.webView = webView
 
+    val callback = object : OnBackPressedCallback(true) {
+      override fun handleOnBackPressed() {
+        webView.evaluateJavascript("""
+          window.backPressed()
+        """.trimIndent()) {
+
+        }
+      }
+    }
+
+    (activity as AppCompatActivity).onBackPressedDispatcher.addCallback(callback)
+
     windowInset(webView, activity.window)
 
     Log.w("Enqueued", "Periodic Work Running")
@@ -124,6 +138,31 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
     Log.w("Enqueued", "Periodic Work Registered")
 
     this.dataSync()
+  }
+
+  @Command
+  fun close(i: Invoke) {
+    activity.finish()
+
+    i.resolve()
+  }
+
+  @Command
+  fun getCommit(invoke: Invoke) {
+    val ctx = this.activity.baseContext!!
+
+    scope.launch {
+      invoke.resolve(CommitInfo(ctx).getCommit())
+    }
+  }
+
+  @Command
+  fun updateCommit(invoke: Invoke) {
+    val ctx = this.activity.baseContext!!
+
+    scope.launch {
+      invoke.resolve(CommitInfo(ctx).fetchUpdateCommit())
+    }
   }
 
   @Command

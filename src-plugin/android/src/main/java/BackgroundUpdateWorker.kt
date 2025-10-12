@@ -39,10 +39,14 @@ class BackgroundUpdateWorker(ctx: Context, params: WorkerParameters): CoroutineW
 
   override suspend fun doWork(): Result {
     val store = UpdateWorkerStore(this.applicationContext)
+    val commit = CommitInfo(this.applicationContext)
 
     createNotificationChannel()
 
     try {
+      // Fetch & Updates Commit Information
+      commit.fetchUpdateCommit()
+
       val available = check(this.applicationContext, store, false)
 
       if (available) {

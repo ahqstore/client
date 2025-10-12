@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import app.tauri.annotation.InvokeArg
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -17,32 +18,33 @@ val Context.updateState: DataStore<Preferences> by preferencesDataStore(name = "
 val AutoUpdatePrefs = stringPreferencesKey("AUTOUPDATE")
 val AppsToUpdateList = stringPreferencesKey("AppsToUpdate")
 
+@InvokeArg
 enum class AutoUpdatePreference {
-  Skip,
-  Notify,
-  UpdateOverWifiNonMetered,
-  UpdateOverWifiMetered,
-  UpdateOverMobileData
+  Never,
+  CheckOnly,
+  UpdateDuringUnmeteredWifi,
+  UpdateDuringMeteredWifi,
+  Always
 }
 
 fun toString(pref: AutoUpdatePreference): String {
   return when (pref) {
-    AutoUpdatePreference.Skip -> "Skip"
-    AutoUpdatePreference.Notify -> "Notify"
-    AutoUpdatePreference.UpdateOverWifiNonMetered -> "UpdateOverWifiNonMetered"
-    AutoUpdatePreference.UpdateOverWifiMetered -> "UpdateOverWifiMetered"
-    AutoUpdatePreference.UpdateOverMobileData -> "UpdateOverMobileData"
+    AutoUpdatePreference.Never -> "Skip"
+    AutoUpdatePreference.CheckOnly -> "Notify"
+    AutoUpdatePreference.UpdateDuringUnmeteredWifi -> "UpdateOverWifiNonMetered"
+    AutoUpdatePreference.UpdateDuringMeteredWifi -> "UpdateOverWifiMetered"
+    AutoUpdatePreference.Always -> "UpdateOverMobileData"
   }
 }
 
 fun fromString(value: String): AutoUpdatePreference {
   return when (value) {
-    "Skip" -> AutoUpdatePreference.Skip
-    "Notify" -> AutoUpdatePreference.Notify
-    "UpdateOverWifiNonMetered" -> AutoUpdatePreference.UpdateOverWifiNonMetered
-    "UpdateOverWifiMetered" -> AutoUpdatePreference.UpdateOverWifiMetered
-    "UpdateOverMobileData" -> AutoUpdatePreference.UpdateOverMobileData
-    else -> AutoUpdatePreference.Skip
+    "Skip" -> AutoUpdatePreference.Never
+    "Notify" -> AutoUpdatePreference.CheckOnly
+    "UpdateOverWifiNonMetered" -> AutoUpdatePreference.UpdateDuringUnmeteredWifi
+    "UpdateOverWifiMetered" -> AutoUpdatePreference.UpdateDuringMeteredWifi
+    "UpdateOverMobileData" -> AutoUpdatePreference.Always
+    else -> AutoUpdatePreference.Never
   }
 }
 
@@ -71,11 +73,22 @@ class UpdatePreferencesState() {
 
   suspend fun shallUpdateCheck(): Boolean {
     return when (this.getAutoUpdatePreference()) {
-      AutoUpdatePreference.Skip -> false
-      AutoUpdatePreference.Notify -> true
-      AutoUpdatePreference.UpdateOverWifiNonMetered -> isWifi() && !isWifiMetered()
-      AutoUpdatePreference.UpdateOverWifiMetered -> true
-      AutoUpdatePreference.UpdateOverMobileData -> true
+      AutoUpdatePreference.Never -> false
+      else -> isConnectedToInternet()
+    }
+  }
+
+  suspend fun shallUpdate(): Boolean {
+    if (!isConnectedToInternet()) {
+      return false
+    }
+
+    return when (this.getAutoUpdatePreference()) {
+      AutoUpdatePreference.Never -> false
+      AutoUpdatePreference.CheckOnly -> false
+      AutoUpdatePreference.UpdateDuringUnmeteredWifi -> isWifi() && !isWifiMetered()
+      AutoUpdatePreference.UpdateDuringMeteredWifi -> isWifi()
+      AutoUpdatePreference.Always -> isWifi() || isCellular()
     }
   }
 
@@ -92,12 +105,25 @@ class UpdatePreferencesState() {
     }
   }
 
+  private fun getActiveNetworkCapabilities() : NetworkCapabilities? {
+    val man = this.ctx.getSystemService(ConnectivityManager::class.java)
+
+    val network = man.activeNetwork
+    val capability = man.getNetworkCapabilities(network)
+
+    return capability
+  }
+
+  fun isConnectedToInternet(): Boolean {
+    val capability = getActiveNetworkCapabilities()
+
+    return capability?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+  }
+
+
   fun isCellular(): Boolean {
     try {
-      val man = this.ctx.getSystemService(ConnectivityManager::class.java)!!
-
-      val network = man.activeNetwork
-      val capability = man.getNetworkCapabilities(network)
+      val capability = getActiveNetworkCapabilities()
 
       return capability!!.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
     } catch (e: Exception) {
@@ -107,12 +133,9 @@ class UpdatePreferencesState() {
 
   fun isWifiMetered(): Boolean {
     try {
-      val man = this.ctx.getSystemService(ConnectivityManager::class.java)!!
+      val capability = getActiveNetworkCapabilities()
 
-      val network = man.activeNetwork
-      val capability = man.getNetworkCapabilities(network)!!
-
-      return !capability.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+      return !(capability?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) ?: true)
     } catch (e: Exception) {
       return false;
     }

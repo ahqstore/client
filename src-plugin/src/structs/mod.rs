@@ -42,7 +42,8 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub enum AutoUpdate {
   Never,
   CheckOnly,
-  UpdateDuringWifi,
+  UpdateDuringUnmeteredWifi,
+  UpdateDuringMeteredWifi,
   Always
 }
 
