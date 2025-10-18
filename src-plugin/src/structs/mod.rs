@@ -72,7 +72,7 @@ pub struct Preferences {
 
 impl Preferences {
   #[cfg(mobile)]
-  pub fn init<R: Runtime>(h: &AppHandle<T>, m: &PluginHandle<R>) -> crate::Result<Self> {
+  pub fn init<R: Runtime>(h: &AppHandle<R>, m: &PluginHandle<R>) -> crate::Result<Self> {
     // Only a polyfill
     return Ok(Self {
       auto_update: AutoUpdate::CheckOnly
