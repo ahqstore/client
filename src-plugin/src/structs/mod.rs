@@ -35,7 +35,7 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
   let commits = Arc::new(RwLock::new(
     mobile
     .run_mobile_plugin::<Commits>("getCommit", ())
-    .map_err(Into::into)?
+    .map_err(Into::<crate::Error>::into)?
   ));
 
   #[cfg(mobile)]
