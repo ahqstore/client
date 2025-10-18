@@ -23,18 +23,35 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<Ahqstore<R>> {
+  #[cfg(desktop)]
   let commits = Arc::new(RwLock::new(async_runtime::block_on(async {
     get_all_commits(None).await
   })?));
+
+  #[cfg(mobile)]
+  let mobile = _api.register_android_plugin("com.plugin.ahqstore", "AHQStorePlugin")?;
+
+  #[cfg(mobile)]
+  let commits = Arc::new(RwLock::new(
+    mobile
+    .run_mobile_plugin::<Commits>("getCommit", ())
+    .map_err(Into::into)?
+  ));
+
+  #[cfg(mobile)]
+  let prefs = Preferences::init(app, &mobile)?;
+
+  #[cfg(desktop)]
+  let prefs = Preferences::init(app)?;
 
   Ok(Ahqstore {
     #[cfg(desktop)]
     handle: app.clone(),
     #[cfg(mobile)]
-    handle: _api.register_android_plugin("com.plugin.ahqstore", "AHQStorePlugin")?,
+    handle: mobile,
     commits,
     send_to_ipc: Mutex::new(None),
-    preferences: Arc::new(RwLock::new(Preferences::init(app)))
+    preferences: Arc::new(RwLock::new(prefs))
   })
 }
 
@@ -54,28 +71,28 @@ pub struct Preferences {
 }
 
 impl Preferences {
-  pub fn init<R: Runtime>(h: &AppHandle<R>) -> Self {
-    #[cfg(desktop)]
-    {
-      use std::fs::read_to_string;
-      use tauri::Manager;
-
-      let mut set_path = h.path().app_local_data_dir().expect("Impossible error");
-      
-      set_path.push("config.json");
-
-      return serde_json::from_str(&read_to_string(&set_path).unwrap_or_default()).unwrap_or(
-        Self {
-          auto_update: AutoUpdate::CheckOnly
-        }
-      );
-    }
-
-    #[cfg(mobile)]
+  #[cfg(mobile)]
+  pub fn init<R: Runtime>(h: &AppHandle<T>, m: &PluginHandle<R>) -> crate::Result<Self> {
     // Only a polyfill
-    return Self {
+    return Ok(Self {
       auto_update: AutoUpdate::CheckOnly
-    };
+    });
+  }
+
+  #[cfg(desktop)]
+  pub fn init<R: Runtime>(h: &AppHandle<R>) -> crate::Result<Self> {
+    use std::fs::read_to_string;
+    use tauri::Manager;
+
+    let mut set_path = h.path().app_local_data_dir()?;
+      
+    set_path.push("config.json");
+
+    return Ok(serde_json::from_str(&read_to_string(&set_path).unwrap_or_default()).unwrap_or(
+      Self {
+        auto_update: AutoUpdate::CheckOnly
+      }
+    ));
   }
 }
 
@@ -99,12 +116,31 @@ impl<R: Runtime> Ahqstore<R> {
     }
   }
 
+  #[cfg(desktop)]
   pub async fn refresh(&self) -> crate::Result<()> {
     let mut lock = self.commits.write().await;
 
     *lock = get_all_commits(None).await?;
 
     Ok(())
+  }
+
+  #[cfg(mobile)]
+  pub async fn refresh(&self) -> crate::Result<()> {
+    let mut lock = self.commits.write().await;
+
+    *lock = self.refresh_commit_android().await?;
+
+    Ok(())
+  }
+
+  #[cfg(mobile)]
+  pub async fn refresh_commit_android(&self) -> crate::Result<Commits> {
+    self
+      .handle
+      .run_mobile_plugin_async("updateCommit", ())
+      .await
+      .map_err(Into::into)
   }
 
   #[cfg(mobile)]
@@ -116,18 +152,20 @@ impl<R: Runtime> Ahqstore<R> {
   }
 
   #[cfg(mobile)]
-  pub fn show_code(&self, code: String) -> crate::Result<()> {
+  pub async fn show_code(&self, code: String) -> crate::Result<()> {
     self
       .handle
-      .run_mobile_plugin("showCode", ShowCodeRequest { value: code })
+      .run_mobile_plugin_async("showCode", ShowCodeRequest { value: code })
+      .await
       .map_err(Into::into)
   }
 
   #[cfg(mobile)]
-  pub fn zoom(&self, zoom: f32) -> crate::Result<()> {
+  pub async fn zoom(&self, zoom: f32) -> crate::Result<()> {
     self
       .handle
-      .run_mobile_plugin("zoom", ZoomRequest { zoom: zoom * 100.0 })
+      .run_mobile_plugin_async("zoom", ZoomRequest { zoom: zoom * 100.0 })
+      .await
       .map_err(Into::into)
   }
 }

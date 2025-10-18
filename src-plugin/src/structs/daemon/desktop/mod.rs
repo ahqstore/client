@@ -4,7 +4,7 @@ use ahqstore_types::Commits;
 use tauri::Runtime;
 use tokio::{sync::{RwLock, broadcast::Sender, mpsc::UnboundedReceiver}, time::sleep};
 
-use crate::structs::{Ahqstore, daemon::{ReceivedData, SendRequest}};
+use crate::structs::{Ahqstore, daemon::{ReceivedData, SendRequest}, platform};
 
 pub async fn daemon<R: Runtime>(_: &Ahqstore<R>, commits: Arc<RwLock<Commits>>, tx: Sender<Arc<ReceivedData>>, rx: UnboundedReceiver<SendRequest>) {
   let mut next_check = 0u64;

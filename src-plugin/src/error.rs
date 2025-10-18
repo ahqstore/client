@@ -10,6 +10,9 @@ pub enum Error {
   UnsupportedPlatform,
 
   #[error(transparent)]
+  Tauri(#[from] tauri::Error),
+
+  #[error(transparent)]
   Io(#[from] std::io::Error),
 
   #[error(transparent)]

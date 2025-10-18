@@ -10,8 +10,8 @@ pub mod downloader;
 
 macro_rules! import {
   ($($x:tt)*) => {
-    mod $($x)*;
-    use $($x)* as platform;
+    pub mod $($x)*;
+    pub use $($x)* as os;
   };
 }
 
@@ -53,11 +53,11 @@ pub async fn download(
 
   let hwnd = handle.clone();
   let stat = tokio::spawn(async move {
-    if !platform::is_supported(&hwnd, &app)? {
+    if !os::is_supported(&hwnd, &app)? {
       return Err(Error::UnsupportedPlatform);
     }
 
-    let (Some(url), Some(extension)) = platform::get_download(&app) else {
+    let (Some(url), Some(extension)) = os::get_download(&app) else {
       return err!("Could not get data");
     };
 

@@ -47,7 +47,7 @@ pub(crate) async fn set_scale(window: tauri::WebviewWindow, scale: f64) {
   let _ = window.set_zoom(scale);
 
   #[cfg(mobile)]
-  let _ = window.app_handle().ahqstore().zoom(scale as f32);
+  let _ = window.app_handle().ahqstore().zoom(scale as f32).await;
 }
 
 #[tauri::command]
@@ -116,8 +116,8 @@ pub(crate) fn hash_username(username: String) -> String {
 
 #[command(async)]
 #[cfg(mobile)]
-pub(crate) fn show_code<R: Runtime>(app: AppHandle<R>, code: String) {
-  app.ahqstore().show_code(code);
+pub(crate) async fn show_code<R: Runtime>(app: AppHandle<R>, code: String) {
+  app.ahqstore().show_code(code).await;
 }
 
 #[command(async)]
