@@ -33,7 +33,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import java.io.File
 import java.util.Vector
@@ -54,7 +56,7 @@ class Data {
   var data: String = ""
 }
 
-fun windowInset(web: WebView, window: Window) {
+suspend fun windowInset(web: WebView, window: Window) {
   val rootView = window.decorView
 
   var top: Int
@@ -70,13 +72,15 @@ fun windowInset(web: WebView, window: Window) {
     bottom = insets.systemWindowInsetBottom
   }
 
-  web.evaluateJavascript(
-    """
-      window.topMargin = $top
-      window.bottomMargin = $bottom
-    """.trimIndent()
-  ) {
+  withContext(Dispatchers.Main) {
+    web.evaluateJavascript(
+      """
+        window.topMargin = $top;
+        window.bottomMargin = $bottom;
+      """.trimIndent()
+    ) {
 
+    }
   }
 }
 
@@ -89,6 +93,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
   private val updatePref = UpdatePreferencesState(activity)
   private val updateWorkerState = UpdateWorkerStore(activity)
   private val installHelper = InstallerHelper(activity)
+  private val com = CommitInfo(activity)
 
   override fun load(webView: WebView) {
     this.webView = webView
@@ -105,7 +110,12 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
 
     (activity as AppCompatActivity).onBackPressedDispatcher.addCallback(callback)
 
-    windowInset(webView, activity.window)
+    scope.launch {
+      while (true) {
+        windowInset(webView, activity.window)
+        delay(1500)
+      }
+    }
 
     Log.w("Enqueued", "Periodic Work Running")
 
@@ -152,7 +162,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
     val ctx = this.activity.baseContext!!
 
     scope.launch {
-      invoke.resolve(CommitInfo(ctx).getCommit())
+      invoke.resolve(com.getCommit())
     }
   }
 
@@ -161,7 +171,7 @@ class AHQStorePlugin(private val activity: Activity): Plugin(activity) {
     val ctx = this.activity.baseContext!!
 
     scope.launch {
-      invoke.resolve(CommitInfo(ctx).fetchUpdateCommit())
+      invoke.resolve(com.fetchUpdateCommit())
     }
   }
 
