@@ -14,6 +14,6 @@ pub async fn daemon<R: Runtime>(_: &Ahqstore<R>, commits: Arc<RwLock<Commits>>, 
 
 
 
-    sleep(Duration::from_millis(100));
+    sleep(Duration::from_millis(100)).await;
   }
 }
