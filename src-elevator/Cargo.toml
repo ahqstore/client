@@ -1,0 +1,11 @@
+[package]
+name = "elevateinstall"
+description = "Elevates installation of AHQ Store Applications"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+windortortent = { git = "https://github.com/ahqstore/windortortent", version = "0.0.1" }
+
+[build-dependencies]
+tauri-winres = "0.3.3"

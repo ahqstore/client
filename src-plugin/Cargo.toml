@@ -3,7 +3,7 @@ name = "tauri-plugin-ahqstore"
 version = "1.0.0"
 authors = ["AHQ"]
 edition = "2021"
-rust-version = "1.77.2"
+rust-version = "1.82"
 exclude = ["/examples", "/dist-js", "/guest-js", "/node_modules"]
 links = "tauri-plugin-ahqstore"
 
@@ -22,7 +22,12 @@ lazy_static = "1"
 reqwest = { version = "0.12", default-features = false, features = [
   "rustls-tls",
 ] }
-tokio = { version = "1", features = ["time", "sync"] }
+tokio = { version = "1", features = ["time", "sync", "fs"] }
+windows = { version = "0.62", features = [
+  "Networking_Connectivity",
+  "Win32_Security",
+] }
+futures = "0.3.31"
 
 [target.'cfg(windows)'.dependencies]
 msi = "0.9"

@@ -3,6 +3,15 @@ use tauri::{AppHandle, Manager, Runtime};
 
 use anyhow::Result;
 
+#[cfg(desktop)]
+pub mod desktop;
+
+pub enum ConnectionType {
+  Disconnected,
+  Metered,
+  Unmetered
+}
+
 pub fn downloads<R: Runtime>(handle: &AppHandle<R>) -> Result<PathBuf> {
   let mut dir = handle.path().app_cache_dir()?;
 

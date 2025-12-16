@@ -1,3 +1,10 @@
+use tao::event_loop::EventLoopBuilder;
+
 fn main() {
-  println!("Hello, world!");
+  let ev = EventLoopBuilder::new()
+    .build();
+
+  ev.run(|| {
+
+  });
 }
