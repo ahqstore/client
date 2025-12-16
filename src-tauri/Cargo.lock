@@ -56,7 +56,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-updater",
  "tauri-plugin-window-state",
- "windows 0.62.2",
+ "windows 0.61.3",
  "zip 5.1.1",
 ]
 
