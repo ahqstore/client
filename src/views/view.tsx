@@ -30,7 +30,7 @@ import {
   Code2Icon,
 } from "lucide-react";
 
-import { useEffect, useMemo, useState } from "react";
+import { JSX, useEffect, useMemo, useState } from "react";
 import NavigationSidebar from "./nav";
 import { useExperiment } from "@/lib/experiment";
 import { useAuth } from "@/lib/auth/provider";

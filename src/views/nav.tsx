@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { items } from "./view";
 
 function NavigationItem({
@@ -13,8 +14,8 @@ function NavigationItem({
   name: string;
   id: number;
   i: number;
-  icon: JSX.Element;
-  iconFilled: JSX.Element;
+  icon: ReactNode;
+  iconFilled: ReactNode;
   active?: number[];
   item: number;
   setItem: (_: number) => void;
