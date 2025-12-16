@@ -157,7 +157,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install wasm-pack
-        run: | 
+        run: |
           npm i -g npm@latest
           npm i -g wasm-pack
         working-directory: src-ahqstore-types
@@ -358,7 +358,7 @@ jobs:
           export NDK_HOME="$ANDROID_NDK_HOME"
 
           pnpm install
-          pnpm tauri android build --apk ${{ matrix.args }}
+          pnpm tauri android build --apk true ${{ matrix.args }}
         env:
           CI: "false"
 
@@ -456,7 +456,7 @@ jobs:
 
       - name: Build Tauri App
         id: tauri-app
-        uses: tauri-apps/tauri-action@dev
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI }}
