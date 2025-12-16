@@ -157,7 +157,9 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install wasm-pack
-        run: npm i -g wasm-pack
+        run: | 
+          npm i -g npm@latest
+          npm i -g wasm-pack
         working-directory: src-ahqstore-types
 
       - name: Build NPM Binaries
@@ -168,8 +170,6 @@ jobs:
         run: npm publish --access public
         working-directory: src-ahqstore-types/pkg
         continue-on-error: true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AHQSTORE_TYPES }}
 
       - name: Publish plugin api
         run: |
@@ -178,8 +178,6 @@ jobs:
           npm publish --access public
         working-directory: pkg-ahqstore
         continue-on-error: true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AHQSTORE_TYPES }}
 
       - name: Publish environment types
         run: |
@@ -193,8 +191,6 @@ jobs:
           cd ..
         working-directory: src-tauri/plugin-script
         continue-on-error: true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AHQSTORE_TYPES }}
 
   make-setup:
     needs: create-release
