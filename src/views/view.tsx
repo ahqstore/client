@@ -46,6 +46,7 @@ import Application from "./app";
 import SearchInterface from "./search";
 import { useExperiments } from "@/lib/experiments";
 import PluginPage from "./plugins";
+import { CategoryView } from "./category";
 
 export const items: {
   name: string;
@@ -234,7 +235,7 @@ function GetJsx({ item, setItem }: Props) {
       return <SettingsPage />;
     case 12:
       // CategoryView
-      return <Application />
+      return <CategoryView set={setItem} />
     case 800:
       return <PluginPage />
     default:

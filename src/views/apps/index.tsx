@@ -9,6 +9,8 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRef } from "react";
 import { searchQueryData } from "@/data/implementations/searchData";
 
+import "./apps.css"
+
 export function AppsHome({ set }: { set: (_: number) => void }) {
   const splash = useSplash();
   const home = useHome();
@@ -131,7 +133,7 @@ export function AppsHome({ set }: { set: (_: number) => void }) {
                 onClick={() => {
                   if (isTablet) {
                     categoryView.data = index;
-                    set(11);
+                    set(12);
                   }
                 }}
               >
@@ -144,11 +146,14 @@ export function AppsHome({ set }: { set: (_: number) => void }) {
                   className="all"
                   onClick={() => {
                     categoryView.data = index;
-                    set(11);
+                    set(12);
                   }}
                 >
                   <ArrowRight className="arrow" />
                 </button>
+              </div>
+              <div>
+                <span className="text-secondary-content">{apps[1].length <= 1 ? `${apps[1].length} app` : `${apps[1].length} apps`}</span>
               </div>
               <div>
                 {apps[1].slice(0, 4).map((app) => (

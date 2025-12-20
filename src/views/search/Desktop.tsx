@@ -31,30 +31,26 @@ export default function DesktopVerticalPanel({ appId, set }: PanelProps) {
       (async () => {
         const [app, icon] = await getAppWrapped(appId);
 
-        setApp([app, icon]);
+        if (app.displayImages.length != 0) {
+          const iconId = app.displayImages[0];
 
-        if (app != undefined) {
-          if (app.displayImages.length != 0) {
-            const iconId = app.displayImages[0];
+          const img = await getAppAsset(appId, iconId.toString());
+          const blob = new Blob([img as unknown as any]);
 
-            getAppAsset(appId, iconId.toString())
-              .then(async (img) => {
-                const blob = new Blob([img as unknown as any]);
+          let uri = URL.createObjectURL(blob);
+          if (appId.startsWith("f:")) {
+            const data = await fetch(await blob.text())
+            const b = await data.blob();
 
-                let uri = URL.createObjectURL(blob);
-                if (appId.startsWith("f:")) {
-                  const data = await fetch(await blob.text())
-                  const b = await data.blob();
-
-                  uri = URL.createObjectURL(b);
-                }
-
-                setImage(uri);
-              });
-          } else {
-            setImage("null");
+            uri = URL.createObjectURL(b);
           }
+
+          setImage(uri);
+        } else {
+          setImage("null");
         }
+
+        setApp([app, icon]);
       })();
     }
   }, [inView]);
