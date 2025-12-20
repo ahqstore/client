@@ -1,3 +1,5 @@
+@reference "../../App.css";
+
 .hero {
   @apply min-w-full max-w-full lg:min-w-[58%] lg:max-w-[58%] xl:min-w-[65%] xl:max-w-[65%] lg:h-96 md:h-80 h-40 rounded-lg;
 
@@ -6,7 +8,7 @@
 }
 
 .hero div:nth-child(1) {
-  @apply absolute top-0 left-0 w-full h-80 lg:h-96 z-0 from-primary-foreground/70 to-primary-foreground/15 bg-gradient-to-br;
+  @apply absolute top-0 left-0 w-full h-80 lg:h-96 z-0 from-primary-foreground/70 to-primary-foreground/15 bg-linear-to-br;
 }
 
 .hero div:nth-child(2) {
@@ -36,7 +38,7 @@
 }
 
 .cards {
-  @apply max-h-[100%] grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-5 w-full;
+  @apply max-h-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-5 w-full;
 }
 
 .cards > div {
@@ -46,7 +48,7 @@
 .cards > div > div:nth-child(1) {
   font-family: Arial, sans-serif;
   @apply absolute z-0 w-full h-full left-0 top-0 rounded-lg;
-  @apply from-primary-foreground/10 hover:from-primary-foreground/0 via-primary-foreground/10 to-primary-foreground/40 bg-gradient-to-br;
+  @apply from-primary-foreground/10 hover:from-primary-foreground/0 via-primary-foreground/10 to-primary-foreground/40 bg-linear-to-br;
 
   @apply flex flex-col items-end justify-end p-2 px-4;
   @apply text-xl md:text-muted font-bold;

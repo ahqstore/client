@@ -5,6 +5,8 @@ import { openApplicationState } from "@/data/implementations/appView";
 import { getAppWrapped } from "@/api/fetchApps";
 import { useInView } from "react-intersection-observer";
 
+import "./app.css";
+
 export function AppBox({ appId, set }: { appId: string, set: (_: number) => void }) {
   const [application, setApp] = useState<"loading" | AHQStoreApplication>("loading")
   const [img, setImg] = useState<string | undefined>(undefined);

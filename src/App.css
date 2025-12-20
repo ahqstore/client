@@ -5,10 +5,6 @@
 @plugin "tailwindcss-animate";
 
 @plugin "daisyui";
-
-/* Pages */
-@import "./views/apps/app.css";
-
 /* Views */
 @import "./views/view.css";
 
@@ -226,12 +222,12 @@
 
   /* Toast */
   [data-sonner-toast][data-styled="true"] {
-    @apply !bg-[var(--colorNeutralBackground1)];
+    @apply bg-[--colorNeutralBackground1]!;
   }
 
   /* Modal UI */
   .r1u3t6p6 {
-    @apply !bg-[var(--colorNeutralBackground1)]/90;
+    @apply bg-[--colorNeutralBackground1]/90!;
   }
 
   .dark {
