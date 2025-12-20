@@ -13,6 +13,7 @@
     "core:window:allow-toggle-maximize",
     "core:window:allow-close",
     "core:window:allow-is-closable",
+    "core:event:allow-emit",
     "autostart:allow-enable",
     "autostart:allow-disable",
     "autostart:allow-is-enabled",

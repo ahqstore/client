@@ -126,7 +126,7 @@ export default function Settings() {
 
       <Separator />
 
-      <Label className="mr-auto !text-xl">Advanced</Label>
+      <Label className="mr-auto text-xl!">Advanced</Label>
 
       <ConfigSelect
         title="Refetch Data"
@@ -144,13 +144,13 @@ export default function Settings() {
 
       <Separator />
 
-      <Label className="mr-auto !text-xl">Attributions</Label>
+      <Label className="mr-auto text-xl!">Attributions</Label>
 
       <Category
         title="About Us"
         description="Making App Distribution Accessible to Everyone"
         Icon={function (props: { size: string; }) {
-          return <img src="/icon.png" style={{ width: props.size, height: props.size }} />;
+          return <img src="/icon.png" style={{ width: props.size, height: props.size, minWidth: props.size, minHeight: props.size, maxWidth: props.size, maxHeight: props.size }} />;
         } as any}
       >
         <></>

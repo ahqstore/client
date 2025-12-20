@@ -10,6 +10,8 @@ import ShowSpinner from "../spinner";
 import DesktopVerticalPanel from "./Desktop";
 import MobileVerticalPanel from "./Mobile";
 
+import "./search.css";
+
 export default function SearchInterface({ set }: { set: (_: number) => void }) {
   const value = useStore(searchQueryData);
 

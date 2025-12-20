@@ -10,8 +10,6 @@
 @import "./views/apps/app.css";
 @import "./views/apps/apps.css";
 
-@import "./views/search/search.css";
-
 /* Views */
 @import "./views/view.css";
 
@@ -191,7 +189,6 @@
 }
 
 @layer base {
-
   html,
   body {
     background: transparent !important;
@@ -212,18 +209,24 @@
 
   /* Update the switch color */
   .ffp7eso,
-  .rsji9ng:enabled:checked~.fui-Switch__indicator {
-    background-color: color-mix(in srgb,
-        var(--win32-accent) 60%, var(--color-neutral) 10%) !important;
+  .rsji9ng:enabled:checked ~ .fui-Switch__indicator {
+    background-color: color-mix(
+      in srgb,
+      var(--win32-accent) 60%,
+      var(--color-neutral) 10%
+    ) !important;
   }
 
   .ffp7eso:hover {
-    background-color: color-mix(in srgb,
-        var(--win32-accent) 40%, white 100%) !important;
+    background-color: color-mix(
+      in srgb,
+      var(--win32-accent) 40%,
+      white 100%
+    ) !important;
   }
 
   /* Toast */
-  [data-sonner-toast][data-styled=true] {
+  [data-sonner-toast][data-styled="true"] {
     @apply !bg-[var(--colorNeutralBackground1)];
   }
 
@@ -233,23 +236,26 @@
   }
 
   .dark {
-
     .ffp7eso,
-    .rsji9ng:enabled:checked~.fui-Switch__indicator {
-      background-color: color-mix(in srgb,
-          var(--win32-accent) 90%,
-          white 75%) !important;
+    .rsji9ng:enabled:checked ~ .fui-Switch__indicator {
+      background-color: color-mix(
+        in srgb,
+        var(--win32-accent) 90%,
+        white 75%
+      ) !important;
     }
 
     .ffp7eso:hover {
-      background-color: color-mix(in srgb,
-          var(--win32-accent) 50%, white 80%) !important;
+      background-color: color-mix(
+        in srgb,
+        var(--win32-accent) 50%,
+        white 80%
+      ) !important;
     }
   }
 }
 
 html:not(.not-win) {
-
   body,
   #root,
   .fxugw4r {
@@ -259,9 +265,11 @@ html:not(.not-win) {
 
 .stylish {
   @apply shadow-lg;
-  background: color-mix(in srgb,
-      transparent 5%,
-      var(--color-neutral-content) 5%) !important;
+  background: color-mix(
+    in srgb,
+    transparent 5%,
+    var(--color-neutral-content) 5%
+  ) !important;
 }
 
 .animate * {
@@ -282,7 +290,7 @@ html:not(.not-win) {
   }
 }
 
-.readd>div {
+.readd > div {
   @apply flex flex-col gap-2;
 }
 

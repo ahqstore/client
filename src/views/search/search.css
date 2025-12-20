@@ -1,12 +1,15 @@
+@reference "../../App.css";
+
 /* Mobile Version */
 /* TODO: Make it better */
+
 .search-results {
   @apply grid gap-2 md:gap-4 mb-32 grid-cols-1;
 }
 
-
-.search-results div {
-  @apply w-full h-24;
+.search-results > div {
+  @apply w-full h-24 flex flex-col cursor-pointer rounded-xl p-4;
+  @apply bg-accent/3 sm:bg-accent/15 dark:bg-neutral-content/3 dark:sm:bg-neutral-content/15 hover:dark:bg-neutral-content/10;
 }
 
 @media (min-width: 800px) {
@@ -15,7 +18,10 @@
     grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)) !important;
   }
 
-  .search-results div {
-    @apply h-[20rem];
+  .search-results > div {
+    @apply break-inside-avoid rounded-xl p-4 cursor-pointer transition-all;
+
+    @apply bg-accent/3 sm:bg-accent/15 dark:bg-neutral-content/3 dark:sm:bg-neutral-content/15 hover:dark:bg-neutral-content/10;
+    @apply h-64;
   }
 }
