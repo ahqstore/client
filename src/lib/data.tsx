@@ -7,6 +7,9 @@ import {
 } from "react";
 import { getHome, Home as HomeInterface } from "tauri-plugin-ahqstore-api";
 
+let homeStateRef: [string, string[]][] | undefined = undefined;
+export const getHomeRef = () => homeStateRef;
+
 const Home = createContext<[string, string[]][] | undefined>(undefined);
 const Splash = createContext<HomeInterface["splash"]>(undefined);
 
@@ -16,6 +19,10 @@ export const useSplash = () => useContext(Splash);
 export function HomeProvider({ children }: { children: ReactNode }) {
   const [home, setHome] = useState<[string, string[]][] | undefined>(undefined);
   const [splash, setSplash] = useState<HomeInterface["splash"]>(undefined);
+
+  useEffect(() => {
+    homeStateRef = home;
+  }, [home]);
 
   useEffect(() => {
     console.log("Loading home...");

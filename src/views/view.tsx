@@ -20,6 +20,9 @@ import {
 } from "@fluentui/react-icons";
 
 import { platform } from "@tauri-apps/plugin-os";
+
+import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
+
 import {
   Library,
   LayoutGrid,
@@ -30,8 +33,9 @@ import {
   Code2Icon,
 } from "lucide-react";
 
-import { JSX, useEffect, useMemo, useState } from "react";
 import NavigationSidebar from "./nav";
+
+import { JSX, useEffect, useMemo, useState } from "react";
 import { useExperiment } from "@/lib/experiment";
 import { useAuth } from "@/lib/auth/provider";
 
@@ -47,6 +51,10 @@ import SearchInterface from "./search";
 import { useExperiments } from "@/lib/experiments";
 import PluginPage from "./plugins";
 import { CategoryView } from "./category";
+import { UnlistenFn } from "@tauri-apps/api/event";
+
+import { close, DeepLink, DeepLinkMeta } from "./deeplink";
+import { matchParseDeepLink } from "./parser";
 
 export const items: {
   name: string;
@@ -161,6 +169,44 @@ export function ApplicationView() {
   const [mTop, setmtop] = useState(0);
   const [mBot, setmBot] = useState(0);
 
+  const [meta, setMeta] = useState<DeepLinkMeta>(close);
+
+  // const itemRef = useRef(item);
+
+  // useEffect(() => {
+  //   itemRef.current = item;
+  // }, [item]);
+
+  useEffect(() => {
+    let unlisten: UnlistenFn | undefined;
+
+    const hwnd = (path: string) => {
+      const data = matchParseDeepLink(path);
+
+      if (data) setMeta(data);
+    };
+
+    (async () => {
+      const current = await getCurrent();
+
+      if (current && current.length >= 1) {
+        const path = current[0];
+        hwnd(path);
+      }
+
+      unlisten = await onOpenUrl((urls) => {
+        if (urls.length >= 1) {
+          const path = urls[0];
+          hwnd(path);
+        }
+      });
+    })()
+
+    return (() => {
+      if (unlisten) unlisten();
+    });
+  }, []);
+
   const desktop = useMediaQuery("(min-width: 640px)");
 
   const ui = useMemo(() => <GetJsx item={item} setItem={setItem} />, [item, setItem]);
@@ -187,6 +233,7 @@ export function ApplicationView() {
           <NavigationSidebar item={item} setItem={setItem} />
         </div>
         <Disclaimer />
+        <DeepLink meta={meta} setMeta={setMeta} set={setItem} />
         <div className="w-full h-full flex flex-col space-y-2 rounded-tl-xl p-3 bg-muted/30 border border-muted dark:border-none border-b-0 border-r-0 overflow-y-scroll">
           {ui}
         </div>
@@ -197,6 +244,7 @@ export function ApplicationView() {
   return (
     <div style={{ marginTop: mTop, marginBottom: mBot }} className="w-full h-full flex flex-col overflow-hidden" >
       <Disclaimer />
+      <DeepLink meta={meta} setMeta={setMeta} set={setItem} />
       <div className="h-full w-full flex flex-col space-y-2 p-2 overflow-scroll">
         {ui}
       </div>

@@ -107,7 +107,6 @@ pub fn run() {
       let _pt1 = path.get(1..=5).unwrap_or("");
       let _plugin_id = path.get(6..).unwrap_or("");
 
-
       let mut html = "".to_string();
 
       #[cfg(desktop)]
@@ -126,12 +125,12 @@ pub fn run() {
               }
               "stat/" => {
                 let (id, state) = _plugin_id.split_once("}::{").unwrap_or(("", ""));
-                
+
                 html = plugin::get_state(_hwnd, id, state);
               }
               "sett/" => {
                 let (id, state) = _plugin_id.split_once("}::{").unwrap_or(("", ""));
-                
+
                 let data: Vec<u8> = request.body().clone();
                 let data = String::from_utf8(data).unwrap();
 

@@ -1,4 +1,6 @@
 import { defineConfig } from '@rsbuild/core';
+
+import { pluginBabel } from '@rsbuild/plugin-babel';
 import { pluginReact } from "@rsbuild/plugin-react";
 
 import path from "path"
@@ -6,9 +8,15 @@ import path from "path"
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [pluginReact({
-    fastRefresh: true
-  })],
+  plugins: [
+    pluginReact(),
+    pluginBabel({
+      include: /\.(?:jsx|tsx)$/,
+      babelLoaderOptions(opts) {
+        opts.plugins?.unshift('babel-plugin-react-compiler');
+      },
+    }),
+  ],
   html: {
     template: './index.html',
   },

@@ -14,6 +14,8 @@
     "core:window:allow-close",
     "core:window:allow-is-closable",
     "core:event:allow-emit",
+    "deep-link:default",
+    "deep-link:allow-get-current",
     "autostart:allow-enable",
     "autostart:allow-disable",
     "autostart:allow-is-enabled",

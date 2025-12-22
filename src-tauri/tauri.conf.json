@@ -23,7 +23,7 @@
       ]
     },
     "deep-link": {
-      "mobile": [{ "host": "ahqstore.github.io", "pathPrefix": ["/view"] }],
+      "mobile": [{ "scheme": ["ahqstore"], "appLink": false }],
       "desktop": {
         "schemes": ["ahqstore"]
       }

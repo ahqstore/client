@@ -9,7 +9,7 @@ use std::sync::LazyLock;
 pub static FDROID_COMMIT_URL: &'static str =
   "https://api.github.com/repos/ahqstore/repo_android/commits";
 pub static FDROID_BASE_URL: &'static str =
-  "https://rawcdn.githack.com/ahqstore/repo_android/{COMMIT}";
+  "https://cdn.jsdelivr.net/gh/ahqstore/repo_android@{COMMIT}";
 
 pub static FDROID_APP_URL: LazyLock<String> =
   LazyLock::new(|| format!("{FDROID_BASE_URL}/db/apps/{{APP_ID}}.json"));

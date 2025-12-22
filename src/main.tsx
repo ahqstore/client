@@ -1,3 +1,17 @@
+import { scan } from "react-scan/all-environments";
+
+try {
+  const item = localStorage.getItem("experiments")!;
+  const d = JSON.parse(item);
+
+  if (d.toolbox) {
+    scan({
+      enabled: true
+    });
+  }
+} catch (_) { }
+
+
 import ReactDOM from "react-dom/client";
 import App from "./App";
 

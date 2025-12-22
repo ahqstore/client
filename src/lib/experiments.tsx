@@ -1,4 +1,4 @@
-import { Bug, Cable, SearchIcon } from "lucide-react";
+import { Bug, Cable, ToolboxIcon, SearchIcon } from "lucide-react";
 import {
   createContext,
   ReactNode,
@@ -8,11 +8,17 @@ import {
 } from "react";
 
 export interface Experiments {
+  toolbox?: boolean;
   plugins?: boolean;
   forceVibrant?: boolean;
 }
 
 export const docs: { [key: string]: { docs: string, title: string, Icon: typeof SearchIcon } } = {
+  toolbox: {
+    docs: "Enables developer toolbox (FPS + heatmap) in AHQ Store",
+    title: "Enable Toolbox",
+    Icon: ToolboxIcon
+  },
   plugins: {
     docs: "Enables plugins for Desktop Build for AHQ Store",
     title: "Enable Plugins",

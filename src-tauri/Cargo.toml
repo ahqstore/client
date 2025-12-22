@@ -36,4 +36,4 @@ tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"
 
-zip = "5"
+zip = "7"

@@ -1,6 +1,6 @@
 import { getAppWrapped } from "@/api/fetchApps";
 import { openApplicationState } from "@/data/implementations/appView";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import { useInView } from "react-intersection-observer";
 import { AHQStoreApplication } from "src-ahqstore-types/pkg/ahqstore_types";
@@ -10,7 +10,7 @@ export interface PanelProps {
   set: (_: number) => void;
 }
 
-export default function DesktopVerticalPanel({ appId, set }: PanelProps) {
+const MobileVerticalPanel = memo(function MobileVerticalPanel({ appId, set }: PanelProps) {
   const { ref, inView } = useInView({
     threshold: 0,
     triggerOnce: true
@@ -46,4 +46,6 @@ export default function DesktopVerticalPanel({ appId, set }: PanelProps) {
       <h2 className="overflow-hidden line-clamp-1">{app.description || "Click to view more"}</h2>
     </div>
   </div>;
-}
+});
+
+export default MobileVerticalPanel;

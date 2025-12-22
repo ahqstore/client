@@ -9,7 +9,7 @@ use std::sync::LazyLock;
 pub static WINGET_COMMIT_URL: &'static str =
   "https://api.github.com/repos/ahqstore/repo_win32/commits";
 pub static WINGET_BASE_URL: &'static str =
-  "https://rawcdn.githack.com/ahqstore/repo_win32/{COMMIT}";
+  "https://cdn.jsdelivr.net/gh/ahqstore/repo_win32@{COMMIT}";
 
 pub static WINGET_APP_URL: LazyLock<String> =
   LazyLock::new(|| format!("{WINGET_BASE_URL}/db/apps/{{APP_ID}}.json"));

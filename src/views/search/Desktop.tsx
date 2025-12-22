@@ -1,6 +1,6 @@
 import { getAppWrapped } from "@/api/fetchApps";
 import { openApplicationState } from "@/data/implementations/appView";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import { useInView } from "react-intersection-observer";
 import { AHQStoreApplication } from "src-ahqstore-types/pkg/ahqstore_types";
@@ -11,7 +11,7 @@ export interface PanelProps {
   set: (_: number) => void;
 }
 
-export default function DesktopVerticalPanel({ appId, set }: PanelProps) {
+const DesktopVerticalPanel = memo(function DesktopVerticalPanel({ appId, set }: PanelProps) {
   const { ref, inView } = useInView({
     threshold: 0,
     triggerOnce: true
@@ -75,4 +75,6 @@ export default function DesktopVerticalPanel({ appId, set }: PanelProps) {
     </div>}
     {image != "null" && <img className="h-full w-full overflow-hidden border-0 rounded-xl dark:bg-neutral-content/10" src={image} />}
   </div>
-}
+});
+
+export default DesktopVerticalPanel;
