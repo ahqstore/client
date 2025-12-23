@@ -232,8 +232,10 @@ export function ApplicationView() {
         <div className="animate h-full w-24 flex flex-col gap-2 px-1 pb-2 items-center text-center overflow-hidden overflow-y-scroll">
           <NavigationSidebar item={item} setItem={setItem} />
         </div>
-        <Disclaimer />
+
         <DeepLink meta={meta} setMeta={setMeta} set={setItem} />
+        <Disclaimer />
+
         <div className="w-full h-full flex flex-col space-y-2 rounded-tl-xl p-3 bg-muted/30 border border-muted dark:border-none border-b-0 border-r-0 overflow-y-scroll">
           {ui}
         </div>
@@ -243,8 +245,9 @@ export function ApplicationView() {
 
   return (
     <div style={{ marginTop: mTop, marginBottom: mBot }} className="w-full h-full flex flex-col overflow-hidden" >
-      <Disclaimer />
       <DeepLink meta={meta} setMeta={setMeta} set={setItem} />
+      <Disclaimer />
+
       <div className="h-full w-full flex flex-col space-y-2 p-2 overflow-scroll">
         {ui}
       </div>
