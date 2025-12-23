@@ -30,3 +30,19 @@ export async function getAppWrapped(appId: string): Promise<[AHQStoreApplication
 
   return [app, uri];
 }
+
+export const getRepo = (app: AHQStoreApplication) => {
+  switch (app.appId[0]) {
+    case "f":
+      return "F-Droid";
+    case "w":
+      return "Winget";
+    case "l":
+      return "AppImageHub";
+    // This is the community repository, so fetch the exact repository
+    case "a":
+      return `${app.repo.author}/${app.repo.repo}`;
+    default:
+      return `Unknown: ${app.repo.author}/${app.repo.repo}`;
+  }
+}

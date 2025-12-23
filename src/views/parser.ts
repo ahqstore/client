@@ -3,14 +3,14 @@ import { DeepLinkMeta } from "./deeplink";
 
 import { getHomeRef } from "@/lib/data";
 
-const regexp = /^ahqstore:\/\/(?:(?<type>app|category)\/(?<id>[a-zA-Z0-9:]+))$/;
+const regexp = /^ahqstore:\/\/(?:(?<type>app|category)\/(?<id>[a-zA-Z0-9:.]+))$/;
 
 let lastToastTime = 0;
 const TOAST_COOLDOWN = 2000; // 2 seconds
 
 function showSecureToast(message: string, description: string) {
   const now = Date.now();
-  // 2. Only show the toast if 2 seconds have passed since the last one
+
   if (now - lastToastTime > TOAST_COOLDOWN) {
     toast.error(message, { description });
     lastToastTime = now;
