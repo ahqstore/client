@@ -49,6 +49,20 @@
         "name": "AHQ Store Package",
         "role": "Editor"
       }
-    ]
+    ],
+    "windows": {
+      "allowDowngrades": true,
+      "certificateThumbprint": "8B85C3AE8D2243C2B62D53D14479A99D413F52A7",
+      "digestAlgorithm": "sha256",
+      "nsis": null,
+      "signCommand": null,
+      "timestampUrl": "http://timestamp.comodoca.com",
+      "tsp": false,
+      "webviewInstallMode": {
+        "silent": true,
+        "type": "downloadBootstrapper"
+      },
+      "wix": null
+    }
   }
 }

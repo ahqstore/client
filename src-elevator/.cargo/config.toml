@@ -1,0 +1,2 @@
+[alias]
+signed = ["build", "--release", "&&", "run", "--bin", "sign"]
