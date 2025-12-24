@@ -6,13 +6,13 @@ import { useEffect, useState } from "react";
 
 import "./app.css";
 import { CompoundButton } from "@fluentui/react-components";
-import { AddCircleColor, ArrowDownloadRegular } from "@fluentui/react-icons";
+import { ArrowDownloadRegular } from "@fluentui/react-icons";
 import { getAppWrapped } from "@/api/fetchApps";
 
 export default function Application() {
   const appId = useStore(openApplicationState);
 
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   console.log(appId);
 
