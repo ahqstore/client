@@ -39,7 +39,11 @@ pub fn handle_installer_loop(sink: EventLoopProxy<DrawRequest>) {
     txt: "Downloading runtime...",
   });
 
+  #[cfg(target_arch = "x86_64")]
   let dotneturl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/10.0.1/windowsdesktop-runtime-10.0.1-win-x64.exe";
+
+  #[cfg(target_arch = "aarch64")]
+  let dotneturl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/10.0.1/windowsdesktop-runtime-10.0.1-win-arm64.exe";
 
   let mut dotnetfilepath = temp_dir();
   dotnetfilepath.push("install_dotnet10.exe");

@@ -13,7 +13,14 @@
         AllowDrop="False"
         WindowStartupLocation="CenterScreen"
         UseLayoutRounding="True"
+        Closing="Window_Closing"
         Icon="pack://application:,,,/Assets/icon.ico">
+
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo x:Name="TaskbarInfo"
+                         ProgressState="None"
+                         ProgressValue="0"/>
+    </Window.TaskbarItemInfo>
 
     <Window.Resources>
         <Storyboard x:Key="SlideAndFadeIn">
@@ -52,27 +59,27 @@
                        Margin="0,270,0,0"
                        HorizontalAlignment="Center"/>
             <TextBlock Text="Let the open sourced software revolution begin"
-                       Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                       Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                        FontSize="14"
                        Margin="0,350,0,0"
                        HorizontalAlignment="Center"/>
 
             <TextBlock Text="Licensed under MIT"
-                       Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                       Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                        FontSize="12"
                        Margin="12,12,12,26"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Bottom"/>
 
             <TextBlock Text="© AHQ Softwares"
-                       Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                       Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                        FontSize="12"
                        Margin="12"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Bottom"/>
 
             <TextBlock Text="Proudly Open Sourced!"
-                       Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                       Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                        FontSize="12"
                        Margin="12"
                        HorizontalAlignment="Left"
@@ -96,7 +103,7 @@
                                VerticalAlignment="Center"/>
 
                     <TextBlock Grid.Column="2"
-                               FontFamily="{StaticResource SymbolThemeFontFamily}"
+                               FontFamily="{DynamicResource SymbolThemeFontFamily}"
                                Text="&#xE8AD;"
                                VerticalAlignment="Center"/>
                 </Grid>
@@ -126,7 +133,7 @@
                         Margin="12,40,0,20"
                         HorizontalAlignment="Center">
 
-                <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                <TextBlock FontFamily="{DynamicResource SymbolThemeFontFamily}"
                            FontSize="30"
                            FontWeight="SemiBold"
                            Margin="0,5,5,0"
@@ -172,7 +179,7 @@
                 Content="I agree to the MIT License"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                 Margin="12,10,12,15"/>
 
             <Button Grid.Row="4"
@@ -194,7 +201,7 @@
                                VerticalAlignment="Center"/>
 
                     <TextBlock Grid.Column="2"
-                               FontFamily="{StaticResource SymbolThemeFontFamily}"
+                               FontFamily="{DynamicResource SymbolThemeFontFamily}"
                                Text="&#xE974;"
                                VerticalAlignment="Center"/>
                 </Grid>
@@ -206,7 +213,7 @@
                         Orientation="Horizontal"
                         Width="800">
                 <TextBlock Text="Step 1 of 5 · License"
-                           Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                            FontSize="12"/>
 
             </StackPanel>
@@ -242,7 +249,7 @@
                         Margin="12,30,0,10"
                         HorizontalAlignment="Center">
 
-                <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                <TextBlock FontFamily="{DynamicResource SymbolThemeFontFamily}"
                            FontSize="30"
                            FontWeight="SemiBold"
                            Margin="0,5,5,0"
@@ -261,23 +268,29 @@
                 <TextBlock Text="• Open-source and transparent under the MIT License."/>
                 <TextBlock Text="• You are free to use, modify, and audit our code anytime."/>
                 <TextBlock Text="• Use at your own risk; we do not guarantee third-party app safety."/>
-                <TextBlock Text="• We value privacy: no tracking without your consent."/>
                 <TextBlock Text="• Malicious use or distributing malware results in a permanent ban."/>
-                <TextBlock Text="• We highly encourage you to read the whole text."
-                           FontWeight="ExtraBold"/>
+                <TextBlock Text="• Intended users: 21+. Community content is best-effort reviewed; not guaranteed."
+                           TextWrapping="Wrap"
+                           MaxWidth="450"/>
+                <TextBlock Text="• This is a summary; only the text below is legally binding."
+                           FontWeight="Bold"/>
             </StackPanel>
 
 
             <Border Grid.Row="2"
-                    Margin="12"
-                    Background="{StaticResource CardBackgroundFillColorDefaultBrush}">
-                <FlowDocumentScrollViewer Margin="10,0"
-                                          BorderThickness="10">
-                    <FlowDocument FontFamily="Segoe UI Variable"
-                                  FontSize="14"
-                                  x:Name="TermsOfService">
-                    </FlowDocument>
-                </FlowDocumentScrollViewer>
+                    Margin="12">
+                <Expander Header="Our Terms of Service"
+                          IsExpanded="True"
+                          VerticalAlignment="Bottom">
+
+                    <FlowDocumentScrollViewer Margin="10,0"
+                                              BorderThickness="10">
+                        <FlowDocument FontFamily="Segoe UI Variable"
+                                      FontSize="14"
+                                      x:Name="TermsOfService">
+                        </FlowDocument>
+                    </FlowDocumentScrollViewer>
+                </Expander>
             </Border>
 
             <CheckBox
@@ -286,7 +299,7 @@
                 Content="I have thoroughly read, understood and agreed to the terms."
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                 Margin="12,10,12,15"/>
 
             <Button Grid.Row="4"
@@ -308,7 +321,7 @@
                                VerticalAlignment="Center"/>
 
                     <TextBlock Grid.Column="2"
-                               FontFamily="{StaticResource SymbolThemeFontFamily}"
+                               FontFamily="{DynamicResource SymbolThemeFontFamily}"
                                Text="&#xE974;"
                                VerticalAlignment="Center"/>
                 </Grid>
@@ -321,7 +334,7 @@
                         Orientation="Horizontal"
                         Width="800">
                 <TextBlock Text="Step 2 of 5 · Terms of Service"
-                           Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                            FontSize="12"/>
 
             </StackPanel>
@@ -356,7 +369,7 @@
                         Margin="12,30,0,10"
                         HorizontalAlignment="Center">
 
-                <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                <TextBlock FontFamily="{DynamicResource SymbolThemeFontFamily}"
                            FontSize="30"
                            FontWeight="SemiBold"
                            Margin="0,5,5,0"
@@ -375,22 +388,26 @@
                 <TextBlock Text="• Only data you voluntarily submit via GitHub is collected."/>
                 <TextBlock Text="• Submissions are public and permanent due to Git history nature."/>
                 <TextBlock Text="• We do not sell or trade your personally identifiable information."/>
-                <TextBlock Text="• Usage is intended for individuals aged 21 and older."/>
                 <TextBlock Text="• Signing in to AHQ Store is absolutely not necessary."/>
-                <TextBlock Text="• We highly encourage you to read the whole text."
-                           FontWeight="ExtraBold"/>
+                <TextBlock Text="• This is a summary; only the text below is legally binding."
+                           FontWeight="Bold"/>
             </StackPanel>
 
 
             <Border Grid.Row="2"
-                    Margin="12"
-                    Background="{StaticResource CardBackgroundFillColorDefaultBrush}">
-                <ScrollViewer>
-                    <FlowDocument FontFamily="Segoe UI Variable"
-                                  FontSize="14"
-                                  x:Name="PrivacyPolicyMarkdown">
-                    </FlowDocument>
-                </ScrollViewer>
+                    Margin="12">
+                <Expander Header="Our Privacy Policy"
+                          IsExpanded="True"
+                          VerticalAlignment="Bottom">
+
+                    <FlowDocumentScrollViewer Margin="10,0"
+                                              BorderThickness="10">
+                        <FlowDocument FontFamily="Segoe UI Variable"
+                                      FontSize="14"
+                                      x:Name="PrivacyPolicyMarkdown">
+                        </FlowDocument>
+                    </FlowDocumentScrollViewer>
+                </Expander>
             </Border>
 
             <CheckBox
@@ -399,7 +416,7 @@
                 Content="I have thoroughly read and understood your privacy policy."
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                 Margin="12,10,12,15"/>
 
             <Button Grid.Row="4"
@@ -421,7 +438,7 @@
                                VerticalAlignment="Center"/>
 
                     <TextBlock Grid.Column="2"
-                               FontFamily="{StaticResource SymbolThemeFontFamily}"
+                               FontFamily="{DynamicResource SymbolThemeFontFamily}"
                                Text="&#xE8FB;"
                                VerticalAlignment="Center"/>
                 </Grid>
@@ -434,7 +451,7 @@
                         Orientation="Horizontal"
                         Width="800">
                 <TextBlock Text="Step 3 of 5 · Privacy Policy"
-                           Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                            FontSize="12"/>
 
             </StackPanel>
@@ -469,14 +486,14 @@
                         Margin="12,30,0,20"
                         HorizontalAlignment="Center">
 
-                <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                <TextBlock FontFamily="{DynamicResource SymbolThemeFontFamily}"
                            FontSize="30"
                            FontWeight="SemiBold"
                            Margin="0,5,5,0"
                            HorizontalAlignment="Center"
                            Text="&#xE81E;"/>
                 <TextBlock
-                    Text="Let's prepare your installation"
+                    Text="Let's customize your installation"
                     FontSize="20"
                     FontWeight="SemiBold"
                     Foreground="{DynamicResource TextFillColorTertiaryBrush}"
@@ -486,15 +503,66 @@
 
 
             <Border Grid.Row="1"
-                    Margin="12"
-                    Background="{StaticResource CardBackgroundFillColorDefaultBrush}">
+                    Margin="12">
+                <StackPanel Orientation="Vertical"
+                            HorizontalAlignment="Center">
+                    <TextBlock Text="Which flavour suits you best?"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
+                    <ComboBox MinWidth="250"
+                              HorizontalAlignment="Center"
+                              Margin="0,2,0,30"
+                              x:Name="ReleaseChannel"
+                              SelectedIndex="0"
+                              SelectionChanged="ReleaseChannel_Changed">
+                        <ComboBoxItem Content="Up to date Stable"/>
+                        <ComboBoxItem Content="Absolute Latest Available"/>
+                    </ComboBox>
+
+                    <StackPanel Orientation="Vertical"
+                                HorizontalAlignment="Left"
+                                Width="400"
+                                Margin="0,25,0,0">
+                        <CheckBox Content="Use AHQ Store Fluent"
+                                  IsChecked="True"
+                                  IsEnabled="False"
+                                  Margin="0,0,0,5"/>
+
+                        <CheckBox Content="Start AHQ Store after install"
+                                  x:Name="StartAfterInstall"
+                                  IsChecked="True"/>
+
+                        <CheckBox Content="Install AHQ Store Elevated Updater (soon)"
+                                  IsChecked="False"
+                                  IsEnabled="False"
+                                  ToolTipService.InitialShowDelay="100"
+                                  ToolTipService.Placement="MousePoint"
+                                  ToolTipService.ToolTip="This allows seamless updates for System Wide Installed Applications when an Administrator User logs on to the computer. This is currently being thought of and has no implications yet."/>
+
+
+                        <ProgressBar IsIndeterminate="True"
+                                     Margin="0,40,0,0"
+                                     HorizontalAlignment="Center"
+                                     x:Name="ProgressStatus"/>
+
+                        <TextBlock
+                            Text="{Binding statusText}"
+                            HorizontalAlignment="Center"
+                            x:Name="CheckStatusInformativeText"
+                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+
+
+                    </StackPanel>
+                </StackPanel>
             </Border>
 
             <Button Grid.Row="3"
                     Margin="12,10,12,15"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
-                    Style="{DynamicResource AccentButtonStyle}">
+                    IsEnabled="{Binding installEnabled}"
+                    Style="{DynamicResource AccentButtonStyle}"
+                    Click="Launch_Install">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -507,7 +575,7 @@
                                VerticalAlignment="Center"/>
 
                     <TextBlock Grid.Column="2"
-                               FontFamily="{StaticResource SymbolThemeFontFamily}"
+                               FontFamily="{DynamicResource SymbolThemeFontFamily}"
                                Text="&#xE74B;"
                                VerticalAlignment="Center"/>
                 </Grid>
@@ -520,7 +588,7 @@
                         Orientation="Horizontal"
                         Width="800">
                 <TextBlock Text="Step 4 of 5 · Configuration"
-                           Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                            FontSize="12"/>
 
             </StackPanel>
@@ -530,6 +598,166 @@
                          HorizontalAlignment="Right"
                          Margin="12,0,12,12"
                          Value="80"
+                         Width="320"/>
+        </Grid>
+
+        <Grid x:Name="Installing"
+              Visibility="Collapsed">
+            <Grid.RenderTransform>
+                <TranslateTransform Y="30"/>
+            </Grid.RenderTransform>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+
+                <RowDefinition Height="*"/>
+
+                <RowDefinition Height="10"/>
+
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0"
+                        Margin="12,30,0,20"
+                        HorizontalAlignment="Center">
+
+                <TextBlock FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                           FontSize="30"
+                           FontWeight="SemiBold"
+                           Margin="0,5,5,0"
+                           HorizontalAlignment="Center"
+                           Text="&#xE81E;"/>
+                <TextBlock
+                    Text="We're installing"
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                    HorizontalAlignment="Center"
+                    Margin="0,10,0,0"/>
+            </StackPanel>
+
+
+            <Border Grid.Row="1"
+                    Margin="12">
+                <StackPanel Orientation="Vertical"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+
+                    <ProgressBar IsIndeterminate="True"
+                                 Margin="0,40,0,0"
+                                 HorizontalAlignment="Center"
+                                 x:Name="InstallingProgressStatus"
+                                 Width="600"/>
+
+                    <TextBlock
+                        Text="{Binding installingStatusText}"
+                        HorizontalAlignment="Center"
+                        FontSize="18"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        Margin="0,25,0,0"/>
+
+                </StackPanel>
+            </Border>
+
+
+            <StackPanel Grid.Row="4"
+                        VerticalAlignment="Bottom"
+                        Margin="12,0,12,12"
+                        Orientation="Horizontal"
+                        Width="800">
+                <TextBlock Text="Installing"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                           FontSize="12"/>
+
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="Installed"
+              Visibility="Collapsed">
+            <Grid.RenderTransform>
+                <TranslateTransform Y="30"/>
+            </Grid.RenderTransform>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+
+                <RowDefinition Height="*"/>
+
+                <RowDefinition Height="10"/>
+
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0"
+                        Margin="12,50,0,20"
+                        HorizontalAlignment="Center">
+
+                <TextBlock FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                           FontSize="100"
+                           FontWeight="SemiBold"
+                           Margin="0,5,5,0"
+                           HorizontalAlignment="Center"
+                           Text="&#xf32a;"/>
+                <TextBlock
+                    Text="AHQ Store is installed!"
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                    HorizontalAlignment="Center"
+                    Margin="0,40,0,0"/>
+            </StackPanel>
+
+
+            <Border Grid.Row="1"
+                    Margin="12">
+                <TextBlock Text="Now you can close this installer!"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Border>
+
+            <Button Grid.Row="3"
+                    Margin="12,10,12,15"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Style="{DynamicResource AccentButtonStyle}"
+                    Click="Close_App">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Close"
+                               VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Column="2"
+                               FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                               Text="&#xf3b1;"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Button>
+
+
+            <StackPanel Grid.Row="4"
+                        VerticalAlignment="Bottom"
+                        Margin="12,0,12,12"
+                        Orientation="Horizontal"
+                        Width="800">
+                <TextBlock Text="Step 5 of 5 · Installed"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                           FontSize="12"/>
+
+            </StackPanel>
+
+            <ProgressBar Grid.Row="4"
+                         VerticalAlignment="Bottom"
+                         HorizontalAlignment="Right"
+                         Margin="12,0,12,12"
+                         Value="100"
                          Width="320"/>
         </Grid>
 

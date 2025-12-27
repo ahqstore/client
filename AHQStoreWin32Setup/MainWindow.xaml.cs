@@ -1,11 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Navigation;
 using MdXaml;
 
 namespace AHQStoreWin32Setup;
@@ -15,11 +14,59 @@ namespace AHQStoreWin32Setup;
 /// </summary>
 public partial class MainWindow : Window
 {
+    public bool installEnabled
+    {
+        get { return (bool)GetValue(IsButtonEnabledProperty); }
+        set { SetValue(IsButtonEnabledProperty, value); }
+    }
+
+    public string ArchStatusText
+    {
+        get { return (string)GetValue(StatusTxtProperty); }
+        set { SetValue(StatusTxtProperty, value); }
+    }
+
+    public string installingStatusText
+    {
+        get { return (string)GetValue(InstallerStatusTextProperty); }
+        set { SetValue(InstallerStatusTextProperty, value); }
+    }
+
+
+
+    public static readonly DependencyProperty StatusTxtProperty =
+        DependencyProperty.Register(
+            "statusText",
+            typeof(string),
+            typeof(MainWindow),
+            new PropertyMetadata("Hang tight!"));
+
+    public static readonly DependencyProperty IsButtonEnabledProperty =
+            DependencyProperty.Register(
+                "installEnabled",
+                typeof(bool),
+                typeof(MainWindow),
+                new PropertyMetadata(false));
+
+    public static readonly DependencyProperty InstallerStatusTextProperty = DependencyProperty.Register(
+        "installingStatusText",
+        typeof(string),
+        typeof(MainWindow),
+        new PropertyMetadata("Downloading..."));
+
     Markdown engine;
+    GitHubService service;
+
+    Urls urls;
 
     public MainWindow()
     {
         InitializeComponent();
+
+        service = new GitHubService();
+        urls = new Urls();
+
+        this.DataContext = this;
 
         LicenseText.Text = """"""
 MIT License
@@ -80,10 +127,27 @@ SOFTWARE.
 
     private async Task Setup()
     {
-        GitHubService service = new GitHubService();
-
         await service.Setup();
-        string tos = await service.FetchTOS();
+
+        string tos;
+
+        try
+        {
+            urls = await service.GetMSIUrls();
+        }
+        catch (Exception)
+        {
+
+        }
+
+        try
+        {
+            tos = await service.FetchTOS();
+        }
+        catch (Exception)
+        {
+            tos = "## Error\nFailed to load, visit [https://ahqstore.github.io/tos](https://ahqstore.github.io/tos)";
+        }
 
         FlowDocument tosFlow = engine.Transform(tos);
 
@@ -92,11 +156,20 @@ SOFTWARE.
             TermsOfService.Blocks.Add(doc);
         }
 
-        string pp = await service.FetchPP();
+        string pp;
 
-        FlowDocument ppFlow = engine.Transform(tos);
+        try
+        {
+            pp = await service.FetchPP();
+        }
+        catch (Exception)
+        {
+            pp = "## Error\nFailed to load, visit [https://ahqstore.github.io/privacy](https://ahqstore.github.io/privacy)";
+        }
 
-        foreach (var doc in tosFlow.Blocks.ToList())
+        FlowDocument ppFlow = engine.Transform(pp);
+
+        foreach (var doc in ppFlow.Blocks.ToList())
         {
             PrivacyPolicyMarkdown.Blocks.Add(doc);
         }
@@ -131,6 +204,95 @@ SOFTWARE.
         sb.Begin(PrivacyPolicy);
     }
 
+    private bool canCloseWindow = true;
+
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (!canCloseWindow)
+        {
+            e.Cancel = true;
+        }
+    }
+
+    private async void Launch_Install(object sender, RoutedEventArgs e)
+    {
+        Configuration.Visibility = Visibility.Collapsed;
+        Installing.Visibility = Visibility.Visible;
+
+        Storyboard sb = (Storyboard)this.FindResource("SlideAndFadeIn");
+        sb.Begin(Installing);
+
+        canCloseWindow = false;
+
+        try
+        {
+            Installer inst = new Installer();
+
+            string url;
+
+            int idx = ReleaseChannel.SelectedIndex;
+
+            if (idx == 0)
+            {
+                url = urls.Release!;
+            }
+            else
+            {
+                url = urls.Prerelease!;
+            }
+
+            await inst.Install(url, (txt, state, status) =>
+            {
+                installingStatusText = txt;
+
+                switch (state)
+                {
+                    case Typeof.Downloading:
+                        TaskbarInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
+                        TaskbarInfo.ProgressValue = (double)status! / 100.0;
+
+                        InstallingProgressStatus.Value = (double)status!;
+                        InstallingProgressStatus.IsIndeterminate = false;
+                        break;
+                    case Typeof.Indeterminate:
+                        TaskbarInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Indeterminate;
+
+                        InstallingProgressStatus.IsIndeterminate = true;
+                        break;
+                    case Typeof.Installed:
+                        TaskbarInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
+
+                        Installing.Visibility = Visibility.Collapsed;
+                        Installed.Visibility = Visibility.Visible;
+
+                        Storyboard sb = (Storyboard)this.FindResource("SlideAndFadeIn");
+                        sb.Begin(Installed);
+
+                        break;
+                    case Typeof.Error:
+                        TaskbarInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
+                        InstallingProgressStatus.IsIndeterminate = false;
+                        InstallingProgressStatus.Value = 0;
+                        break;
+                    case Typeof.None:
+                        TaskbarInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Indeterminate;
+
+                        InstallingProgressStatus.IsIndeterminate = true;
+                        break;
+                }
+
+            });
+        }
+        catch (Exception)
+        {
+
+        }
+        finally
+        {
+            canCloseWindow = true;
+        }
+    }
+
     private async void ArchitectureSelect(object sender, RoutedEventArgs e)
     {
         PrivacyPolicy.Visibility = Visibility.Collapsed;
@@ -138,6 +300,56 @@ SOFTWARE.
 
         Storyboard sb = (Storyboard)this.FindResource("SlideAndFadeIn");
         sb.Begin(Configuration);
+
+        CheckInstallTask();
+        CheckInstallTask();
+    }
+
+    private void Close_App(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    bool first = true;
+
+    private void CheckInstallTask()
+    {
+        if (first)
+        {
+            first = false;
+            return;
+        }
+
+
+        int idx = ReleaseChannel.SelectedIndex;
+
+        if ((idx == 0 && urls.Release == null) || (idx == 1 && urls.Prerelease == null))
+        {
+            DisableInstall("This Release is not available!");
+            return;
+        }
+
+        EnableInstall();
+    }
+
+    private void ReleaseChannel_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        CheckInstallTask();
+    }
+
+    private void DisableInstall(
+        string text
+    )
+    {
+        installEnabled = false;
+        ArchStatusText = text;
+        ProgressStatus.IsIndeterminate = true;
+    }
+
+    private void EnableInstall()
+    {
+        installEnabled = true;
+        ArchStatusText = "Great, you can install now!";
     }
 
 
