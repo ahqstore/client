@@ -17,6 +17,10 @@
     <DebugSymbols>false</DebugSymbols>
 
     <RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
+
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +31,17 @@
 
   <ItemGroup>
     <PackageReference Include="MdXaml" Version="1.27.0" />
+    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="5.0.2" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <SignToolExe Condition="'$(SIGNTOOL_PATH)' != ''">$(SIGNTOOL_PATH)</SignToolExe>
+    <SignToolExe Condition="'$(SIGNTOOL_PATH)' == ''">signtool.exe</SignToolExe>
+  </PropertyGroup>
+
+  <Target Name="SignOutput" AfterTargets="Publish">
+    <Exec
+      Command="$(SignToolExe) sign /sha1 &quot;8B85C3AE8D2243C2B62D53D14479A99D413F52A7&quot; /fd SHA256 /t http://timestamp.digicert.com &quot;$(TargetPath)&quot;" />
+  </Target>
 
 </Project>

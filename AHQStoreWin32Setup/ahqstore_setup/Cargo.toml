@@ -1,7 +1,7 @@
 [package]
 name = "ahqstore_setup"
-description = "Install AHQ Store"
-version = "0.1.0"
+description = "AHQ Store Setup"
+version = "1.0.0"
 edition = "2024"
 
 [dependencies]

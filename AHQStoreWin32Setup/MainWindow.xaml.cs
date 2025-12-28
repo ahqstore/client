@@ -120,7 +120,14 @@ SOFTWARE.
             Process.Start(new ProcessStartInfo(e.Parameter.ToString()!) { UseShellExecute = true });
         }));
 
-        _ = Setup();
+        var last = Environment.GetCommandLineArgs().Last();
+
+        List<string> lists = ["uninstall-step2", "uninstall"];
+
+        if (!lists.Any((s) => last == s))
+        {
+            _ = Setup();
+        }
 
         Activate();
     }
@@ -226,7 +233,7 @@ SOFTWARE.
 
         try
         {
-            Installer inst = new Installer();
+            AHQInstaller inst = new AHQInstaller();
 
             string url;
 
@@ -241,7 +248,7 @@ SOFTWARE.
                 url = urls.Prerelease!;
             }
 
-            await inst.Install(url, (txt, state, status) =>
+            await inst.Install(url, InstallCertificate.IsChecked.GetValueOrDefault(false), (txt, state, status) =>
             {
                 installingStatusText = txt;
 
@@ -357,9 +364,86 @@ SOFTWARE.
     {
         base.OnSourceInitialized(e);
 
+        var argLast = Environment.GetCommandLineArgs().Last();
+
+        switch (argLast)
+        {
+            case "uninstall":
+                Launch_UninstallPrep();
+                break;
+            case "uninstall-step2":
+                _ = Launch_UninstallFInal();
+                break;
+            default:
+                Launch_Normal();
+                break;
+        }
+    }
+
+    public string unstStatusText
+    {
+        get { return (string)GetValue(UnstStatusTxt); }
+        set { SetValue(UnstStatusTxt, value); }
+    }
+
+    public static readonly DependencyProperty UnstStatusTxt =
+        DependencyProperty.Register(
+            "unstStatusTxt",
+            typeof(string),
+            typeof(MainWindow),
+            new PropertyMetadata("We are checking a few things..."));
+
+    private async Task Launch_UninstallFInal()
+    {
+        UninstallPrep.Visibility = Visibility.Visible;
+
+        Storyboard sb = (Storyboard)this.FindResource("SlideAndFadeIn");
+        sb.Begin(UninstallPrep);
+
+        unstStatusText = "We're starting...";
+
+        var unst = new AHQStoreCoreUninstaller();
+
+        await unst.Uninstall((cb) =>
+        {
+            unstStatusText = cb;
+        });
+
+        await Task.Delay(1500);
+        Environment.Exit(0);
+    }
+
+    private async void Launch_UninstallPrep()
+    {
+        UninstallPrep.Visibility = Visibility.Visible;
+
+        Storyboard sb = (Storyboard)this.FindResource("SlideAndFadeIn");
+        sb.Begin(UninstallPrep);
+
+        var unst = new AHQStoreUninstallerEligibility();
+
+        if (!unst.Eligible())
+        {
+            unstStatusText = "You cannot uninstall because AHQ Store system apps are installed! Uninstall them first from the store app.";
+        }
+        else
+        {
+            unstStatusText = "Launching uninstall...";
+
+            unst.RunMainUninstaller();
+
+            await Task.Delay(1500);
+
+            Environment.Exit(0);
+        }
+    }
+
+    private void Launch_Normal()
+    {
         Welcome.Visibility = Visibility.Visible;
 
         Storyboard sb = (Storyboard)this.FindResource("SlideAndFadeIn");
         sb.Begin(Welcome);
+
     }
 }
