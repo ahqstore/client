@@ -65,11 +65,7 @@ public partial class MainWindow : Window
 
         if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000, 0))
         {
-#pragma warning disable WPF0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            ThemeMode = ThemeMode.System;
             Background = Brushes.Transparent;
-
-#pragma warning restore WPF0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         }
 
         service = new GitHubService();

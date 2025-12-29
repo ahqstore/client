@@ -11,11 +11,11 @@
         Width="800"
         ResizeMode="NoResize"
         AllowDrop="False"
-        Background="Black"
+        Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
         WindowStartupLocation="CenterScreen"
         UseLayoutRounding="True"
         Closing="Window_Closing"
-        ThemeMode="Dark"
+        ThemeMode="System"
         Icon="pack://application:,,,/Assets/icon.ico">
 
     <Window.TaskbarItemInfo>
