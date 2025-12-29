@@ -5,16 +5,16 @@ $item = $items[-1].Name
 
 $signtoolDir = "C:\Program Files (x86)\Windows Kits\10\bin\${item}\x64"
 
+$signtool = "C:\Program Files (x86)\Windows Kits\10\bin\${item}\x64\signtool.exe"
+
+$env:SIGNTOOL_PATH = $signtool
+
 $env:PATH = "$env:PATH;$signtoolDir"
 
 [System.Environment]::SetEnvironmentVariable("PATH", $env:PATH)
 
 dotnet publish -c Release -r win-x64
 dotnet publish -c Release -r win-arm64
-
-$signtool = "C:\Program Files (x86)\Windows Kits\10\bin\${item}\x64\signtool.exe"
-
-$env:SIGNTOOL_PATH = $signtool
 
 $sha = "8B85C3AE8D2243C2B62D53D14479A99D413F52A7"
 
