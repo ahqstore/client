@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -6,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using MdXaml;
+using Microsoft.Win32;
 
 namespace AHQStoreWin32Setup;
 
@@ -57,11 +59,18 @@ public partial class MainWindow : Window
     Markdown engine;
     GitHubService service;
 
+    private readonly PeriodicTimer _timer;
+    private CancellationTokenSource _cts = new();
+
     Urls urls;
 
     public MainWindow()
     {
+        _timer = new PeriodicTimer(TimeSpan.FromSeconds(0.5));
+
         InitializeComponent();
+
+        Resources["NormalTextBrush"] = Resources["TextFillColorTertiaryBrush"];
 
         if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000, 0))
         {
@@ -125,8 +134,43 @@ SOFTWARE.
             Process.Start(new ProcessStartInfo(e.Parameter.ToString()!) { UseShellExecute = true });
         }));
 
+        _ = StartThemeMgr();
+
         Activate();
     }
+
+    public async Task StartThemeMgr()
+    {
+        try
+        {
+
+            // This loop repeats every interval
+            while (await _timer.WaitForNextTickAsync(_cts.Token))
+            {
+                // Mutate 'this' (the class instance state)
+                using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
+                {
+                    int registryValueObject = (int)key?.GetValue("AppsUseLightTheme")!;
+
+                    var dark = registryValueObject == 0;
+
+                    if (dark)
+                    {
+                        Resources["NormalTextBrush"] = Resources["TextFillColorTertiaryBrush"];
+                    }
+                    else
+                    {
+                        Resources["NormalTextBrush"] = Resources["TextFillColorPrimaryBrush"];
+                    }
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("Timer stopped.");
+        }
+    }
+
 
     private async Task Setup()
     {
