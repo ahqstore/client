@@ -3,12 +3,14 @@ rustup target add aarch64-pc-windows-msvc
 $items = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\" -Filter "10.*"
 $item = $items[-1].Name
 
-dotnet publish -c Release -r win-x64
-dotnet publish -c Release -r win-arm64
-
 $signtoolDir = "C:\Program Files (x86)\Windows Kits\10\bin\${item}\x64"
 
 $env:PATH = "$env:PATH;$signtoolDir"
+
+[System.Environment]::SetEnvironmentVariable("PATH", $env:PATH)
+
+dotnet publish -c Release -r win-x64
+dotnet publish -c Release -r win-arm64
 
 $signtool = "C:\Program Files (x86)\Windows Kits\10\bin\${item}\x64\signtool.exe"
 
