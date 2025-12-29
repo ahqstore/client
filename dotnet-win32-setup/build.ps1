@@ -1,3 +1,5 @@
+rustup target add aarch64-pc-windows-msvc
+
 $items = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\" -Filter "10.*"
 $item = $items[-1].Name
 
