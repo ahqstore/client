@@ -10,10 +10,10 @@ windows = { version = "0.62", features = ["Win32_System_Console"] }
 softbuffer = "0.4"
 resvg = "0.45"
 winit = { version = "0.30", default-features = false, features = ["rwh_06"] }
-ureq = "3.1.4"
+ureq = "3"
 
 [build-dependencies]
-winres = "0.1.12"
+winres = "0.1"
 
 [profile.release]
 strip = true

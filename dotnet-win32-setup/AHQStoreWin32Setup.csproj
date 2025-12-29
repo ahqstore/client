@@ -21,6 +21,11 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+
+    <Description>AHQ Store Setup</Description>
+    <Company>AHQ Store</Company>
+    <Product>AHQ Store Windows Setup</Product>
+    <Copyright>Copyright © 2026</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

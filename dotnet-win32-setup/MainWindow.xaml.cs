@@ -124,11 +124,6 @@ SOFTWARE.
         link.Setters.Add(new Setter(FlowDocument.ForegroundProperty, new SolidColorBrush(Color.FromRgb(0, 120, 212))));
         engine.LinkStyle = link;
 
-        //         PrivacyPolicyMarkdown.Markdown = """
-        // # Hello World
-        // This is our privacy policy
-        // """;
-
         this.CommandBindings.Add(new CommandBinding(NavigationCommands.GoToPage, (s, e) =>
         {
             Process.Start(new ProcessStartInfo(e.Parameter.ToString()!) { UseShellExecute = true });
