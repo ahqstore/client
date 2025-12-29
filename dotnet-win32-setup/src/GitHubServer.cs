@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace AHQStoreWin32Setup;
 
@@ -32,7 +33,7 @@ public class Urls
   public string? Release;
 }
 
-public class GitHubService
+public partial class GitHubService
 {
   string commits = "https://api.github.com/repos/ahqstore/ahqstore.github.io/commits";
 
@@ -62,12 +63,9 @@ public class GitHubService
 
     string tos = await client.GetStringAsync(terms_of_service);
 
-    tos = tos.Replace("""
----
-title: Terms and Conditions
-sidebar: false
----
-""", "").Replace("[Usage Guidelines](#usage-guidelines)", "**Usage Guidelines**").Replace("(/", "(https://ahqstore.github.io/");
+    tos = FrontMatter().Replace(tos, "");
+
+    tos = tos.Replace("[Usage Guidelines](#usage-guidelines)", "**Usage Guidelines**").Replace("(/", "(https://ahqstore.github.io/");
 
     return tos;
   }
@@ -76,12 +74,9 @@ sidebar: false
   {
     string pp = await client.GetStringAsync(privacy_policy);
 
-    pp = pp.Replace("""
----
-title: Privacy Policy
-sidebar: false
----
-""", "").Replace("[Your Data Rights](#your-data-rights)", "**Your Data Rights**").Replace("(/", "(https://ahqstore.github.io/");
+    pp = FrontMatter().Replace(pp, "");
+
+    pp = pp.Replace("[Your Data Rights](#your-data-rights)", "**Your Data Rights**").Replace("(/", "(https://ahqstore.github.io/");
 
     return pp;
   }
@@ -126,4 +121,7 @@ sidebar: false
 
     return output;
   }
+
+  [GeneratedRegex(@"---(.*)---", RegexOptions.Singleline)]
+  private static partial Regex FrontMatter();
 }
