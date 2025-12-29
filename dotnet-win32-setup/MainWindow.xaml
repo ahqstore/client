@@ -11,7 +11,7 @@
         Width="800"
         ResizeMode="NoResize"
         AllowDrop="False"
-        Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+        Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
         WindowStartupLocation="CenterScreen"
         UseLayoutRounding="True"
         Closing="Window_Closing"
