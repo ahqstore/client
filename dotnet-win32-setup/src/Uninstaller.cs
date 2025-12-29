@@ -15,6 +15,19 @@ public class AHQStoreCoreUninstaller
   {
     cb("Uninstalling AHQ Store Core");
 
+    foreach (var process in Process.GetProcesses())
+    {
+      try
+      {
+        if (process.ProcessName.Contains("ahqstore"))
+        {
+          process.Kill(true);
+          process.WaitForExit(3000);
+        }
+      }
+      catch { /* Ignore if already exiting */ }
+    }
+
     UninstallMsi();
 
     cb("Uninstalling AHQ Store Apps");
@@ -28,11 +41,23 @@ public class AHQStoreCoreUninstaller
     cb("Uninstalled!");
   }
 
-  public readonly string preUninstall = @"C:\Program Files\AHQ Store Neo\.msiexec";
+  public readonly string msiUninstall = @"C:\Program Files\AHQ Store Neo\.msiexec";
 
   public void UninstallMsi()
   {
+    var execString = FileSystem.ReadAllText(msiUninstall).Split(" ");
 
+    var proc = new Process();
+    proc.StartInfo.FileName = execString[0];
+    proc.StartInfo.ArgumentList.Add(execString[1]);
+    proc.StartInfo.ArgumentList.Add("/qn");
+    proc.StartInfo.Verb = "runas";
+
+    proc.StartInfo.CreateNoWindow = true;
+    proc.StartInfo.CreateNewProcessGroup = true;
+
+    proc.Start();
+    proc.WaitForExit();
   }
 
   public readonly string inst = @"C:\Program Files\AHQ Store Neo\";
@@ -72,13 +97,13 @@ public class AHQStoreCoreUninstaller
 
     foreach (var user in FileSystem.GetDirectories(users))
     {
-      var userahqstore = Path.Combine(users, user, "AHQStoreNEO");
+      var userahqstore = Path.Combine(user, "AHQStoreNEO");
 
       if (FileSystem.DirectoryExists(userahqstore))
       {
         try
         {
-          FileSystem.DeleteDirectory(apps, DeleteDirectoryOption.DeleteAllContents);
+          FileSystem.DeleteDirectory(userahqstore, DeleteDirectoryOption.DeleteAllContents);
 
         }
         catch (Exception) { }
@@ -101,7 +126,7 @@ public class AHQStoreUninstallerEligibility
 
     var files2 = (FileSystem.GetDirectories(users)?.All((user) =>
     {
-      var userahqstore = Path.Combine(users, user, "AHQStoreNEO", "Applications");
+      var userahqstore = Path.Combine(user, "AHQStoreNEO", "Applications");
 
       if (FileSystem.DirectoryExists(userahqstore))
       {

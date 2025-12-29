@@ -120,15 +120,6 @@ SOFTWARE.
             Process.Start(new ProcessStartInfo(e.Parameter.ToString()!) { UseShellExecute = true });
         }));
 
-        var last = Environment.GetCommandLineArgs().Last();
-
-        List<string> lists = ["uninstall-step2", "uninstall"];
-
-        if (!lists.Any((s) => last == s))
-        {
-            _ = Setup();
-        }
-
         Activate();
     }
 
@@ -183,13 +174,28 @@ SOFTWARE.
 
     }
 
-    private void Open_License(object sender, RoutedEventArgs e)
+    private async void Open_License(object sender, RoutedEventArgs e)
     {
         Welcome.Visibility = Visibility.Collapsed;
-        License.Visibility = Visibility.Visible;
+        LoadingPrepping.Visibility = Visibility.Visible;
 
         Storyboard sb = (Storyboard)this.FindResource("SlideAndFadeIn");
-        sb.Begin(License);
+        sb.Begin(LoadingPrepping);
+
+
+        try
+        {
+            await Setup();
+
+            LoadingPrepping.Visibility = Visibility.Collapsed;
+            License.Visibility = Visibility.Visible;
+
+            sb.Begin(License);
+        }
+        catch (Exception err)
+        {
+            Console.WriteLine(err);
+        }
 
     }
 

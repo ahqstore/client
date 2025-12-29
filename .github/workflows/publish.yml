@@ -206,15 +206,11 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            arch: amd64
+            arch: amd64,arm64
 
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             arch: amd64
-
-          - os: windows-latest
-            target: aarch64-pc-windows-msvc
-            arch: arm64
 
     runs-on: ${{ matrix.os }}
 
@@ -254,10 +250,15 @@ jobs:
           Remove-Item -path certificate -include tempCert.txt
           Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText)
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
       - name: Build Windows GUI Setup
         if: matrix.os == 'windows-latest'
-        run: cargo build --release --target ${{ matrix.target }}
-        working-directory: src-setup
+        run: ./build.ps1
+        working-directory: dotnet-win32-setup
 
       - name: Build Linux CLI Setup
         if: matrix.os != 'windows-latest'
@@ -265,15 +266,26 @@ jobs:
         env:
           TAG: ${{ needs.create-release.outputs.tag_name }}
 
-      - name: Upload Windows Setup
+      - name: Upload Windows Setup (X64)
         if: matrix.os == 'windows-latest'
         uses: ahqstore/upload-release-assets@v60
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./src-setup/target/${{ matrix.target }}/release/ahqstore_setup_amd64.exe
-          asset_name: ahqstore_setup_win32_${{ matrix.arch }}.exe
+          asset_path: ./dotnet-win32-setup/outputs/ahqstore_setup_x64.exe
+          asset_name: ahqstore_setup_win32_amd64.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+
+      - name: Upload Windows Setup (Arm64)
+        if: matrix.os == 'windows-latest'
+        uses: ahqstore/upload-release-assets@v60
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./dotnet-win32-setup/outputs/ahqstore_setup_arm64.exe
+          asset_name: ahqstore_setup_win32_arm64.exe
           asset_content_type: application/vnd.microsoft.portable-executable
 
       - name: Upload Linux Setup

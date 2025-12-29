@@ -79,7 +79,7 @@ public class AHQInstaller
       {
         if (process.ProcessName.Contains("ahqstore"))
         {
-          process.Kill();
+          process.Kill(true);
           process.WaitForExit(3000);
         }
       }

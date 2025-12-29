@@ -49,7 +49,7 @@ public class GitHubService
   public async Task Setup()
   {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("AHQStore");
-    client.Timeout = TimeSpan.FromSeconds(10);
+    client.Timeout = TimeSpan.FromSeconds(30);
 
     var output = (await client.GetFromJsonAsync<List<Commit>>(commits))![0]!;
 
