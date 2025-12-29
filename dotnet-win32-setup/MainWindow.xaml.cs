@@ -67,7 +67,7 @@ public partial class MainWindow : Window
         {
 #pragma warning disable WPF0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             ThemeMode = ThemeMode.System;
-            Foreground = Brushes.Transparent;
+            Background = Brushes.Transparent;
 
 #pragma warning restore WPF0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         }

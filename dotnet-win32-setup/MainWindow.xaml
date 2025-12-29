@@ -11,7 +11,7 @@
         Width="800"
         ResizeMode="NoResize"
         AllowDrop="False"
-        Foreground="Black"
+        Background="Black"
         WindowStartupLocation="CenterScreen"
         UseLayoutRounding="True"
         Closing="Window_Closing"
