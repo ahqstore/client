@@ -1,11 +1,25 @@
 import { AHQStoreApplication } from "ahqstore-types";
-import { getCommit } from "tauri-plugin-ahqstore-api"
+import { getCommitSmart } from "./commit";
 
-let cache: Map<String, [AHQStoreApplication, string]> = new Map();
+interface MapData {
+  data: [AHQStoreApplication, string],
+  expires: number
+}
+
+let cache: Map<String, MapData> = new Map();
 let commit: string | undefined = undefined;
 
+setInterval(() => {
+  const now = Date.now();
+  cache.forEach((val, key, map) => {
+    if (now > val.expires) {
+      map.delete(key);
+    }
+  });
+}, 30 * 1000);
+
 export async function getKeyFromCache(key: string): Promise<[AHQStoreApplication, string] | undefined> {
-  const ahqstoreCommit = (await getCommit()).ahqstore;
+  const ahqstoreCommit = (await getCommitSmart());
 
   if (commit != ahqstoreCommit) {
     commit = ahqstoreCommit;
@@ -14,16 +28,19 @@ export async function getKeyFromCache(key: string): Promise<[AHQStoreApplication
     return undefined;
   }
 
-  return cache.get(key);
+  return cache.get(key)?.data;
 }
 
 export async function setKeyToCache(key: string, val: [AHQStoreApplication, string]) {
-  const ahqstoreCommit = (await getCommit()).ahqstore;
+  const ahqstoreCommit = (await getCommitSmart());
 
   if (commit != ahqstoreCommit) {
     commit = ahqstoreCommit;
     cache.clear();
   }
 
-  cache.set(key, val);
+  cache.set(key, {
+    data: val,
+    expires: Date.now() + (60 * 1000)
+  });
 }
