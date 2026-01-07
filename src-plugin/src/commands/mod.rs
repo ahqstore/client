@@ -35,7 +35,7 @@ pub use encrypt::*;
 #[command(async)]
 pub(crate) async fn get_commit<R: Runtime>(app: tauri::AppHandle<R>) -> Response {
   Response::new(
-    serde_json::to_string(&*app.ahqstore().commits.read().await)
+    serde_json::to_string(&app.ahqstore().commits.read().await.commit)
       .unwrap()
       .into_bytes(),
   )
@@ -62,7 +62,7 @@ pub(crate) async fn refresh_commit(app: AppHandle) {
 
 #[command(async)]
 pub(crate) async fn get_all_search(app: AppHandle, query: &str) -> Result<Vec<String>> {
-  Ok(search::get_search(&*app.ahqstore().commits.read().await, query).await?)
+  Ok(search::get_search(&app.ahqstore().commits.read().await.commit, query).await?)
 }
 
 #[command(async)]
@@ -79,7 +79,7 @@ pub(crate) async fn get_home(app: AppHandle) -> Result<Home> {
         #[cfg(mobile)]
         return OfficialManifestSource::FDroid;
       })(),
-      &app.ahqstore().commits.read().await.alt,
+      &app.ahqstore().commits.read().await.commit.alt,
     )
     .await?,
   )
@@ -87,12 +87,12 @@ pub(crate) async fn get_home(app: AppHandle) -> Result<Home> {
 
 #[command(async)]
 pub(crate) async fn get_app(appl: AppHandle, app: &str) -> Result<AHQStoreApplication> {
-  Ok(internet::get_app(&*appl.ahqstore().commits.read().await, app).await?)
+  Ok(internet::get_app(&appl.ahqstore().commits.read().await.commit, app).await?)
 }
 
 #[command(async)]
 pub(crate) async fn get_app_asset(appl: AppHandle, app: &str, asset: &str) -> Result<Response> {
-  let bytes = internet::get_app_asset(&*appl.ahqstore().commits.read().await, app, asset)
+  let bytes = internet::get_app_asset(&appl.ahqstore().commits.read().await.commit, app, asset)
     .await
     .context("")?;
 
@@ -101,12 +101,12 @@ pub(crate) async fn get_app_asset(appl: AppHandle, app: &str, asset: &str) -> Re
 
 #[command(async)]
 pub(crate) async fn get_dev_data(app: AppHandle, dev: &str) -> Result<DevData> {
-  Ok(internet::get_dev_data(&*app.ahqstore().commits.read().await, dev).await?)
+  Ok(internet::get_dev_data(&app.ahqstore().commits.read().await.commit, dev).await?)
 }
 
 #[command(async)]
 pub(crate) async fn get_devs_apps(app: AppHandle, dev: &str) -> Result<Vec<String>> {
-  Ok(internet::get_devs_apps(&*app.ahqstore().commits.read().await, dev).await?)
+  Ok(internet::get_devs_apps(&app.ahqstore().commits.read().await.commit, dev).await?)
 }
 
 #[command(async)]

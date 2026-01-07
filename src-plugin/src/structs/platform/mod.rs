@@ -17,7 +17,7 @@ macro_rules! import {
 
 macro_rules! get_commit {
   ($x:ident) => {
-    &*$x.ahqstore().commits.read().await
+    &$x.ahqstore().commits.read().await.commit
   };
 }
 
@@ -76,15 +76,13 @@ pub async fn download(
         prog.send(DownloadEvent::Started { length });
       },
       |progress| {
-        prog.send(DownloadEvent::Progress {
-          progress,
-        });
+        prog.send(DownloadEvent::Progress { progress });
       },
     )
     .await
     .context("Unable to download")?;
 
-    prog.send(DownloadEvent::Finished {  });
+    prog.send(DownloadEvent::Finished {});
 
     Ok(())
   });
@@ -103,7 +101,9 @@ pub async fn download(
 
       Ok(())
     } else {
-      Err(tauri::Error::Anyhow(AnyError::msg("The download task is already complete")))
+      Err(tauri::Error::Anyhow(AnyError::msg(
+        "The download task is already complete",
+      )))
     }
   });
 

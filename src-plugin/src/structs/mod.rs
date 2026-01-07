@@ -3,9 +3,9 @@
 use std::sync::Arc;
 
 use ahqstore_types::{get_all_commits, Commits};
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tauri::{
-  async_runtime::{self, RwLock},
+  async_runtime::{self, spawn, RwLock},
   plugin::PluginApi,
   AppHandle, Runtime,
 };
@@ -14,10 +14,19 @@ use tauri::{
 use tauri::plugin::PluginHandle;
 use tokio::sync::Mutex;
 
-use crate::{models::*, structs::daemon::{IPCSend, initialize}};
+use crate::{
+  models::*,
+  structs::{
+    daemon::{initialize, IPCSend},
+    search::search_daemon,
+  },
+};
 
-pub(crate) mod platform;
 pub(crate) mod daemon;
+pub(crate) mod platform;
+pub(crate) mod search;
+
+use search::CommitSearchIndex;
 
 pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
@@ -25,7 +34,10 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 ) -> crate::Result<Ahqstore<R>> {
   #[cfg(desktop)]
   let commits = Arc::new(RwLock::new(async_runtime::block_on(async {
-    get_all_commits(None).await
+    Ok::<CommitSearchIndex, anyhow::Error>(CommitSearchIndex {
+      commit: get_all_commits(None).await?,
+      meta: None,
+    })
   })?));
 
   #[cfg(mobile)]
@@ -34,8 +46,8 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
   #[cfg(mobile)]
   let commits = Arc::new(RwLock::new(
     mobile
-    .run_mobile_plugin::<Commits>("getCommit", ())
-    .map_err(Into::<crate::Error>::into)?
+      .run_mobile_plugin::<Commits>("getCommit", ())
+      .map_err(Into::<crate::Error>::into)?,
   ));
 
   #[cfg(mobile)]
@@ -51,7 +63,7 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
     handle: mobile,
     commits,
     send_to_ipc: Mutex::new(None),
-    preferences: Arc::new(RwLock::new(prefs))
+    preferences: Arc::new(RwLock::new(prefs)),
   })
 }
 
@@ -61,13 +73,13 @@ pub enum AutoUpdate {
   CheckOnly,
   UpdateDuringUnmeteredWifi,
   UpdateDuringMeteredWifi,
-  Always
+  Always,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Preferences {
   #[serde(rename = "autoUpdate")]
-  pub auto_update: AutoUpdate
+  pub auto_update: AutoUpdate,
 }
 
 impl Preferences {
@@ -75,7 +87,7 @@ impl Preferences {
   pub fn init<R: Runtime>(h: &AppHandle<R>, m: &PluginHandle<R>) -> crate::Result<Self> {
     // Only a polyfill
     return Ok(Self {
-      auto_update: AutoUpdate::CheckOnly
+      auto_update: AutoUpdate::CheckOnly,
     });
   }
 
@@ -85,14 +97,14 @@ impl Preferences {
     use tauri::Manager;
 
     let mut set_path = h.path().app_local_data_dir()?;
-      
+
     set_path.push("config.json");
 
-    return Ok(serde_json::from_str(&read_to_string(&set_path).unwrap_or_default()).unwrap_or(
-      Self {
-        auto_update: AutoUpdate::CheckOnly
-      }
-    ));
+    return Ok(
+      serde_json::from_str(&read_to_string(&set_path).unwrap_or_default()).unwrap_or(Self {
+        auto_update: AutoUpdate::CheckOnly,
+      }),
+    );
   }
 }
 
@@ -103,7 +115,7 @@ pub struct Ahqstore<R: Runtime> {
   #[cfg(mobile)]
   pub(crate) handle: PluginHandle<R>,
   pub preferences: Arc<RwLock<Preferences>>,
-  pub commits: Arc<RwLock<Commits>>,
+  pub commits: Arc<RwLock<CommitSearchIndex>>,
   pub send_to_ipc: Mutex<Option<IPCSend>>,
 }
 
@@ -111,16 +123,27 @@ impl<R: Runtime> Ahqstore<R> {
   pub fn init(&self, hwnd: AppHandle<R>) {
     let mut lock = self.send_to_ipc.blocking_lock();
 
+    let hwnd2 = hwnd.clone();
+
     if lock.is_none() {
       *lock = Some(initialize(hwnd, self.commits.clone()));
     }
+
+    let lck = self.commits.clone();
+
+    spawn(async move {
+      search_daemon(hwnd2, lck).await;
+    });
   }
 
   #[cfg(desktop)]
   pub async fn refresh(&self) -> crate::Result<()> {
     let mut lock = self.commits.write().await;
 
-    *lock = get_all_commits(None).await?;
+    *lock = CommitSearchIndex {
+      commit: get_all_commits(None).await?,
+      meta: None,
+    };
 
     Ok(())
   }
