@@ -4,7 +4,7 @@ use ahqstore_types::{Commits, SearchEntry};
 use tantivy::{
   collector::TopDocs,
   query::{BooleanQuery, FuzzyTermQuery, QueryParser},
-  schema::{Field, Schema, Value, STORED, STRING, TEXT},
+  schema::{Field, Schema, Value, FAST, STORED, STRING, TEXT},
   Index, IndexReader, ReloadPolicy, TantivyDocument, Term,
 };
 use tauri::{async_runtime::spawn_blocking, AppHandle, Manager, Runtime};
@@ -68,7 +68,7 @@ pub async fn search_daemon<R: Runtime>(hwnd: AppHandle<R>, lck: Arc<RwLock<Commi
   let mut builder = Schema::builder();
   let name_txt = builder.add_text_field("name", TEXT);
   let title_txt = builder.add_text_field("title", TEXT);
-  let id = builder.add_text_field("id", STRING | STORED);
+  let id = builder.add_text_field("id", STRING | STORED | FAST);
   let schema = builder.build();
 
   let index = {
