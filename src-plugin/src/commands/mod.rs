@@ -62,7 +62,15 @@ pub(crate) async fn refresh_commit(app: AppHandle) {
 
 #[command(async)]
 pub(crate) async fn get_all_search(app: AppHandle, query: &str) -> Result<Vec<String>> {
-  Ok(search::get_search(&app.ahqstore().commits.read().await.commit, query).await?)
+  Ok(
+    app
+      .ahqstore()
+      .commits
+      .read()
+      .await
+      .search(query)
+      .map_err(|_| crate::Error::SearchError)?,
+  )
 }
 
 #[command(async)]

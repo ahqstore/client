@@ -9,6 +9,9 @@ pub enum Error {
   #[error("The platform is not supported")]
   UnsupportedPlatform,
 
+  #[error("There was an error while performing search")]
+  SearchError,
+
   #[error(transparent)]
   Tauri(#[from] tauri::Error),
 

@@ -98,6 +98,7 @@ pub async fn search_daemon<R: Runtime>(hwnd: AppHandle<R>, lck: Arc<RwLock<Commi
       Index::open_in_dir(&cache).expect("Unable to create db, exiting")
     } else {
       _ = fs::remove_dir_all(&cache).await;
+      _ = fs::create_dir_all(&cache).await;
 
       Index::create_in_dir(&cache, schema).expect("Unable to create db, exiting")
     }
