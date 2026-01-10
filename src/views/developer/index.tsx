@@ -47,7 +47,7 @@ export default function DeveloperPage() {
     (ready && dev && apps && auth) ? <>
       <div className="flex gap-1">
         <h1 className="text-xl">Welcome, <strong className="text-foreground">{dev?.name}</strong></h1>
-        <img className="rounded-full my-auto w-[1.25rem] h-[1.25rem]" src={dev?.avatar_url} />
+        <img className="rounded-full my-auto w-[1.25rem] h-[1.25rem]" src={dev?.avatar_url || undefined} />
       </div>
 
       <Dialog
@@ -86,7 +86,7 @@ export default function DeveloperPage() {
             <span>{dev.id}</span>
             <span>{dev.github}</span>
             <span role="button" onClick={() => open(`https://github.com/${dev.github}`)} className="w-fit-content cursor-pointer underline">Open</span>
-            <img role="button" aria-description="Open in browser" onClick={() => open(dev.avatar_url || "")} className="rounded-full my-auto w-2 cursor-pointer" src={dev?.avatar_url} />
+            <img role="button" aria-description="Open in browser" onClick={() => open(dev.avatar_url || "")} className="rounded-full my-auto w-2 cursor-pointer" src={dev?.avatar_url || undefined} />
           </div>
         </div>
       </Category>
