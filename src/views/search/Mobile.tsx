@@ -3,7 +3,7 @@ import { openApplicationState } from "@/data/implementations/appView";
 import { memo, useEffect, useState } from "react";
 
 import { useInView } from "react-intersection-observer";
-import type { AHQStoreApplication } from "src-ahqstore-types/pkg/ahqstore.types";
+import type { AHQStoreApplication } from "@ahqstore/core-types";
 
 export interface PanelProps {
   appId: string;

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { getDevData, getDevsApps, open } from "tauri-plugin-ahqstore-api"
 
-import type { DevData } from "src-ahqstore-types/pkg/ahqstore.types";
+import type { DevData } from "@ahqstore/core-types";
 import { ConfigSelect } from "@/components/select";
 
 import { Dialog, DialogSurface, DialogTitle } from "@fluentui/react-components"
@@ -81,7 +81,7 @@ export default function DeveloperPage() {
           </div>
 
           {/* Values */}
-          <div className="flex flex-col space-y-2 text-gray-700 dark:!text-gray-200/80">
+          <div className="flex flex-col space-y-2 text-gray-700 dark:text-gray-200/80!">
             <span>{dev.name}</span>
             <span>{dev.id}</span>
             <span>{dev.github}</span>

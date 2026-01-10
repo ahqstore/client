@@ -3,7 +3,7 @@ use std::{
   thread,
 };
 
-use ahqstore_types::Commits;
+use ahqstore_types::{Commits, StatusUpdateData};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Runtime};
 use tokio::{
@@ -25,7 +25,6 @@ pub type IPCSend = S1<SendRequest>;
 pub type Broadcast = S2<Arc<StatusUpdateData>>;
 
 pub static BOXED_TX_REF: OnceLock<Broadcast> = OnceLock::new();
-
 
 #[cfg(desktop)]
 mod desktop;

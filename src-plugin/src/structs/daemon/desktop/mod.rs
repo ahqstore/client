@@ -3,7 +3,7 @@ use std::{
   time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use ahqstore_types::Commits;
+use ahqstore_types::{Commits, StatusUpdateData};
 use tauri::Runtime;
 use tokio::{
   sync::{broadcast::Sender, mpsc::UnboundedReceiver, RwLock},
@@ -11,12 +11,7 @@ use tokio::{
   time::sleep,
 };
 
-use crate::structs::{
-  daemon::{SendRequest, StatusUpdateData},
-  platform,
-  search::CommitSearchIndex,
-  Ahqstore,
-};
+use crate::structs::{daemon::SendRequest, platform, search::CommitSearchIndex, Ahqstore};
 
 const TEN_MINS: u64 = 10 * 60 * 1000;
 
