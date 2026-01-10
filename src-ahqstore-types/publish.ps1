@@ -1,5 +1,4 @@
 # Building
-Clear-Host
 cargo test --features export
 
 # Packaging

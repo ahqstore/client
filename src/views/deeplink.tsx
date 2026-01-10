@@ -17,7 +17,7 @@ import {
   Caption1,
 } from "@fluentui/react-components";
 import { useEffect, useState } from "react";
-import { AHQStoreApplication } from "src-ahqstore-types/pkg/ahqstore_types";
+import type { AHQStoreApplication } from "src-ahqstore-types/pkg/ahqstore_types";
 
 import { Check, BookMarked, SearchAlert } from "lucide-react"
 
