@@ -1,17 +1,5 @@
-#[cfg(feature = "js")]
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
-
-#[cfg(feature = "js")]
-use kfghdfghdfkgh_js_macros::TsifyAsync;
-
-#[cfg(feature = "js")]
-use tsify::{declare, JsValueSerdeExt};
-
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-
-#[cfg(feature = "search")]
-use fuse_rust::{FuseProperty, Fuseable};
 
 #[cfg(feature = "internet")]
 pub mod internet;
@@ -34,9 +22,6 @@ pub mod linux;
 #[cfg(feature = "internet")]
 pub mod fdroid;
 
-#[cfg(all(feature = "internet", feature = "search"))]
-pub mod search;
-
 use reqwest::{Client, ClientBuilder};
 use std::sync::LazyLock;
 
@@ -47,11 +32,11 @@ pub static CLIENT: LazyLock<Client> = LazyLock::new(|| {
     .unwrap()
 });
 
-#[cfg_attr(feature = "js", declare)]
 pub type MapData = Vec<String>;
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen)]
+
 /// This is exactly `Vec<(String, Vec<String>)>`
 pub struct HomeMapData {
   inner: Vec<(String, Vec<String>)>,
@@ -76,31 +61,17 @@ impl<'de> Deserialize<'de> for HomeMapData {
   }
 }
 
-#[cfg(feature = "js")]
-#[wasm_bindgen]
-impl HomeMapData {
-  #[wasm_bindgen(constructor)]
-  pub fn new() -> HomeMapData {
-    HomeMapData {
-      inner: vec![],
-    }
-  }
-
-  #[wasm_bindgen(getter)]
-  pub fn inner(&self) -> JsValue {
-    serde_wasm_bindgen::to_value(&self.inner).unwrap()
-  }
-}
-
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct Home {
   pub splash: Option<Splash>,
   pub home: HomeMapData,
 }
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct Splash {
   pub hero: Hero,
   pub subhero: SubHero,
@@ -108,8 +79,8 @@ pub struct Splash {
   pub fourth: Semi,
 }
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 #[allow(non_snake_case)]
 pub struct Hero {
   pub title: String,
@@ -120,70 +91,43 @@ pub struct Hero {
   pub appId: String,
 }
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 #[allow(non_snake_case)]
 pub struct SubHero {
   pub title: String,
   pub background: String,
   pub appId: String,
-  pub color: Option<String>
+  pub color: Option<String>,
 }
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
 #[allow(non_snake_case)]
 pub struct Semi {
   pub title: String,
   pub background: String,
   pub appId: String,
-  pub color: Option<String>
+  pub color: Option<String>,
 }
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct SearchEntry {
   pub name: String,
   pub title: String,
   pub id: String,
 }
 
-#[cfg(feature = "search")]
-impl Fuseable for SearchEntry {
-  fn properties(&self) -> Vec<FuseProperty> {
-    vec![
-      FuseProperty {
-        value: "id".into(),
-        weight: 0.34,
-      },
-      FuseProperty {
-        value: "title".into(),
-        weight: 0.33,
-      },
-      FuseProperty {
-        value: "name".into(),
-        weight: 0.33,
-      },
-    ]
-  }
-
-  fn lookup(&self, key: &str) -> Option<&str> {
-    match key {
-      "name" => Some(&self.name),
-      "title" => Some(&self.title),
-      "id" => Some(&self.id),
-      _ => None,
-    }
-  }
-}
-
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct DevData {
   pub name: Option<String>,
   pub id: String,
   pub github: String,
   pub avatar_url: Option<String>,
   #[serde(default)]
-  pub verified: bool
+  pub verified: bool,
 }

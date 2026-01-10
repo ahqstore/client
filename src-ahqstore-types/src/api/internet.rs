@@ -33,8 +33,8 @@ use super::{
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "js", derive(tsify::Tsify))]
 pub struct Commits {
   pub ahqstore: String,
   pub alt: String,
@@ -62,18 +62,7 @@ pub async fn get_all_commits(token: Option<String>) -> Result<Commits> {
 
   Ok(Commits {
     ahqstore,
-    #[cfg(
-      any(
-        feature = "js",
-        not(
-          any(
-            windows,
-            target_os = "android",
-            target_os = "linux"
-          )
-        )
-      )
-    )]
+    #[cfg(not(any(windows, target_os = "android", target_os = "linux")))]
     alt: "".to_string(),
     #[cfg(windows)]
     alt: winget,

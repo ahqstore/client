@@ -1,52 +1,70 @@
-#[cfg(feature = "js")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use std::env::consts::{ARCH, OS};
 
 use serde::{Deserialize, Serialize};
 
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct InstallerOptions {
-  #[doc = "🎯 Introduced in v1\n\n"]
+  /// 🎯 Introduced in v1
+///
+///
   pub win32: Option<InstallerOptionsWindows>,
-  #[doc = "🎯 Introduced in v2\n\n"]
+  /// 🎯 Introduced in v2
+///
+///
   pub winarm: Option<InstallerOptionsWindows>,
-  #[doc = "🎯 Introduced in v1\n\n"]
+  /// 🎯 Introduced in v1
+///
+///
   pub linux: Option<InstallerOptionsLinux>,
-  #[doc = "🎯 Introduced in v2\n\n"]
+  /// 🎯 Introduced in v2
+///
+///
   pub linuxArm64: Option<InstallerOptionsLinux>,
-  #[doc = "🎯 Introduced in v2\n\n"]
+  /// 🎯 Introduced in v2
+///
+///
   pub linuxArm7: Option<InstallerOptionsLinux>,
-  #[doc = "🔬 Planned\n🎯 Introduced in v2\n\n"]
+  /// 🔬 Planned\n🎯 Introduced in v2
+///
+///
   pub android: Option<InstallerOptionsAndroid>,
 }
 
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen)]
+
 pub enum WindowsInstallScope {
   User,
   Machine,
 }
 
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct InstallerOptionsWindows {
-  #[doc = "🎯 Introduced in v2\n\n"]
+  /// 🎯 Introduced in v2
+///
+///
   pub assetId: u8,
   /// The exe to link as a shortcut[^1]
   ///
   /// [^1]: Only if you choose WindowsZip
   pub exec: Option<String>,
-  #[doc = "🎯 Introduced in v1\n\n"]
+  /// 🎯 Introduced in v1
+///
+///
   /// The scope of the installer[^1]
   ///
   /// [^1]: Applicable for WindowsInstallerExe or WindowsZip only, WindowsInstallerMsi is treated as Machine
   pub scope: Option<WindowsInstallScope>,
-  #[doc = "🎯 Stable as of v3\n\n"]
+  /// 🎯 Stable as of v3
+///
+///
   /// Args to pass to the custom exe installer[^1]
   ///
   /// [^1]: Only if you choose WindowsInstallerExe
@@ -54,9 +72,12 @@ pub struct InstallerOptionsWindows {
 }
 
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[doc = "🔬 Under Development\n\n"]
-#[cfg_attr(feature = "js", wasm_bindgen)]
+/// 🔬 Under Development
+///
+///
+
 pub enum AndroidAbi {
   Aarch64,
   Armv7,
@@ -86,22 +107,32 @@ fn android_abi() -> &'static str {
 }
 
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[doc = "🔬 Under Development\n\n"]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+/// 🔬 Under Development
+///
+///
+
 pub struct InstallerOptionsAndroid {
-  #[doc = "🎯 Introduced in v2\n\n"]
+  /// 🎯 Introduced in v2
+///
+///
   pub assetId: u8,
   pub min_sdk: u32,
   pub abi: Vec<AndroidAbi>,
 }
 
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[doc = "🔬 Under Development\n\n"]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+/// 🔬 Under Development
+///
+///
+
 pub struct InstallerOptionsLinux {
-  #[doc = "🎯 Introduced in v2\n\n"]
+  /// 🎯 Introduced in v2
+///
+///
   pub assetId: u8,
 }
 
@@ -114,7 +145,7 @@ macro_rules! push_install_arch {
 }
 
 impl InstallerOptions {
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn list_os_arch(&self) -> Vec<&'static str> {
     let mut arch = vec![];
 
@@ -143,7 +174,7 @@ impl InstallerOptions {
     arch
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn is_supported(&self) -> bool {
     let os = self.list_os_arch();
     if OS == "android" {
@@ -153,7 +184,7 @@ impl InstallerOptions {
     os.contains(&format!("{}-{}", OS, ARCH).as_str())
   }
 
-  #[doc = "🎯 Introduced in v3"]
+  /// 🎯 Introduced in v3
   pub fn is_supported_android(&self, sdk: u32) -> bool {
     let os = self.list_os_arch();
 
@@ -168,7 +199,7 @@ impl InstallerOptions {
     false
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn has_platform(&self) -> bool {
     self.is_supported()
   }

@@ -1,6 +1,5 @@
 use crate::error::Result;
 use anyhow::Context;
-use bcrypt::{hash_with_salt, Version, DEFAULT_COST};
 use chacha20poly1305::{
   aead::{generic_array::GenericArray, Aead, KeyInit},
   ChaCha20Poly1305,

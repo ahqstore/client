@@ -3,7 +3,7 @@ use std::{num::NonZero, sync::Arc, thread::available_parallelism, time::Duration
 use ahqstore_types::{Commits, SearchEntry};
 use tantivy::{
   collector::TopDocs,
-  query::{BooleanQuery, FuzzyTermQuery, QueryParser},
+  query::{BooleanQuery, BoostQuery, FuzzyTermQuery, Query, QueryParser},
   schema::{Field, Schema, Value, FAST, STORED, STRING, TEXT},
   Index, IndexReader, ReloadPolicy, TantivyDocument, Term,
 };
@@ -32,27 +32,61 @@ impl CommitSearchIndex {
 
     let searcher = meta.reader.searcher();
 
-    let name_data = Term::from_field_text(meta.name_txt, query);
-    let name_query = FuzzyTermQuery::new(name_data, 2, true);
+    let name_query = BoostQuery::new(
+      Box::new(BooleanQuery::intersection(
+        query
+          .split_whitespace()
+          .into_iter()
+          .map(|x| {
+            let x = Term::from_field_text(meta.name_txt, x);
 
-    let title_term = Term::from_field_text(meta.title_txt, query);
-    let title_query = FuzzyTermQuery::new(title_term, 2, true);
+            Box::new(FuzzyTermQuery::new(x, 1, true)) as Box<dyn Query + 'static>
+          })
+          .collect::<Vec<Box<_>>>() as _,
+      )),
+      1.5,
+    );
+
+    let title_query = BooleanQuery::intersection(
+      query
+        .split_whitespace()
+        .into_iter()
+        .map(|x| {
+          let x = Term::from_field_text(meta.title_txt, x);
+
+          Box::new(FuzzyTermQuery::new(x, 1, true)) as Box<dyn Query + 'static>
+        })
+        .collect::<Vec<Box<_>>>(),
+    );
 
     let query = BooleanQuery::union(vec![Box::new(name_query), Box::new(title_query)]);
 
     let Ok(mut search) = searcher.search(&query, &TopDocs::with_limit(500)) else {
+      println!("ERRORED OUT SEARCH");
       return Err(());
     };
 
     let results: Vec<String> = search
       .into_iter()
       .map(|(_, b)| {
-        let data: TantivyDocument = searcher.doc(b).expect("Couldn't deserialize document");
-
-        data
-          .get_first(meta.id)
-          .map(|x| x.as_str().map(|x| x.to_string()))
+        searcher
+          .segment_reader(b.segment_ord)
+          .fast_fields()
+          .str("id")
+          .ok()
           .flatten()
+          .and_then(|x| {
+            let mut out = [None; 1];
+            x.ords().first_vals(&[b.doc_id], &mut out);
+
+            let out = out[0]?;
+
+            let mut data = String::default();
+
+            x.ord_to_str(out, &mut data).ok()?;
+
+            Some(data)
+          })
       })
       // Flatten to auto ignore None values
       .flatten()
@@ -68,7 +102,7 @@ pub async fn search_daemon<R: Runtime>(hwnd: AppHandle<R>, lck: Arc<RwLock<Commi
   let mut builder = Schema::builder();
   let name_txt = builder.add_text_field("name", TEXT);
   let title_txt = builder.add_text_field("title", TEXT);
-  let id = builder.add_text_field("id", STRING | STORED | FAST);
+  let id = builder.add_text_field("id", STRING | FAST);
   let schema = builder.build();
 
   let index = {
@@ -148,6 +182,8 @@ pub async fn search_daemon<R: Runtime>(hwnd: AppHandle<R>, lck: Arc<RwLock<Commi
 
     // Building phase
     if let Ok(searches) = get_all_search(&to_update).await {
+      println!("[INFO] Parsing search map");
+
       let idx_c = index.clone();
       // Fetching phase
       if let Ok(Ok(_)) =
@@ -187,7 +223,7 @@ fn build_search(
       .len()
       // Let's assume each entry takes approx 128-bytes, plenty
       .saturating_mul(128)
-      .clamp(10 * 1024 * 1024, 100 * 1024 * 1024),
+      .clamp(15 * 1024 * 1024, 100 * 1024 * 1024),
   )?;
 
   // Clean up all documents as currently delta updates is not done

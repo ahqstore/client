@@ -15,62 +15,17 @@ use tokio::{
   },
 };
 
-pub enum SendRequest {}
-
-pub enum ReceivedData {}
+pub enum SendRequest {
+  CheckForUpdate,
+  InstallUSERAPP { app_id: String },
+  RemoveUSERAPP { app_id: String },
+}
 
 pub type IPCSend = S1<SendRequest>;
-pub type Broadcast = S2<Arc<ReceivedData>>;
+pub type Broadcast = S2<Arc<StatusUpdateData>>;
 
 pub static BOXED_TX_REF: OnceLock<Broadcast> = OnceLock::new();
 
-#[derive(Debug, Serialize, Deserialize)]
-pub enum UpdateInstallStatus {
-  Unknown,
-  // The UpdateInstall process is checking for updates
-  CheckingForUpdates,
-  // The UpdateInstall process is in progress
-  InProgress,
-  // Everything is alright
-  // Nothing Pending
-  NoPending,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(tag = "status")]
-pub enum AppUpdateInstallStatus {
-  /// { "status": "Pending" }
-  Pending,
-  /// { "status": "Downloading", "progress": 100.0 }
-  Downloading { progress: f64 },
-  /// { "status": "Installing" }
-  Installing,
-  /// { "status": "Updating" }
-  Updating,
-  /// { "status": "Uninstalling" }
-  Uninstalling,
-  /// { "status": "Done" }
-  Done,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AppUpdateInstall {
-  pub id: String,
-  pub status: AppUpdateInstallStatus,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UpdateInstallState {
-  pub update: UpdateInstallStatus,
-  pub list: Vec<AppUpdateInstall>,
-}
-
-pub static UPDATE_INSTALL_STATUS: LazyLock<RwLock<UpdateInstallState>> = LazyLock::new(|| {
-  RwLock::new(UpdateInstallState {
-    update: UpdateInstallStatus::Unknown,
-    list: vec![],
-  })
-});
 
 #[cfg(desktop)]
 mod desktop;
@@ -86,7 +41,7 @@ pub use android::*;
 
 use crate::{structs::search::CommitSearchIndex, AhqstoreExt};
 
-pub fn get_daemon_listener() -> Receiver<Arc<ReceivedData>> {
+pub fn get_daemon_listener() -> Receiver<Arc<StatusUpdateData>> {
   BOXED_TX_REF.get().expect("Cannot error out").subscribe()
 }
 

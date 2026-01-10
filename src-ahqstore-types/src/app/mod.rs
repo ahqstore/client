@@ -1,15 +1,13 @@
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
-use std::{collections::HashMap, env::consts::ARCH, time::{SystemTime, UNIX_EPOCH}};
+use std::{
+  collections::HashMap,
+  env::consts::ARCH,
+  time::{SystemTime, UNIX_EPOCH},
+};
 
 pub mod install;
 mod other_fields;
-
-#[cfg(feature = "js")]
-use tsify::*;
-
-#[cfg(feature = "js")]
-use wasm_bindgen::JsValue;
 
 pub use install::*;
 pub use other_fields::*;
@@ -17,10 +15,10 @@ pub use other_fields::*;
 use crate::api::Commits;
 
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[doc = "Use the official ahqstore (<https://crates.io/crates/ahqstore_cli_rs>) cli\n🎯 Introduced in v1, Revamped in v2"]
-#[cfg_attr(feature = "js", derive(Tsify))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
+/// Use the official ahqstore (<https://crates.io/crates/ahqstore_cli_rs>) cli\n🎯 Introduced in v1, Revamped in v2
+
 pub struct AHQStoreApplication {
   /// The ID of the application
   pub appId: String,
@@ -56,6 +54,7 @@ pub struct AHQStoreApplication {
   pub usrVersion: Option<String>,
 
   /// Will be automatically overriden
+  #[cfg_attr(feature = "export", specta(type = u32))]
   pub version: u64,
 
   /// The Site to your app
@@ -164,7 +163,10 @@ impl AHQStoreApplication {
   pub fn export(&self) -> (String, Vec<(u8, Vec<u8>)>) {
     let mut obj = self.clone();
     obj.verified = false;
-    obj.version = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time is somehow running in reverse").as_secs();
+    obj.version = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .expect("Time is somehow running in reverse")
+      .as_secs();
 
     for val in obj.downloadUrls.values_mut() {
       if &obj.authorId == Self::AHQSTORE_OFFICIAL_AUTHOR_ID && &val.asset == "url" {
@@ -196,7 +198,7 @@ impl AHQStoreApplication {
     self.install.has_platform()
   }
 
-  #[doc = "🎯 Introduced in v3"]
+  /// 🎯 Introduced in v3
   pub fn get_win_options(&self) -> Option<&InstallerOptionsWindows> {
     let get_w32 = || {
       let Some(x) = &self.install.win32 else {
@@ -220,7 +222,7 @@ impl AHQStoreApplication {
     Some(win32)
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn get_win_download(&self) -> Option<&DownloadUrl> {
     let win32 = self.get_win_options()?;
     let url = self.downloadUrls.get(&win32.assetId)?;
@@ -235,13 +237,13 @@ impl AHQStoreApplication {
     }
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   /// Just a clone of get_win_download for backwards compatibility
   pub fn get_win32_download(&self) -> Option<&DownloadUrl> {
     self.get_win_download()
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn get_win_extension(&self) -> Option<&'static str> {
     match self.get_win_download()?.installerType {
       InstallerFormat::WindowsZip => Some(".zip"),
@@ -253,13 +255,13 @@ impl AHQStoreApplication {
     }
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   /// Just a clone of get_win_extention for backwards compatibility
   pub fn get_win32_extension(&self) -> Option<&'static str> {
     self.get_win_extension()
   }
 
-  #[doc = "🎯 Introduced in v3"]
+  /// 🎯 Introduced in v3
   pub fn get_linux_options(&self) -> Option<&InstallerOptionsLinux> {
     match ARCH {
       "x86_64" => self.install.linux.as_ref(),
@@ -271,7 +273,7 @@ impl AHQStoreApplication {
     }
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn get_linux_download(&self) -> Option<&DownloadUrl> {
     let linux = self.get_linux_options()?;
 
@@ -283,7 +285,7 @@ impl AHQStoreApplication {
     }
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn get_linux_extension(&self) -> Option<&'static str> {
     match self.get_linux_download()?.installerType {
       InstallerFormat::LinuxAppImage => Some(".AppImage"),
@@ -291,12 +293,12 @@ impl AHQStoreApplication {
     }
   }
 
-  #[doc = "🎯 Introduced in v3"]
+  /// 🎯 Introduced in v3
   pub fn is_supported_android(&self, sdk: u32) -> bool {
     self.install.is_supported_android(sdk)
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn get_android_download(&self) -> Option<&DownloadUrl> {
     let Some(android) = &self.install.android else {
       return None;
@@ -310,7 +312,7 @@ impl AHQStoreApplication {
     }
   }
 
-  #[doc = "🎯 Introduced in v2"]
+  /// 🎯 Introduced in v2
   pub fn get_android_extension(&self) -> Option<&'static str> {
     match self.get_android_download()?.installerType {
       InstallerFormat::AndroidApkZip => Some(".apk"),
@@ -319,7 +321,7 @@ impl AHQStoreApplication {
   }
 
   #[cfg(feature = "internet")]
-  #[doc = "🎯 Introduced in v3"]
+  /// 🎯 Introduced in v3
   #[deprecated(since = "3.14.3", note = "Use `get_resource` instead")]
   pub async fn get_resource(&self, resource: u8) -> Option<Vec<u8>> {
     use crate::api::internet::{get_all_commits, get_app_asset};
@@ -330,7 +332,7 @@ impl AHQStoreApplication {
   }
 
   #[cfg(feature = "internet")]
-  #[doc = "🎯 Introduced in v3.14.3"]
+  /// 🎯 Introduced in v3.14.3
   pub async fn get_resource_commit(&self, commit: &Commits, resource: u8) -> Option<Vec<u8>> {
     use crate::{api::internet::get_all_commits, get_app_asset};
 

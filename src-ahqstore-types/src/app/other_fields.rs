@@ -1,13 +1,11 @@
-#[cfg(feature = "js")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct DownloadUrl {
   pub installerType: InstallerFormat,
   pub asset: String,
@@ -16,28 +14,41 @@ pub struct DownloadUrl {
   pub url: String,
 }
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen)]
+
 pub enum InstallerFormat {
-  #[doc = "🎯 Stable as of v1"]
+  /// 🎯 Stable as of v1
   WindowsZip,
 
-  #[doc = "🎯 Stable as of v2\n\n"]
+  /// 🎯 Stable as of v2
+  ///
+  ///
   WindowsInstallerMsi,
 
-  #[doc = "🎯 Stable after v2\n\n"]
+  /// 🎯 Stable after v2
+  ///
+  ///
   WindowsInstallerExe,
 
-  #[doc = "🔬 Planned in AHQ Store NEO\n\n"]
+  /// 🔬 Planned in AHQ Store NEO
+  ///
+  ///
   WindowsUWPMsix,
 
-  #[doc = "🔬 Planned in AHQ Store NEO\n\n"]
+  /// 🔬 Planned in AHQ Store NEO
+  ///
+  ///
   WindowsAHQDB,
 
-  #[doc = "🎯 Stable as of v2\n\n"]
+  /// 🎯 Stable as of v2
+  ///
+  ///
   LinuxAppImage,
 
-  #[doc = "🔬 Planned in AHQ Store NEO\n\n"]
+  /// 🔬 Planned in AHQ Store NEO
+  ///
+  ///
   AndroidApkZip,
 }
 
@@ -59,8 +70,9 @@ impl Display for InstallerFormat {
   }
 }
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct AppRepo {
   /// author must be your GitHub username or username of an org where you're a "visible" member
   pub author: String,

@@ -9,21 +9,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::{from_str, to_string, to_string_pretty};
 use std::fs::read;
 
-#[cfg(feature = "js")]
-use tsify::*;
-#[cfg(feature = "js")]
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
-
-#[cfg_attr(feature = "js", declare)]
 pub type AppId = String;
-#[cfg_attr(feature = "js", declare)]
 pub type Str = String;
-#[cfg_attr(feature = "js", declare)]
 pub type AppData = (String, String);
-#[cfg_attr(feature = "js", declare)]
 pub type RefId = u64;
 
-#[cfg_attr(feature = "js", declare)]
 pub type Success = bool;
 
 pub mod app;
@@ -46,15 +36,60 @@ pub mod winget;
 /// This Module:
 /// This module lists the standard commands & types that AHQ Store sends to AHQ Store Service
 
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", wasm_bindgen)]
-pub struct Prefs {
-  pub launch_app: bool,
-  pub install_apps: bool,
-  pub auto_update_apps: bool,
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Debug, Serialize)]
+pub struct StatusUpdateData {
+  pub queue: &'static [QueuedApp],
+  #[serde(rename = "supportsUpdate")]
+  pub supports_update: bool,
 }
 
-#[cfg_attr(feature = "js", wasm_bindgen)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Debug, Serialize)]
+pub struct QueuedApp {
+  pub id: String,
+  pub status: AppUpdateInstallStatus,
+}
+
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Debug, Serialize)]
+#[serde(tag = "status")]
+pub enum AppUpdateInstallStatus {
+  /// { "status": "Pending" }
+  Pending,
+  /// { "status": "Cancelled" }
+  Cancelled,
+  /// { "status": "Downloading", "progress": 100.0 }
+  Downloading { progress: f64 },
+  /// { "status": "Installing" }
+  Installing,
+  /// { "status": "Updating" }
+  Updating,
+  /// { "status": "Uninstalling" }
+  Uninstalling,
+  /// { "status": "Done" }
+  Done,
+}
+
+/// PREFERENCES
+
+#[allow(non_camel_case_types)]
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Serialize, Deserialize, Debug)]
+pub enum UpdateStrategy {
+  Never,
+  CheckOnly,
+  DownloadInstall_UnmeteredWifi,
+  DownloadInstall_Wifi,
+  DownloadInstall,
+}
+
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Prefs {
+  pub update: UpdateStrategy,
+}
+
 impl Prefs {
   pub fn get(path: &str) -> Option<Vec<u8>> {
     read(&path).ok()
@@ -70,16 +105,14 @@ impl Prefs {
 
   pub fn default() -> Prefs {
     Prefs {
-      launch_app: true,
-      install_apps: true,
-      auto_update_apps: true,
+      update: UpdateStrategy::CheckOnly,
     }
   }
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Debug, Clone)]
+
 pub enum AppStatus {
   Pending,
   Downloading,
@@ -111,9 +144,9 @@ impl Serialize for AppStatus {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Serialize, Debug, Clone)]
+
 pub enum UpdateStatusReport {
   Disabled,
   UpToDate,
@@ -121,15 +154,12 @@ pub enum UpdateStatusReport {
   Updating,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AuthPing {
-  pub process: usize,
-}
-
-impl AuthPing {
-  pub fn from<T: AsRef<str>>(value: T) -> Option<Self> {
-    let string = value.as_ref();
-
-    serde_json::from_str(string).ok()
+#[cfg(test)]
+mod tests {
+  #[test]
+  #[cfg(feature = "export")]
+  fn export() {
+    _ = specta::export::ts("./pkg/ahqstore.types.d.ts").unwrap();
+    _ = specta::export::ts("./types/ahqstore.types.d.ts").unwrap();
   }
 }

@@ -12,7 +12,7 @@ use tokio::{
 };
 
 use crate::structs::{
-  daemon::{ReceivedData, SendRequest},
+  daemon::{SendRequest, StatusUpdateData},
   platform,
   search::CommitSearchIndex,
   Ahqstore,
@@ -23,7 +23,7 @@ const TEN_MINS: u64 = 10 * 60 * 1000;
 pub async fn daemon<R: Runtime>(
   a: &Ahqstore<R>,
   commits: Arc<RwLock<CommitSearchIndex>>,
-  tx: Sender<Arc<ReceivedData>>,
+  tx: Sender<Arc<StatusUpdateData>>,
   mut rx: UnboundedReceiver<SendRequest>,
 ) {
   let mut next_check = 0u64;

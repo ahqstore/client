@@ -14,7 +14,7 @@ use tauri::{command, AppHandle, Manager, Runtime};
 use crate::models::*;
 use crate::AhqstoreExt;
 
-use ahqstore_types::{internet, search};
+use ahqstore_types::internet;
 
 #[cfg(desktop)]
 use tauri::{

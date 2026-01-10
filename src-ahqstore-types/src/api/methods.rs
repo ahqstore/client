@@ -6,9 +6,6 @@
 
 use std::collections::HashMap;
 
-#[cfg(feature = "js")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use serde::{Deserialize, Serialize};
 
 use crate::AHQStoreApplication;
@@ -18,21 +15,22 @@ use super::{
   winget::WINGET_COMMIT_URL, Home, CLIENT,
 };
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct GHRepoCommit {
   pub sha: String,
 }
 
 pub enum OfficialManifestSource {
-  #[doc = "Official Community repository"]
+  /// Official Community repository
   AHQStore,
 
-  #[doc = "Third Party Manifest Repo Adapted for use"]
+  /// Third Party Manifest Repo Adapted for use
   WinGet,
-  #[doc = "Third Party Manifest Repo Adapted for use"]
+  /// Third Party Manifest Repo Adapted for use
   Linux,
-  #[doc = "Third Party Manifest Repo Adapted for use"]
+  /// Third Party Manifest Repo Adapted for use
   FDroid,
 }
 

@@ -160,20 +160,15 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install wasm-pack
+      - name: Install npm
         run: |
           npm i -g npm@latest
-          npm i -g wasm-pack
         working-directory: src-ahqstore-types
 
-      - name: Build NPM Binaries
-        run: wasm-pack build --release -- --features js
+      - name: Build & Publish NPM Binaries
+        shell: pwsh
+        run: ./publish.ps1
         working-directory: src-ahqstore-types
-
-      - name: Publish NPM Binaries
-        run: npm publish --access public
-        working-directory: src-ahqstore-types/pkg
-        continue-on-error: true
 
       - name: Publish plugin api
         run: |
@@ -358,15 +353,17 @@ jobs:
           echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
       - name: Build ahqstore-types locally
+        shell: pwsh
         run: |
-          npm i -g wasm-pack
-          wasm-pack build --release -- --features js
+          ./publish.ps1
 
           cd ../src-plugin
           npm i -g pnpm
           pnpm install
           pnpm build
         working-directory: src-ahqstore-types
+        env:
+          NO_PUBLISH: true
 
       - name: Build plugin api
         run: |
@@ -467,15 +464,17 @@ jobs:
           sudo chmod -R 777 /usr
 
       - name: Build ahqstore-types locally
+        shell: pwsh
         run: |
-          npm i -g wasm-pack
-          wasm-pack build --release -- --features js
+          ./publish.ps1
 
           cd ../src-plugin
           npm i -g pnpm
           pnpm install
           pnpm build
         working-directory: src-ahqstore-types
+        env:
+          NO_PUBLISH: "true"
 
       - name: Build plugin api
         run: |
