@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { getDevData, getDevsApps, open } from "tauri-plugin-ahqstore-api"
 
-import type { DevData } from "src-ahqstore-types/pkg/ahqstore_types";
+import type { DevData } from "src-ahqstore-types/pkg/ahqstore.types";
 import { ConfigSelect } from "@/components/select";
 
 import { Dialog, DialogSurface, DialogTitle } from "@fluentui/react-components"

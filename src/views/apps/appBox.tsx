@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import ShowSpinner from "../spinner";
-import type { AHQStoreApplication } from "src-ahqstore-types/pkg/ahqstore_types";
+import type { AHQStoreApplication } from "src-ahqstore-types/pkg/ahqstore.types";
 import { openApplicationState } from "@/data/implementations/appView";
 import { getAppWrapped } from "@/api/fetchApps";
 import { useInView } from "react-intersection-observer";
