@@ -4,7 +4,7 @@ use ahqstore_types::{Commits, SearchEntry};
 use tantivy::{
   collector::TopDocs,
   query::{BooleanQuery, BoostQuery, FuzzyTermQuery, Query, QueryParser},
-  schema::{Field, Schema, Value, FAST, STORED, STRING, TEXT},
+  schema::{Field, Schema, Value, FAST, STRING, TEXT},
   Index, IndexReader, ReloadPolicy, TantivyDocument, Term,
 };
 use tauri::{async_runtime::spawn_blocking, AppHandle, Manager, Runtime};
@@ -14,6 +14,7 @@ use ahqstore_types::internet::get_all_search;
 
 pub struct CommitSearchIndex {
   pub commit: Commits,
+  pub last_updated_secs: u64,
   pub meta: Option<SearchMeta>,
 }
 

@@ -1,6 +1,9 @@
 #![allow(unused)]
 
-use std::sync::Arc;
+use std::{
+  sync::Arc,
+  time::{SystemTime, UNIX_EPOCH},
+};
 
 use ahqstore_types::{get_all_commits, Commits};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -28,6 +31,13 @@ pub(crate) mod search;
 
 use search::CommitSearchIndex;
 
+fn now() -> u64 {
+  SystemTime::now()
+    .duration_since(UNIX_EPOCH)
+    .expect("Time is going in reverse")
+    .as_secs()
+}
+
 pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
@@ -36,6 +46,7 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
   let commits = Arc::new(RwLock::new(async_runtime::block_on(async {
     Ok::<CommitSearchIndex, anyhow::Error>(CommitSearchIndex {
       commit: get_all_commits(None).await?,
+      last_updated_secs: now(),
       meta: None,
     })
   })?));
@@ -136,12 +147,25 @@ impl<R: Runtime> Ahqstore<R> {
     });
   }
 
+  pub async fn can_update_commit(&self) -> bool {
+    let exp = self.commits.read().await.last_updated_secs;
+
+    (exp + 60) < now()
+  }
+
   #[cfg(desktop)]
   pub async fn refresh(&self) -> crate::Result<()> {
+    if !self.can_update_commit().await {
+      use crate::Error;
+
+      return Err(Error::CannotUpdate);
+    }
+
     let mut lock = self.commits.write().await;
 
     *lock = CommitSearchIndex {
       commit: get_all_commits(None).await?,
+      last_updated_secs: now(),
       meta: None,
     };
 

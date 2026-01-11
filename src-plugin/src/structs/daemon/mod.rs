@@ -17,6 +17,9 @@ use tokio::{
 
 pub enum SendRequest {
   CheckForUpdate,
+  PerformTransaction { transaction: u64 },
+  PerformAllTransactions,
+  CancelTransaction { transaction: u64 },
   InstallUSERAPP { app_id: String },
   RemoveUSERAPP { app_id: String },
 }

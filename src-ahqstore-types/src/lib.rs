@@ -5,9 +5,20 @@
   reason = "Conditional compilation"
 )]
 
+//! **You should use cli**
+//! ```sh
+//! cargo install ahqstore_cli_rs
+//! ```
+//! or visit app / api sub module
+//!
+//! This Module:
+//! - This module lists the standard commands & types that AHQ Store sends to AHQ Store Service
+//! - Defines schemas for the AHQ Store File Formats
+
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, to_string, to_string_pretty};
-use std::fs::read;
+use std::{borrow::Cow, fs::read, sync::Arc};
+use tokio::task::JoinHandle;
 
 pub type AppId = String;
 pub type Str = String;
@@ -27,131 +38,108 @@ pub use data::*;
 
 pub mod winget;
 
-/// **You should use cli**
-/// ```sh
-/// cargo install ahqstore_cli_rs
-/// ```
-/// or visit app / api sub module
-///
-/// This Module:
-/// This module lists the standard commands & types that AHQ Store sends to AHQ Store Service
-
 #[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Debug, Serialize)]
 pub struct StatusUpdateData {
-  pub queue: &'static [QueuedApp],
+  pub queue: Box<[QueuedAppData]>,
   #[serde(rename = "supportsUpdate")]
-  pub supports_update: bool,
+  pub disable_update: bool,
+  #[serde(rename = "queueOverflow")]
+  pub overflow: bool,
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Debug, Serialize)]
-pub struct QueuedApp {
-  pub id: String,
+#[derive(Debug, Serialize, Clone)]
+pub enum AppActionIntent {
+  Install,
+  Uninstall,
+  Update,
+}
+
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Debug, Serialize, Clone)]
+pub struct QueuedAppData {
+  pub id: Arc<str>,
+  pub transaction: u64,
   pub status: AppUpdateInstallStatus,
+  pub intent: AppActionIntent,
 }
 
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Debug, Serialize)]
-#[serde(tag = "status")]
-pub enum AppUpdateInstallStatus {
-  /// { "status": "Pending" }
-  Pending,
-  /// { "status": "Cancelled" }
-  Cancelled,
-  /// { "status": "Downloading", "progress": 100.0 }
-  Downloading { progress: f64 },
-  /// { "status": "Installing" }
-  Installing,
-  /// { "status": "Updating" }
-  Updating,
-  /// { "status": "Uninstalling" }
-  Uninstalling,
-  /// { "status": "Done" }
-  Done,
-}
-
-/// PREFERENCES
-
-#[allow(non_camel_case_types)]
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Serialize, Deserialize, Debug)]
-pub enum UpdateStrategy {
-  Never,
-  CheckOnly,
-  DownloadInstall_UnmeteredWifi,
-  DownloadInstall_Wifi,
-  DownloadInstall,
-}
-
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Prefs {
-  pub update: UpdateStrategy,
-}
-
-impl Prefs {
-  pub fn get(path: &str) -> Option<Vec<u8>> {
-    read(&path).ok()
-  }
-
-  pub fn str_to(s: &str) -> Option<Prefs> {
-    from_str(s).ok()
-  }
-
-  pub fn convert(&self) -> Option<String> {
-    to_string(self).ok()
-  }
-
-  pub fn default() -> Prefs {
-    Prefs {
-      update: UpdateStrategy::CheckOnly,
+impl QueuedAppData {
+  pub fn from(data: &QueuedApp) -> Self {
+    Self {
+      id: data.id.clone(),
+      transaction: data.transaction,
+      intent: data.intent.clone(),
+      status: data.status.clone(),
     }
   }
 }
 
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize)]
+pub struct QueuedApp {
+  pub id: Arc<str>,
+  pub transaction: u64,
+  pub status: AppUpdateInstallStatus,
+  pub intent: AppActionIntent,
+  #[serde(skip)]
+  pub task: Option<JoinHandle<()>>,
+}
 
-pub enum AppStatus {
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Debug, Serialize, Clone)]
+#[serde(tag = "status")]
+pub enum AppUpdateInstallStatus {
+  /// { "status": "Pending" }
   Pending,
-  Downloading,
+  /// { "status": "PendingUserAction" }
+  PendingUserAction,
+  /// { "status": "Cancelled" }
+  Cancelled {
+    #[serde(skip)]
+    // Shows for 5seconds
+    time: u64,
+  },
+  /// { "status": "Downloading", "progress": 100.0 }
+  Downloading { progress: f64 },
+  /// { "status": "AVSCanning" }
   AVScanning,
-  Installing,
-  Uninstalling,
-  InstallSuccessful,
-  UninstallSuccessful,
-  NotSuccessful,
-  AVFlagged,
-}
-
-impl Serialize for AppStatus {
-  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-  where
-    S: serde::Serializer,
-  {
-    serializer.serialize_str(match self {
-      AppStatus::Pending => "Pending...",
-      AppStatus::Downloading => "Downloading...",
-      AppStatus::Installing => "Installing...",
-      AppStatus::Uninstalling => "Uninstalling...",
-      AppStatus::InstallSuccessful => "Installed",
-      AppStatus::UninstallSuccessful => "Uninstalled",
-      AppStatus::NotSuccessful => "Error!",
-      AppStatus::AVScanning => "Scanning for Viruses!",
-      AppStatus::AVFlagged => "Flagged as Malicious!",
-    })
-  }
-}
-
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Serialize, Debug, Clone)]
-
-pub enum UpdateStatusReport {
-  Disabled,
-  UpToDate,
-  Checking,
+  /// { "status": "PendingInstall" }
+  PendingInstall,
+  /// { "status": "Installing", "progress": null }
+  ///
+  /// OR
+  ///
+  /// { "status": "Installing", "progress": 30.0 }
+  Installing { progress: Option<f64> },
+  /// { "status": "MoreDwnlNeeded" }
+  MoreDwnlNeeded {
+    // Total progress
+    progress: f64,
+    current: usize,
+    items: usize,
+  },
+  /// { "status": "CopyingFiles", "percentage": 67, "total": 100 }
+  CopyingFiles { percentage: f64, total: usize },
+  /// { "status": "Finalizing" }
+  Finalizing,
+  /// { "status": "Updating" }
   Updating,
+  /// { "status": "Uninstalling" }
+  Uninstalling,
+  /// { "status": "Successful" }
+  Successful {
+    #[serde(skip)]
+    // This is a time delta used by us to auto prune >2s entries
+    time: u64,
+  },
+  /// { "status": "Error", "err": "ERROR DESC" }
+  Error {
+    err: Cow<'static, str>,
+    #[serde(skip)]
+    // >10s time delta
+    time: u64,
+  },
 }
 
 #[cfg(test)]

@@ -1,45 +1,189 @@
 use std::{
+  mem::replace,
   sync::Arc,
   time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use ahqstore_types::{Commits, StatusUpdateData};
+use ahqstore_types::{
+  AppActionIntent, AppUpdateInstallStatus, Commits, QueuedApp, QueuedAppData, StatusUpdateData,
+};
 use tauri::Runtime;
 use tokio::{
-  sync::{broadcast::Sender, mpsc::UnboundedReceiver, RwLock},
+  spawn,
+  sync::{broadcast::Sender, mpsc::UnboundedReceiver, Notify, RwLock},
   task::JoinHandle,
-  time::sleep,
+  time::{interval, sleep, MissedTickBehavior},
 };
 
 use crate::structs::{daemon::SendRequest, platform, search::CommitSearchIndex, Ahqstore};
 
 const TEN_MINS: u64 = 10 * 60 * 1000;
 
+pub mod lock;
+
 pub async fn daemon<R: Runtime>(
-  a: &Ahqstore<R>,
+  ahqstore: &Ahqstore<R>,
   commits: Arc<RwLock<CommitSearchIndex>>,
   tx: Sender<Arc<StatusUpdateData>>,
   mut rx: UnboundedReceiver<SendRequest>,
 ) {
-  let mut next_check = 0u64;
   let mut user_initiated = false;
 
-  let mut update_task: Option<JoinHandle<()>> = None;
+  // Queues
+  let mut queue: Vec<QueuedApp> = Vec::with_capacity(50);
 
+  // Timers
+  let mut intl = interval(Duration::from_mins(10));
+  intl.tick().await;
+
+  intl.set_missed_tick_behavior(MissedTickBehavior::Burst);
+
+  let mut notify = Notify::new();
+
+  // States
+  let mut changed = false;
+  let mut transaction = 0;
+
+  // Main Loop
   loop {
     let now = SystemTime::now()
       .duration_since(UNIX_EPOCH)
       .expect("Time is running in reverse")
       .as_secs();
 
-    while let Some(x) = rx.try_recv().ok() {}
+    tokio::select! {
+      // Queue Pruning
+      _ = sleep(Duration::from_millis(100)) => {
+        let old = queue.len();
+        queue.retain(|x| match &x.status {
+          AppUpdateInstallStatus::Successful { time } => now < (*time + 2),
+          AppUpdateInstallStatus::Cancelled { time } => now < (*time + 5),
+          AppUpdateInstallStatus::Error { time, .. } => now < (*time + 10),
+          _ => true,
+        });
+        changed = old != queue.len();
+      }
 
-    if user_initiated {}
+      // Sending update inteval tick
+      //
+      // Updating ticking
+      _ = intl.tick() => {
+        notify.notify_one();
+      }
 
-    sleep(Duration::from_millis(100)).await;
+      // Run Update
+      _ = notify.notified() => {
+        // TODO
+        changed = true;
+      }
+
+      // Handle user commands
+      Some(msg) = rx.recv() => {
+        handle_msg(ahqstore, &mut user_initiated, &notify, msg, &mut queue, &mut transaction, now).await;
+
+        while let Ok(extra_msg) = rx.try_recv() {
+          handle_msg(ahqstore, &mut user_initiated, &notify, extra_msg, &mut queue, &mut transaction, now).await;
+        }
+
+        changed = true;
+      }
+    }
+
+    if changed {
+      let queue_data = queue.iter().map(QueuedAppData::from).collect::<Box<[_]>>();
+      _ = tx.send(Arc::new(StatusUpdateData {
+        disable_update: false,
+        overflow: queue.len() >= 100,
+        queue: queue_data,
+      }));
+
+      changed = false;
+    }
   }
 }
 
-pub fn should_run() -> bool {
-  false
+#[inline(always)]
+async fn handle_msg<R: Runtime>(
+  ahqstore: &Ahqstore<R>,
+  user_initiated: &mut bool,
+  notify: &Notify,
+  msg: SendRequest,
+  queue: &mut Vec<QueuedApp>,
+  transaction: &mut u64,
+  now: u64,
+) {
+  *transaction += 1;
+
+  if queue.len() < 100 {
+    match msg {
+      SendRequest::CheckForUpdate => {
+        if ahqstore.can_update_commit().await {
+          *user_initiated = true;
+          notify.notify_one();
+        }
+      }
+
+      SendRequest::CancelTransaction { transaction } => {
+        if let Some(x) = queue.iter_mut().find(|x| x.transaction == transaction) {
+          match x.status {
+            AppUpdateInstallStatus::Pending
+            | AppUpdateInstallStatus::PendingUserAction
+            | AppUpdateInstallStatus::Downloading { .. }
+            | AppUpdateInstallStatus::AVScanning => {
+              x.status = AppUpdateInstallStatus::Cancelled { time: now };
+
+              if let Some(data) = x.task.take() {
+                data.abort();
+              }
+
+              // Run cleanup
+            }
+            // Ignore whatever its requested
+            _ => {}
+          }
+        }
+      }
+
+      SendRequest::PerformTransaction { transaction } => {
+        if let Some(x) = queue.iter_mut().find(|x| x.transaction == transaction) {
+          x.status = AppUpdateInstallStatus::Pending;
+
+          x.task = Some(spawn(async {}));
+        }
+      }
+
+      SendRequest::PerformAllTransactions => {
+        queue.iter_mut().for_each(|x| {
+          if let AppUpdateInstallStatus::PendingUserAction = &x.status {
+            x.status = AppUpdateInstallStatus::Pending;
+
+            // Now spawn the task
+            x.task = Some(spawn(async {}));
+          }
+        });
+      }
+
+      SendRequest::InstallUSERAPP { app_id } => {
+        let app_id: Arc<str> = Arc::from(app_id);
+        queue.push(QueuedApp {
+          status: AppUpdateInstallStatus::Pending,
+          intent: AppActionIntent::Install,
+          transaction: *transaction,
+          id: app_id,
+          task: Some(spawn(async {})),
+        });
+      }
+
+      SendRequest::RemoveUSERAPP { app_id } => {
+        let app_id: Arc<str> = Arc::from(app_id);
+        queue.push(QueuedApp {
+          status: AppUpdateInstallStatus::Pending,
+          intent: AppActionIntent::Uninstall,
+          transaction: *transaction,
+          id: app_id,
+          task: Some(spawn(async {})),
+        });
+      }
+    }
+  }
 }

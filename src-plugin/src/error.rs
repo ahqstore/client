@@ -12,6 +12,9 @@ pub enum Error {
   #[error("There was an error while performing search")]
   SearchError,
 
+  #[error("You cannot safely update commits")]
+  CannotUpdate,
+
   #[error(transparent)]
   Tauri(#[from] tauri::Error),
 
