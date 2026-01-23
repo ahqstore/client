@@ -42,10 +42,11 @@ export function WindowTitlebar({
     };
   };
 
+  // TODO: Fix after webview2 gets fixed.
   return (
     <div
       className={cn(
-        "bg-transparent flex select-none flex-row overflow-hidden",
+        "bg-base-100 flex select-none flex-row overflow-hidden",
         className,
       )}
       data-tauri-drag-region

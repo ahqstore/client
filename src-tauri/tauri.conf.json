@@ -59,8 +59,8 @@
       "timestampUrl": "http://timestamp.comodoca.com",
       "tsp": false,
       "webviewInstallMode": {
-        "type": "fixedRuntime",
-        "path": "./WebView.143.x64/"
+        "silent": true,
+        "type": "embedBootstrapper"
       },
       "wix": null
     }
