@@ -58,6 +58,13 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
   let commits = Arc::new(RwLock::new(
     mobile
       .run_mobile_plugin::<Commits>("getCommit", ())
+      .map(|c| {
+        CommitSearchIndex {
+            commit: c,
+            last_updated_secs: now(),
+            meta: None,
+        }
+      })
       .map_err(Into::<crate::Error>::into)?,
   ));
 
@@ -176,7 +183,11 @@ impl<R: Runtime> Ahqstore<R> {
   pub async fn refresh(&self) -> crate::Result<()> {
     let mut lock = self.commits.write().await;
 
-    *lock = self.refresh_commit_android().await?;
+    *lock = CommitSearchIndex {
+      commit: self.refresh_commit_android().await?,
+      last_updated_secs: now(),
+      meta: None,
+    };
 
     Ok(())
   }

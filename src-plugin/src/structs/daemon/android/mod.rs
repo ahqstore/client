@@ -10,6 +10,7 @@ use tokio::{
 use crate::structs::{
   daemon::{SendRequest, StatusUpdateData},
   Ahqstore,
+  search::CommitSearchIndex
 };
 
 // It'll just be an api mapper
