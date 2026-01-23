@@ -1,4 +1,4 @@
-import { AHQStoreApplication } from "@ahqstore/core--types";
+import { AHQStoreApplication } from "@ahqstore/core-types";
 import { getCommitSmart } from "./commit";
 
 interface MapData {
