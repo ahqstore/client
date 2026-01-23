@@ -2,7 +2,7 @@ use futures::future::join_all;
 use serde::{Deserialize, Serialize};
 use tokio::fs;
 
-use crate::structs::platform::os::install::{AHQSTORE_USER_DIR, AHQSTORE_GLOBAL_DIR};
+use crate::structs::platform::os::install::{AHQSTORE_GLOBAL_DIR, AHQSTORE_USER_DIR};
 
 pub async fn list_user_apps() -> Option<Vec<AppListing>> {
   let dir = &AHQSTORE_USER_DIR.as_str();
@@ -19,27 +19,28 @@ pub async fn list_global_apps() -> Option<Vec<AppListing>> {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "event", content = "data")]
 pub enum AppListing {
-  Full {
-    app_id: String
-  },
-  Unknown {
-    app_id: String
-  }
+  Full { app_id: String },
+  Unknown { app_id: String },
 }
 
 pub async fn _inner_list_apps(dir: &str, create_if_needed: bool) -> Option<Vec<AppListing>> {
   // Check if it exists
-  if fs::read_dir(&dir)
+  if !fs::metadata(&dir)
     .await
-    .is_err() {
+    .ok()
+    .and_then(|x| Some(x.is_dir()))
+    .unwrap_or(false)
+  {
+    if !create_if_needed {
+      return Some(vec![]);
+    }
+
     fs::create_dir_all(&dir).await.ok()?;
   }
 
   let mut tasks = vec![];
 
-  let mut dir  =fs::read_dir(&dir)
-      .await
-      .ok()?;
+  let mut dir = fs::read_dir(&dir).await.ok()?;
 
   while let Some(entry) = dir.next_entry().await.ok()? {
     // Fetching & Parsing
@@ -57,9 +58,11 @@ pub async fn _inner_list_apps(dir: &str, create_if_needed: bool) -> Option<Vec<A
       .into_iter()
       // Guaranteed unwrap
       .map(|x| match x {
-        Ok(()) => AppListing::Full { app_id: "()".into() },
-        Err(app_id) => AppListing::Unknown { app_id }
+        Ok(()) => AppListing::Full {
+          app_id: "()".into(),
+        },
+        Err(app_id) => AppListing::Unknown { app_id },
       })
-      .collect::<Vec<_>>()
+      .collect::<Vec<_>>(),
   )
 }

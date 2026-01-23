@@ -169,6 +169,7 @@ jobs:
         shell: pwsh
         run: ./publish.ps1
         working-directory: src-ahqstore-types
+        continue-on-error: true
 
       - name: Publish plugin api
         run: |

@@ -5,11 +5,13 @@ use std::{
 };
 
 use ahqstore_types::{
-  AppActionIntent, AppUpdateInstallStatus, Commits, QueuedApp, QueuedAppData, StatusUpdateData,
+  AppActionIntent, AppUpdateInstallStatus, Commits, QueuedApp, QueuedAppData, QueuedAppUpdate,
+  StatusUpdateData,
 };
 use tauri::Runtime;
 use tokio::{
   spawn,
+  sync::mpsc::channel,
   sync::{broadcast::Sender, mpsc::UnboundedReceiver, Notify, RwLock},
   task::JoinHandle,
   time::{interval, sleep, MissedTickBehavior},
@@ -19,7 +21,8 @@ use crate::structs::{daemon::SendRequest, platform, search::CommitSearchIndex, A
 
 const TEN_MINS: u64 = 10 * 60 * 1000;
 
-pub mod lock;
+mod installation;
+mod lock;
 
 pub async fn daemon<R: Runtime>(
   ahqstore: &Ahqstore<R>,
@@ -44,6 +47,8 @@ pub async fn daemon<R: Runtime>(
   let mut changed = false;
   let mut transaction = 0;
 
+  let (for_apps, mut updates) = channel::<QueuedAppUpdate>(50);
+
   // Main Loop
   loop {
     let now = SystemTime::now()
@@ -62,6 +67,12 @@ pub async fn daemon<R: Runtime>(
           _ => true,
         });
         changed = old != queue.len();
+      }
+
+      Some(msg) = updates.recv() => {
+        if let Some(x) = queue.iter_mut().find(|x| x.transaction == msg.transaction) {
+          x.status = msg.status;
+        }
       }
 
       // Sending update inteval tick
@@ -114,6 +125,8 @@ async fn handle_msg<R: Runtime>(
 ) {
   *transaction += 1;
 
+  let commit = ahqstore.commits.read().await.commit.clone();
+
   if queue.len() < 100 {
     match msg {
       SendRequest::CheckForUpdate => {
@@ -138,7 +151,7 @@ async fn handle_msg<R: Runtime>(
 
               // Run cleanup
             }
-            // Ignore whatever its requested
+            // Ignore whatever is requested
             _ => {}
           }
         }

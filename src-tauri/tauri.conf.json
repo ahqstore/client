@@ -60,7 +60,8 @@
       "tsp": false,
       "webviewInstallMode": {
         "silent": true,
-        "type": "downloadBootstrapper"
+        "type": "fixedRuntime",
+        "path": "./WebView.143.x64/"
       },
       "wix": null
     }

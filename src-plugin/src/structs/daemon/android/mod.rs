@@ -19,7 +19,5 @@ pub async fn daemon<R: Runtime>(
   tx: Sender<Arc<StatusUpdateData>>,
   rx: UnboundedReceiver<SendRequest>,
 ) {
-  loop {
-    sleep(Duration::from_millis(100)).await;
-  }
+  // Ahh, android queue is in Java World of things!
 }

@@ -7,6 +7,7 @@ use tokio::sync::oneshot;
 
 pub mod common;
 pub mod downloader;
+pub mod turbofile;
 
 macro_rules! import {
   ($($x:tt)*) => {
@@ -64,13 +65,11 @@ pub async fn download(
     let turbo = cfg!(mobile);
 
     let dwnl = downloads(&hwnd)?;
-    let dir_tmp = dwnl_tmp(&hwnd)?;
 
     downloader::download(
       &url.url,
       &format!("{}{}", &app.appId, extension),
       { dwnl.to_str().context("Invalid String")? },
-      { dir_tmp.to_str().context("Invalid String")? },
       turbo,
       |length| {
         prog.send(DownloadEvent::Started { length });

@@ -77,6 +77,12 @@ impl QueuedAppData {
 }
 
 #[derive(Debug, Serialize)]
+pub struct QueuedAppUpdate {
+  pub transaction: u64,
+  pub status: AppUpdateInstallStatus,
+}
+
+#[derive(Debug, Serialize)]
 pub struct QueuedApp {
   pub id: Arc<str>,
   pub transaction: u64,

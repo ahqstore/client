@@ -10,8 +10,11 @@ use tokio::{
   fs::{create_dir_all, remove_dir_all, remove_file, File, OpenOptions},
   io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt},
   sync::mpsc::{channel, error::TryRecvError, Sender},
+  task::spawn_blocking,
   time::sleep,
 };
+
+use crate::structs::platform::turbofile::TurboFile;
 
 static CLIENT: LazyLock<Client> = LazyLock::new(|| {
   ClientBuilder::new()
@@ -24,16 +27,12 @@ pub async fn download<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
   url: &str,
   out_file: &str,
   out_dir: &str,
-  temp_dir: &str,
   turbo: bool,
   mut len_fn: T,
   mut log: F,
 ) -> Option<()> {
   let _ = remove_dir_all(out_dir).await;
   create_dir_all(out_dir).await.ok()?;
-
-  let _ = remove_dir_all(temp_dir).await;
-  create_dir_all(temp_dir).await.ok()?;
 
   let ranged = turbo && supports_ranged(url).await;
 
@@ -42,15 +41,15 @@ pub async fn download<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
   let size = get_size(url).await;
 
   if ranged && size.is_some() {
-    dwn_ranged(size, url, format!("{out_dir}/{out_file}"), temp_dir, len_fn, log).await?;
+    dwn_ranged(size, url, format!("{out_dir}/{out_file}"), len_fn, log).await?;
   } else {
-    let mut file = File::create(format!("{out_dir}/{out_file}")).await.ok()?;
-
     let mut resp = CLIENT.get(url).send().await.ok()?;
 
     let len = resp.content_length().unwrap_or(1);
 
     len_fn(len);
+
+    let mut file = TurboFile::create(format!("{out_dir}/{out_file}"), len).ok()?;
 
     let mut curr = 0u64;
 
@@ -58,7 +57,8 @@ pub async fn download<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
 
     while let Some(x) = resp.chunk().await.ok()? {
       curr += x.len() as u64;
-      file.write_all(&x).await.ok()?;
+
+      file.write_all(&x).ok()?;
 
       let perc = (curr as f64 * 100.0) / (len as f64);
 
@@ -67,9 +67,14 @@ pub async fn download<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
         least = perc;
       }
     }
-    file.flush().await.ok()?; // Ensure the file is fully written before closing
 
-    drop(file);
+    spawn_blocking(move || {
+      file.flush().ok()?; // Ensure the file is fully written before closing
+
+      Some(())
+    })
+    .await
+    .ok()?;
   }
 
   Some(())
@@ -79,16 +84,17 @@ async fn dwn_ranged<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
   size: Option<u64>,
   url: &str,
   out: String,
-  temp: &str,
   mut len: T,
   mut log: F,
 ) -> Option<()> {
-  let mut file = File::create(&out).await.ok()?;
+  let size = size?;
+
+  let mut file = spawn_blocking(move || Some(Arc::new(TurboFile::create(out, size).ok()?)))
+    .await
+    .ok()??;
 
   let url = Arc::new(url.to_string());
-  let temp = Arc::new(temp.to_string());
 
-  let size = size?;
   let mut done = 0u64;
 
   len(size);
@@ -101,13 +107,12 @@ async fn dwn_ranged<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
     let tx = tx.clone();
 
     let url = url.clone();
-    let temp = temp.clone();
+
+    let fl = file.clone();
 
     pool.push(async_runtime::spawn(async move {
-      download_range(&url, tx, start, end, &temp).await
+      download_range(&url, tx, start, end, fl).await
     }));
-
-    sleep(Duration::from_micros(50)).await;
   }
 
   let mut last_prog: f64 = 0.0;
@@ -147,29 +152,17 @@ async fn dwn_ranged<F: FnMut(f64) -> (), T: FnOnce(u64) -> ()>(
     sleep(Duration::from_millis(100)).await;
   }
 
-  log(100.0);
+  drop(tx);
 
-  for data in pool {
-    let (path, mut data) = data.await.ok()??;
-    data.seek(SeekFrom::Start(0)).await.ok()?;
-
-    let mut buf = [0; 4096];
-
-    loop {
-      let size = data.read(&mut buf).await.ok()?;
-
-      if size == 0 {
-        break;
-      }
-
-      file.write(&buf[0..size]).await.ok()?;
-    }
-
-    drop(data);
-    remove_file(path).await.ok()?;
+  for handle in pool {
+    drop(handle.await);
   }
 
-  drop(file);
+  log(100.0);
+
+  let file = Arc::into_inner(file).expect("This ain't happening");
+
+  file.flush().ok()?;
 
   Some(())
 }
@@ -179,8 +172,8 @@ async fn download_range(
   tx: Sender<u64>,
   start: u64,
   end: u64,
-  temp: &str,
-) -> Option<(String, File)> {
+  file: Arc<TurboFile>,
+) -> Option<()> {
   let mut resp = CLIENT
     .get(url)
     .header("Range", format!("bytes={}-{}", start, end))
@@ -188,31 +181,29 @@ async fn download_range(
     .await
     .ok()?;
 
-  let file = format!("{temp}/{start}_to_{end}");
-
-  let mut buf = OpenOptions::new();
-
-  buf.create_new(true).read(true).write(true).truncate(true);
-
-  #[cfg(windows)]
-  buf.share_mode(0);
-
-  let mut buf = buf.open(&file).await.ok()?;
+  let mut collected = 0;
 
   while let Some(chunk) = resp.chunk().await.ok()? {
     let _ = tx.send(chunk.len() as u64).await;
-    buf.write_all(&chunk).await.ok()?;
+
+    let f2 = file.clone();
+
+    f2.write_seekable(&chunk, start + collected).ok()?;
+
+    collected += chunk.len() as u64;
   }
 
-  Some((file, buf))
+  Some(())
 }
 
 fn divide_into_ranges(total_size: u64) -> Vec<(u64, u64)> {
-  let mut total = total_size / 1024 * 1024;
+  let mut total = (total_size / (20 * 1024 * 1024)).max(1).min((|| {
+    #[cfg(not(target_os = "android"))]
+    return 16;
 
-  if total > 100 {
-    total = 100;
-  }
+    #[cfg(target_os = "android")]
+    return 8;
+  })());
 
   let chunk_size = total_size / total;
   let mut ranges = Vec::new();
@@ -244,15 +235,10 @@ pub async fn get_size(url: &str) -> Option<u64> {
 }
 
 async fn supports_ranged(url: &str) -> bool {
-  let res = CLIENT
-    .get(url)
-    .header("Range", "bytes=0-0")
-    .send()
-    .await;
-
+  let res = CLIENT.get(url).header("Range", "bytes=0-0").send().await;
 
   if let Ok(res) = res {
-    return res.status() == StatusCode::PARTIAL_CONTENT
+    return res.status() == StatusCode::PARTIAL_CONTENT;
   }
 
   false

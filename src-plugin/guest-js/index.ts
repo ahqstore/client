@@ -1,5 +1,5 @@
 import { Channel, invoke } from '@tauri-apps/api/core'
-import type { AHQStoreApplication, DevData } from "ahqstore-types"
+import type { AHQStoreApplication, DevData } from "@ahqstore/core-types"
 
 interface Commits {
   ahqstore: string,
