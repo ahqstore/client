@@ -1,9 +1,9 @@
-import { AHQStoreApplication } from "ahqstore-types";
+import { AHQStoreApplication } from "@ahqstore/core--types";
 import { getCommitSmart } from "./commit";
 
 interface MapData {
-  data: [AHQStoreApplication, string],
-  expires: number
+  data: [AHQStoreApplication, string];
+  expires: number;
 }
 
 let cache: Map<String, MapData> = new Map();
@@ -18,8 +18,10 @@ setInterval(() => {
   });
 }, 30 * 1000);
 
-export async function getKeyFromCache(key: string): Promise<[AHQStoreApplication, string] | undefined> {
-  const ahqstoreCommit = (await getCommitSmart());
+export async function getKeyFromCache(
+  key: string,
+): Promise<[AHQStoreApplication, string] | undefined> {
+  const ahqstoreCommit = await getCommitSmart();
 
   if (commit != ahqstoreCommit) {
     commit = ahqstoreCommit;
@@ -31,8 +33,11 @@ export async function getKeyFromCache(key: string): Promise<[AHQStoreApplication
   return cache.get(key)?.data;
 }
 
-export async function setKeyToCache(key: string, val: [AHQStoreApplication, string]) {
-  const ahqstoreCommit = (await getCommitSmart());
+export async function setKeyToCache(
+  key: string,
+  val: [AHQStoreApplication, string],
+) {
+  const ahqstoreCommit = await getCommitSmart();
 
   if (commit != ahqstoreCommit) {
     commit = ahqstoreCommit;
@@ -41,6 +46,6 @@ export async function setKeyToCache(key: string, val: [AHQStoreApplication, stri
 
   cache.set(key, {
     data: val,
-    expires: Date.now() + (60 * 1000)
+    expires: Date.now() + 60 * 1000,
   });
 }
