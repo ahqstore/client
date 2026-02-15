@@ -58,7 +58,6 @@ pub struct AHQStoreApplication {
   pub usrVersion: Option<String>,
 
   /// Will be automatically overriden
-  #[cfg_attr(feature = "export", specta(type = u32))]
   pub version: u64,
 
   /// The Site to your app
