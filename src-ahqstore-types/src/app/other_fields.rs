@@ -6,18 +6,32 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
-pub struct DownloadUrl {
-  pub installerType: InstallerFormat,
-  pub asset: String,
-
-  /// This will be based on asset and releaseId
-  pub url: String,
+pub struct Resource {
+  pub intent: FileIntent,
+  pub asset: AssetData,
+  pub sha: String,
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type")]
+pub enum AssetData {
+  AssetName(String),
+  /// Not allowed unless you are `AHQ Store Account`
+  ArbitraryUrl(String),
+}
 
-pub enum InstallerFormat {
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type")]
+pub enum FileIntent {
+  // Zip File that AHQDB Installers might require
+  ArtifactZip,
+  // A custom single file that AHQDB Installer might require
+  Artifact {
+    extension: String,
+  },
+
   /// 🎯 Stable as of v1
   WindowsZip,
 
@@ -52,19 +66,21 @@ pub enum InstallerFormat {
   AndroidApkZip,
 }
 
-impl Display for InstallerFormat {
+impl Display for FileIntent {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     write!(
       f,
       "{}",
       match &self {
-        InstallerFormat::WindowsZip => "Windows Zip",
-        InstallerFormat::WindowsInstallerExe => "Windows Installer Exe",
-        InstallerFormat::WindowsInstallerMsi => "Windows Installer Msi",
-        InstallerFormat::WindowsAHQDB => "Windows AHQDB Installer",
-        InstallerFormat::WindowsUWPMsix => "UWP Windows Msix Package",
-        InstallerFormat::LinuxAppImage => "Linux App Image",
-        InstallerFormat::AndroidApkZip => "Universal Android Apk Zip Package",
+        FileIntent::ArtifactZip => "Zip Artifact",
+        FileIntent::Artifact { .. } => "Artifact",
+        FileIntent::WindowsZip => "Windows Zip",
+        FileIntent::WindowsInstallerExe => "Windows Installer Exe",
+        FileIntent::WindowsInstallerMsi => "Windows Installer Msi",
+        FileIntent::WindowsAHQDB => "Windows AHQDB Installer",
+        FileIntent::WindowsUWPMsix => "UWP Windows Msix Package",
+        FileIntent::LinuxAppImage => "Linux App Image",
+        FileIntent::AndroidApkZip => "Universal Android Apk Zip Package",
       }
     )
   }

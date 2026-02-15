@@ -1,14 +1,17 @@
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use std::{
+  borrow::Cow,
   collections::HashMap,
   env::consts::ARCH,
   time::{SystemTime, UNIX_EPOCH},
 };
 
-pub mod install;
+mod attestations;
+mod install;
 mod other_fields;
 
+pub use attestations::*;
 pub use install::*;
 pub use other_fields::*;
 
@@ -17,8 +20,10 @@ use crate::api::Commits;
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-/// Use the official ahqstore (<https://crates.io/crates/ahqstore_cli_rs>) cli\n🎯 Introduced in v1, Revamped in v2
-
+/// Use the official ahqstore (<https://crates.io/crates/ahqstore_cli_rs>) cli\n🎯 Introduced in v1
+///
+/// Please note that this entire file (encoded as JSON), must be supplemented with
+/// OIDC Rekor Transparency bundle log
 pub struct AHQStoreApplication {
   /// The ID of the application
   pub appId: String,
@@ -26,23 +31,22 @@ pub struct AHQStoreApplication {
   /// The name of the shortcut of the app
   pub appShortcutName: String,
 
-  /// The name that'll be displayed in the app
+  /// The name that'll be displayed in the AHQ Store
   pub appDisplayName: String,
 
   /// Unique ID of the author
   pub authorId: String,
 
-  /// The TagName of the release, MUST NOT BE LATEST
-  pub releaseTagName: String,
+  /// URLs to files the app might use
+  ///
+  /// Maximum 256 resources as `u8` suggests
+  pub resources: HashMap<u8, Resource>,
 
-  /// Download URLs that the app will address
-  pub downloadUrls: HashMap<u8, DownloadUrl>,
+  /// Path to ahqstore.tarball file
+  pub ahqtarball: String,
 
   /// Install options
   pub install: InstallerOptions,
-
-  /// App display images referencing /resources, let the cli do it
-  pub displayImages: Vec<u8>,
 
   /// App description
   pub description: String,
@@ -66,13 +70,27 @@ pub struct AHQStoreApplication {
   pub source: Option<String>,
 
   /// License type or Terms of Service Page
-  pub license_or_tos: Option<String>,
+  pub licenseOrTos: Option<String>,
 
-  /// These Resources will be passed to the installer, the size of all the `Vec<u8>` must not be more than 5 * 1024 * 1024 bytes (~5MiB)
-  pub resources: Option<HashMap<u8, Vec<u8>>>,
+  /// These are the total number of images
+  ///
+  /// The minimum value must is 1 and maximum is actually 10
+  /// The resources must be in the order 0,1,2,3,4,....9
+  ///
+  /// image id `0` signifies the icon
+  /// Others signify wallpaper icons
+  pub totalImages: u8,
 
   /// This is set to true when the app is verified by the AHQ Store Team
+  ///
+  /// This is a heuristic, not the proof, its only work is to show a supplementary checkmark
+  /// in the web app client.
   pub verified: bool,
+
+  /// Attestations, Provenance and security reports
+  ///
+  /// These are included for accountability
+  pub attestations: Attestations,
 }
 
 impl AHQStoreApplication {
@@ -82,10 +100,13 @@ impl AHQStoreApplication {
   pub const AHQSTORE_OFFICIAL_AUTHOR_ID: &str = "1";
 
   #[cfg(feature = "apps_repo")]
-  pub fn validate(&self) -> Result<String, String> {
+  /// Performs a shallow validation of the schema
+  ///
+  /// # WARNING
+  /// This is a heuristic, not lacks vital scans
+  /// Refrain from using this method solely in production
+  pub fn validate_schema(&self) -> Result<String, String> {
     let mut result = String::new();
-
-    result.push_str(&self.validate_resource());
 
     if let Some(ver) = &self.usrVersion {
       if !ver.is_ascii() {
@@ -110,10 +131,6 @@ impl AHQStoreApplication {
     }
 
     if &self.authorId != Self::AHQSTORE_OFFICIAL_AUTHOR_ID {
-      if &self.releaseTagName == "latest" {
-        result.push_str("❌ ReleaseTagName can't be latest\n");
-      }
-
       if let Some(_) = self.source {
         result
           .push_str("❌ Source can't be present, your application must not reference a source\n");
@@ -127,40 +144,7 @@ impl AHQStoreApplication {
     }
   }
 
-  #[cfg(feature = "apps_repo")]
-  pub fn validate_resource(&self) -> String {
-    let Some(x) = &self.resources else {
-      return "❌ No Resources Present".into();
-    };
-
-    let mut total = 0;
-
-    x.iter().for_each(|(_, v)| total += v.len());
-
-    let mut resp = String::new();
-
-    if total > 5 * 1024 * 1024 {
-      resp.push_str("❌ Total size of all resources combined must not be more than 5MiB\n");
-    } else if self.displayImages.len() > 6 {
-      resp.push_str(
-        "❌ A maximum of 6 images (1 icon + 5 display images) can be set in displayImages\n",
-      );
-    } else if x.get(&0).is_none() {
-      resp.push_str("❌ Resource with id 0 must be present as it represents icon\n");
-    } else if !self
-      .displayImages
-      .iter()
-      .all(|id| x.get(&(*id + 1)).is_some())
-    {
-      resp.push_str("❌ Every display images should have their resource id\n");
-    } else {
-      resp.push_str("✅ Resources are valid\n");
-    }
-
-    resp
-  }
-
-  pub fn export(&self) -> (String, Vec<(u8, Vec<u8>)>) {
+  pub fn export(&self) -> Option<String> {
     let mut obj = self.clone();
     obj.verified = false;
     obj.version = SystemTime::now()
@@ -168,25 +152,24 @@ impl AHQStoreApplication {
       .expect("Time is somehow running in reverse")
       .as_secs();
 
-    for val in obj.downloadUrls.values_mut() {
-      if &obj.authorId == Self::AHQSTORE_OFFICIAL_AUTHOR_ID && &val.asset == "url" {
+    for val in obj.resources.values_mut() {
+      if &obj.authorId == Self::AHQSTORE_OFFICIAL_AUTHOR_ID {
         continue;
       }
 
-      let path = format!(
-        "https://github.com/{}/{}/releases/download/{}/{}",
-        self.repo.author, self.repo.repo, self.releaseTagName, val.asset
-      );
-
-      val.url = path;
+      if let AssetData::ArbitraryUrl(_) = val.asset {
+        return None;
+      }
     }
-    let resources: Vec<(u8, Vec<u8>)> = std::mem::replace(&mut obj.resources, None)
-      .map_or(vec![], |map| map.into_iter().collect::<Vec<_>>());
 
-    (to_string(&obj).unwrap(), resources)
+    if obj.totalImages < 1 || obj.totalImages > 10 {
+      return None;
+    }
+
+    to_string(&obj).ok()
   }
 
-  pub fn list_os_arch(&self) -> Vec<&'static str> {
+  pub fn list_os_arch(&self) -> Vec<Platform> {
     self.install.list_os_arch()
   }
 
@@ -223,42 +206,37 @@ impl AHQStoreApplication {
   }
 
   /// 🎯 Introduced in v2
-  pub fn get_win_download(&self) -> Option<&DownloadUrl> {
+  pub fn get_win_download(&self) -> Option<&Resource> {
     let win32 = self.get_win_options()?;
-    let url = self.downloadUrls.get(&win32.assetId)?;
+    let url = self.resources.get(&win32.assetId)?;
 
-    match &url.installerType {
-      InstallerFormat::WindowsZip
-      | InstallerFormat::WindowsInstallerExe
-      | InstallerFormat::WindowsInstallerMsi
-      | InstallerFormat::WindowsAHQDB
-      | InstallerFormat::WindowsUWPMsix => Some(&url),
+    match &url.intent {
+      FileIntent::WindowsZip
+      | FileIntent::WindowsInstallerExe
+      | FileIntent::WindowsInstallerMsi
+      | FileIntent::WindowsAHQDB
+      | FileIntent::WindowsUWPMsix => Some(&url),
       _ => None,
     }
   }
 
   /// 🎯 Introduced in v2
   /// Just a clone of get_win_download for backwards compatibility
-  pub fn get_win32_download(&self) -> Option<&DownloadUrl> {
+  pub fn get_win32_download(&self) -> Option<&Resource> {
     self.get_win_download()
   }
 
   /// 🎯 Introduced in v2
-  pub fn get_win_extension(&self) -> Option<&'static str> {
-    match self.get_win_download()?.installerType {
-      InstallerFormat::WindowsZip => Some(".zip"),
-      InstallerFormat::WindowsInstallerExe => Some(".exe"),
-      InstallerFormat::WindowsInstallerMsi => Some(".msi"),
-      InstallerFormat::WindowsAHQDB => Some(".ahqdb"),
-      InstallerFormat::WindowsUWPMsix => Some(".msix"),
+  pub fn get_win_extension<'a>(&'a self) -> Option<&'a str> {
+    match &self.get_win_download()?.intent {
+      FileIntent::WindowsZip => Some(".zip"),
+      FileIntent::WindowsInstallerExe => Some(".exe"),
+      FileIntent::WindowsInstallerMsi => Some(".msi"),
+      FileIntent::WindowsAHQDB => Some(".ahqdb"),
+      FileIntent::WindowsUWPMsix => Some(".msix"),
+      FileIntent::Artifact { extension } => Some(extension),
       _ => None,
     }
-  }
-
-  /// 🎯 Introduced in v2
-  /// Just a clone of get_win_extention for backwards compatibility
-  pub fn get_win32_extension(&self) -> Option<&'static str> {
-    self.get_win_extension()
   }
 
   /// 🎯 Introduced in v3
@@ -266,7 +244,6 @@ impl AHQStoreApplication {
     match ARCH {
       "x86_64" => self.install.linux.as_ref(),
       "aarch64" => self.install.linuxArm64.as_ref(),
-      "arm" => self.install.linuxArm7.as_ref(),
       _ => {
         return None;
       }
@@ -274,21 +251,22 @@ impl AHQStoreApplication {
   }
 
   /// 🎯 Introduced in v2
-  pub fn get_linux_download(&self) -> Option<&DownloadUrl> {
+  pub fn get_linux_download(&self) -> Option<&Resource> {
     let linux = self.get_linux_options()?;
 
-    let url = self.downloadUrls.get(&linux.assetId)?;
+    let url = self.resources.get(&linux.assetId)?;
 
-    match &url.installerType {
-      InstallerFormat::LinuxAppImage => Some(&url),
+    match &url.intent {
+      FileIntent::LinuxAppImage => Some(&url),
       _ => None,
     }
   }
 
   /// 🎯 Introduced in v2
-  pub fn get_linux_extension(&self) -> Option<&'static str> {
-    match self.get_linux_download()?.installerType {
-      InstallerFormat::LinuxAppImage => Some(".AppImage"),
+  pub fn get_linux_extension<'a>(&'a self) -> Option<&'a str> {
+    match &self.get_linux_download()?.intent {
+      FileIntent::LinuxAppImage => Some(".AppImage"),
+      FileIntent::Artifact { extension } => Some(extension),
       _ => None,
     }
   }
@@ -299,36 +277,43 @@ impl AHQStoreApplication {
   }
 
   /// 🎯 Introduced in v2
-  pub fn get_android_download(&self) -> Option<&DownloadUrl> {
+  pub fn get_android_download(&self, sdk: u32) -> Option<&Resource> {
     let Some(android) = &self.install.android else {
       return None;
     };
 
-    let url = self.downloadUrls.get(&android.assetId)?;
+    if !self.install.is_supported_android(sdk) {
+      return None;
+    }
 
-    match &url.installerType {
-      InstallerFormat::AndroidApkZip => Some(&url),
+    let url = self.resources.get(&match android.asset {
+      AndroidAssetId::Universal { assetId } => Some(assetId),
+      AndroidAssetId::AbiBased {
+        aarch64,
+        armv7,
+        x86,
+        x86_64,
+      } => match ARCH {
+        "aarch64" => aarch64,
+        "arm" => armv7,
+        "x86" => x86,
+        "x86_64" => x86_64,
+        _ => return None,
+      },
+    }?)?;
+
+    match &url.intent {
+      FileIntent::AndroidApkZip => Some(&url),
       _ => None,
     }
   }
 
   /// 🎯 Introduced in v2
-  pub fn get_android_extension(&self) -> Option<&'static str> {
-    match self.get_android_download()?.installerType {
-      InstallerFormat::AndroidApkZip => Some(".apk"),
+  pub fn get_android_extension<'a>(&'a self, sdk: u32) -> Option<&'a str> {
+    match self.get_android_download(sdk)?.intent {
+      FileIntent::AndroidApkZip => Some(".apk"),
       _ => None,
     }
-  }
-
-  #[cfg(feature = "internet")]
-  /// 🎯 Introduced in v3
-  #[deprecated(since = "3.14.3", note = "Use `get_resource` instead")]
-  pub async fn get_resource(&self, resource: u8) -> Option<Vec<u8>> {
-    use crate::api::internet::{get_all_commits, get_app_asset};
-
-    let commit = get_all_commits(None).await.ok()?;
-
-    get_app_asset(&commit, &self.appId, &resource.to_string()).await
   }
 
   #[cfg(feature = "internet")]

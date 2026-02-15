@@ -41,7 +41,10 @@ pub mod winget;
 #[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Debug, Serialize)]
 pub struct StatusUpdateData {
+  #[cfg(not(feature = "export"))]
   pub queue: Box<[QueuedAppData]>,
+  #[cfg(feature = "export")]
+  pub queue: Vec<QueuedAppData>,
   #[serde(rename = "supportsUpdate")]
   pub disable_update: bool,
   #[serde(rename = "queueOverflow")]
@@ -59,7 +62,11 @@ pub enum AppActionIntent {
 #[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Debug, Serialize, Clone)]
 pub struct QueuedAppData {
+  #[cfg(not(feature = "export"))]
   pub id: Arc<str>,
+  #[cfg(feature = "export")]
+  pub id: String,
+  #[cfg_attr(feature = "export", specta(type = u32))]
   pub transaction: u64,
   pub status: AppUpdateInstallStatus,
   pub intent: AppActionIntent,
@@ -84,7 +91,10 @@ pub struct QueuedAppUpdate {
 
 #[derive(Debug, Serialize)]
 pub struct QueuedApp {
+  #[cfg(not(feature = "export"))]
   pub id: Arc<str>,
+  #[cfg(feature = "export")]
+  pub id: String,
   pub transaction: u64,
   pub status: AppUpdateInstallStatus,
   pub intent: AppActionIntent,
@@ -102,8 +112,8 @@ pub enum AppUpdateInstallStatus {
   PendingUserAction,
   /// { "status": "Cancelled" }
   Cancelled {
-    #[serde(skip)]
     // Shows for 5seconds
+    #[serde(skip)]
     time: u64,
   },
   /// { "status": "Downloading", "progress": 100.0 }
@@ -135,15 +145,15 @@ pub enum AppUpdateInstallStatus {
   Uninstalling,
   /// { "status": "Successful" }
   Successful {
-    #[serde(skip)]
     // This is a time delta used by us to auto prune >2s entries
+    #[serde(skip)]
     time: u64,
   },
   /// { "status": "Error", "err": "ERROR DESC" }
   Error {
     err: Cow<'static, str>,
-    #[serde(skip)]
     // >10s time delta
+    #[serde(skip)]
     time: u64,
   },
 }
@@ -153,7 +163,11 @@ mod tests {
   #[test]
   #[cfg(feature = "export")]
   fn export() {
-    _ = specta::export::ts("./pkg/ahqstore.types.d.ts").unwrap();
-    _ = specta::export::ts("./types/ahqstore.types.d.ts").unwrap();
+    // Since the `u64`s represent time deltas, and counters. We can safely treat as JS Number.
+    let export =
+      specta::ts::ExportConfiguration::new().bigint(specta::ts::BigIntExportBehavior::Number);
+
+    _ = specta::export::ts_with_cfg("./pkg/ahqstore.types.d.ts", &export).unwrap();
+    _ = specta::export::ts_with_cfg("./types/ahqstore.types.d.ts", &export).unwrap();
   }
 }
