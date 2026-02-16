@@ -112,7 +112,10 @@ impl AHQStoreApplication {
         result.push_str("❌ Version of not plain ascii\n");
       }
 
-      if !ver.chars().all(|x| x.is_alphanumeric()) {
+      if !ver
+        .chars()
+        .all(|x| x.is_alphanumeric() || x == '.' || x == '-' || x == '_')
+      {
         result.push_str("❌ Version is not alphanumeric\n");
       }
 
@@ -133,6 +136,98 @@ impl AHQStoreApplication {
       if let Some(_) = self.source {
         result
           .push_str("❌ Source can't be present, your application must not reference a source\n");
+      }
+    }
+
+    for val in self.resources.values() {
+      if &self.authorId == Self::AHQSTORE_OFFICIAL_AUTHOR_ID {
+        break;
+      }
+
+      if let AssetData::ArbitraryUrl(_) = val.asset {
+        result.push_str("❌ Found instance of ArbitraryUrl!\n");
+      }
+    }
+
+    if self.totalImages < 1 || self.totalImages > 10 {
+      result.push_str("❌ Source specifies an invalid number of images.\n");
+    }
+
+    let mut check_id = |id: u8, platform: &str| {
+      match self.resources.get(&id) {
+        None => result.push_str(&format!(
+          "❌ {} installer points to missing assetId {}\n",
+          platform, id
+        )),
+        Some(res) => {
+          // Logic Guard: Ensure the file intent matches the platform
+          let is_win = matches!(
+            res.intent,
+            FileIntent::WindowsZip
+              | FileIntent::WindowsInstallerExe
+              | FileIntent::WindowsInstallerMsi
+              | FileIntent::WindowsAHQDB
+              | FileIntent::WindowsUWPMsix
+          );
+          let is_lin = matches!(res.intent, FileIntent::LinuxAppImage);
+          let is_andy = matches!(res.intent, FileIntent::AndroidApkZip);
+
+          if platform.contains("win") && !is_win {
+            result.push_str(&format!(
+              "❌ win32 installer points to a non-Windows resource (ID {})\n",
+              id
+            ));
+          }
+          if platform.contains("linux") && !is_lin {
+            result.push_str(&format!(
+              "❌ linux installer points to a non-Linux resource (ID {})\n",
+              id
+            ));
+          }
+          if platform.contains("android") && !is_andy {
+            result.push_str(&format!(
+              "❌ android installer points to a non-Android resource (ID {})\n",
+              id
+            ));
+          }
+        }
+      }
+    };
+
+    if let Some(w) = &self.install.win32 {
+      check_id(w.assetId, "win32");
+    }
+    if let Some(wa) = &self.install.winarm {
+      check_id(wa.assetId, "winarm");
+    }
+    if let Some(l) = &self.install.linux {
+      check_id(l.assetId, "linux");
+    }
+    if let Some(la) = &self.install.linuxArm64 {
+      check_id(la.assetId, "linuxArm64");
+    }
+    if let Some(a) = &self.install.android {
+      match a.asset {
+        AndroidAssetId::Universal { assetId } => check_id(assetId, "android"),
+        AndroidAssetId::AbiBased {
+          aarch64,
+          armv7,
+          x86,
+          x86_64,
+        } => {
+          if let Some(aarch64) = aarch64 {
+            check_id(aarch64, "android-arm64");
+          }
+          if let Some(armv7) = armv7 {
+            check_id(armv7, "android-armv7");
+          }
+          if let Some(x86) = x86 {
+            check_id(x86, "android-x86");
+          }
+          if let Some(x86_64) = x86_64 {
+            check_id(x86_64, "android-x86_64");
+          }
+        }
       }
     }
 
