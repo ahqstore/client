@@ -9,62 +9,24 @@ use serde::{Deserialize, Serialize};
 pub struct InstallerOptions {
   /// 🎯 Introduced in v1
   ///
-  ///
-  pub win32: Option<InstallerOptionsWindows>,
+  /// This points to the resource via resource id
+  pub win32: Option<u8>,
   /// 🎯 Introduced in v2
   ///
-  ///
-  pub winarm: Option<InstallerOptionsWindows>,
+  /// This points to the resource via resource id
+  pub winarm: Option<u8>,
   /// 🎯 Introduced in v1
   ///
-  ///
-  pub linux: Option<InstallerOptionsLinux>,
+  /// This points to the resource via resource id
+  pub linux: Option<u8>,
   /// 🎯 Introduced in v2
   ///
-  ///
-  pub linuxArm64: Option<InstallerOptionsLinux>,
+  /// This points to the resource via resource id
+  pub linuxArm64: Option<u8>,
   /// 🔬 Planned\n🎯 Introduced in v2
   ///
   ///
-  pub android: Option<InstallerOptionsAndroid>,
-}
-
-#[allow(non_snake_case)]
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-
-pub enum WindowsInstallScope {
-  User,
-  Machine,
-}
-
-#[allow(non_snake_case)]
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-
-pub struct InstallerOptionsWindows {
-  /// 🎯 Introduced in v2
-  ///
-  ///
-  pub assetId: u8,
-  /// The exe to link as a shortcut[^1]
-  ///
-  /// [^1]: Only if you choose WindowsZip
-  pub exec: Option<String>,
-  /// 🎯 Introduced in v1
-  ///
-  ///
-  /// The scope of the installer[^1]
-  ///
-  /// [^1]: Applicable for WindowsInstallerExe or WindowsZip only, WindowsInstallerMsi is treated as Machine
-  pub scope: Option<WindowsInstallScope>,
-  /// 🎯 Stable as of v3
-  ///
-  ///
-  /// Args to pass to the custom exe installer[^1]
-  ///
-  /// [^1]: Only if you choose WindowsInstallerExe
-  pub installerArgs: Option<Vec<String>>,
+  pub android: Option<AndroidAssetId>,
 }
 
 #[allow(non_snake_case)]
@@ -122,20 +84,6 @@ pub fn current_platform() -> Platform {
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-/// 🔬 Under Development
-///
-///
-pub struct InstallerOptionsAndroid {
-  /// 🎯 Introduced in v2
-  ///
-  ///
-  pub asset: AndroidAssetId,
-  pub min_sdk: u32,
-}
-
-#[allow(non_snake_case)]
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "assetType")]
 pub enum AndroidAssetId {
   Universal {
@@ -147,20 +95,6 @@ pub enum AndroidAssetId {
     x86: Option<u8>,
     x86_64: Option<u8>,
   },
-}
-
-#[allow(non_snake_case)]
-#[cfg_attr(feature = "export", derive(specta::Type))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-/// 🔬 Under Development
-///
-///
-
-pub struct InstallerOptionsLinux {
-  /// 🎯 Introduced in v2
-  ///
-  ///
-  pub assetId: u8,
 }
 
 macro_rules! push_install_arch {
@@ -208,7 +142,7 @@ impl InstallerOptions {
     push_install_arch!(arch -> self.linuxArm64, Platform::LinuxArm64);
 
     if let Some(x) = &self.android {
-      match x.asset {
+      match x {
         AndroidAssetId::Universal { .. } => {
           arch.push(Platform::AndroidArm64);
           arch.push(Platform::AndroidArm7);
@@ -248,15 +182,15 @@ impl InstallerOptions {
   }
 
   /// 🎯 Introduced in v3
-  pub fn is_supported_android(&self, sdk: u32) -> bool {
+  pub fn is_supported_android(&self, min_sdk: u32, sdk: u32) -> bool {
     let os = self.list_os_arch();
 
-    let Some(x) = &self.android else {
+    let Some(_) = &self.android else {
       return false;
     };
 
     if OS == "android" {
-      return os.contains(&android_abi()) && x.min_sdk <= sdk;
+      return os.contains(&android_abi()) && min_sdk <= sdk;
     }
 
     false

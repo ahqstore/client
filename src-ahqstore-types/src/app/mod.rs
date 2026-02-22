@@ -163,14 +163,14 @@ impl AHQStoreApplication {
           // Logic Guard: Ensure the file intent matches the platform
           let is_win = matches!(
             res.intent,
-            FileIntent::WindowsZip
-              | FileIntent::WindowsInstallerExe
-              | FileIntent::WindowsInstallerMsi
-              | FileIntent::WindowsAHQDB
-              | FileIntent::WindowsUWPMsix
+            FileIntent::WindowsZip { .. }
+              | FileIntent::WindowsInstallerExe { .. }
+              | FileIntent::WindowsInstallerMsi { .. }
+              | FileIntent::WindowsAHQDB { .. }
+              | FileIntent::WindowsUWPMsix { .. }
           );
           let is_lin = matches!(res.intent, FileIntent::LinuxAppImage);
-          let is_andy = matches!(res.intent, FileIntent::AndroidApkZip);
+          let is_andy = matches!(res.intent, FileIntent::AndroidApkZip { .. });
 
           if platform.contains("win") && !is_win {
             result.push_str(&format!(
@@ -195,20 +195,20 @@ impl AHQStoreApplication {
     };
 
     if let Some(w) = &self.install.win32 {
-      check_id(w.assetId, "win32");
+      check_id(*w, "win32");
     }
     if let Some(wa) = &self.install.winarm {
-      check_id(wa.assetId, "winarm");
+      check_id(*wa, "winarm");
     }
     if let Some(l) = &self.install.linux {
-      check_id(l.assetId, "linux");
+      check_id(*l, "linux");
     }
     if let Some(la) = &self.install.linuxArm64 {
-      check_id(la.assetId, "linuxArm64");
+      check_id(*la, "linuxArm64");
     }
     if let Some(a) = &self.install.android {
-      match a.asset {
-        AndroidAssetId::Universal { assetId } => check_id(assetId, "android"),
+      match a {
+        AndroidAssetId::Universal { assetId } => check_id(*assetId, "android"),
         AndroidAssetId::AbiBased {
           aarch64,
           armv7,
@@ -216,16 +216,16 @@ impl AHQStoreApplication {
           x86_64,
         } => {
           if let Some(aarch64) = aarch64 {
-            check_id(aarch64, "android-arm64");
+            check_id(*aarch64, "android-arm64");
           }
           if let Some(armv7) = armv7 {
-            check_id(armv7, "android-armv7");
+            check_id(*armv7, "android-armv7");
           }
           if let Some(x86) = x86 {
-            check_id(x86, "android-x86");
+            check_id(*x86, "android-x86");
           }
           if let Some(x86_64) = x86_64 {
-            check_id(x86_64, "android-x86_64");
+            check_id(*x86_64, "android-x86_64");
           }
         }
       }
@@ -276,7 +276,7 @@ impl AHQStoreApplication {
   }
 
   /// 🎯 Introduced in v3
-  pub fn get_win_options(&self) -> Option<&InstallerOptionsWindows> {
+  fn get_win_options(&self) -> Option<&u8> {
     let get_w32 = || {
       let Some(x) = &self.install.win32 else {
         return None;
@@ -302,39 +302,33 @@ impl AHQStoreApplication {
   /// 🎯 Introduced in v2
   pub fn get_win_download(&self) -> Option<&Resource> {
     let win32 = self.get_win_options()?;
-    let url = self.resources.get(&win32.assetId)?;
+    let url = self.resources.get(&win32)?;
 
     match &url.intent {
-      FileIntent::WindowsZip
-      | FileIntent::WindowsInstallerExe
-      | FileIntent::WindowsInstallerMsi
-      | FileIntent::WindowsAHQDB
-      | FileIntent::WindowsUWPMsix => Some(&url),
+      FileIntent::WindowsZip { .. }
+      | FileIntent::WindowsInstallerExe { .. }
+      | FileIntent::WindowsInstallerMsi { .. }
+      | FileIntent::WindowsAHQDB { .. }
+      | FileIntent::WindowsUWPMsix { .. } => Some(&url),
       _ => None,
     }
   }
 
   /// 🎯 Introduced in v2
-  /// Just a clone of get_win_download for backwards compatibility
-  pub fn get_win32_download(&self) -> Option<&Resource> {
-    self.get_win_download()
-  }
-
-  /// 🎯 Introduced in v2
   pub fn get_win_extension<'a>(&'a self) -> Option<&'a str> {
     match &self.get_win_download()?.intent {
-      FileIntent::WindowsZip => Some(".zip"),
-      FileIntent::WindowsInstallerExe => Some(".exe"),
-      FileIntent::WindowsInstallerMsi => Some(".msi"),
-      FileIntent::WindowsAHQDB => Some(".ahqdb"),
-      FileIntent::WindowsUWPMsix => Some(".msix"),
+      FileIntent::WindowsZip { .. } => Some(".zip"),
+      FileIntent::WindowsInstallerExe { .. } => Some(".exe"),
+      FileIntent::WindowsInstallerMsi { .. } => Some(".msi"),
+      FileIntent::WindowsAHQDB { .. } => Some(".ahqdb"),
+      FileIntent::WindowsUWPMsix { .. } => Some(".msix"),
       FileIntent::Artifact { extension } => Some(extension),
       _ => None,
     }
   }
 
   /// 🎯 Introduced in v3
-  pub fn get_linux_options(&self) -> Option<&InstallerOptionsLinux> {
+  fn get_linux_options(&self) -> Option<&u8> {
     match ARCH {
       "x86_64" => self.install.linux.as_ref(),
       "aarch64" => self.install.linuxArm64.as_ref(),
@@ -348,7 +342,7 @@ impl AHQStoreApplication {
   pub fn get_linux_download(&self) -> Option<&Resource> {
     let linux = self.get_linux_options()?;
 
-    let url = self.resources.get(&linux.assetId)?;
+    let url = self.resources.get(&linux)?;
 
     match &url.intent {
       FileIntent::LinuxAppImage => Some(&url),
@@ -367,20 +361,23 @@ impl AHQStoreApplication {
 
   /// 🎯 Introduced in v3
   pub fn is_supported_android(&self, sdk: u32) -> bool {
-    self.install.is_supported_android(sdk)
+    let Some(min_sdk) = self.get_android_download().and_then(|x| match x.intent {
+      FileIntent::AndroidApkZip { min_sdk } => Some(min_sdk),
+      _ => None,
+    }) else {
+      return false;
+    };
+
+    self.install.is_supported_android(min_sdk, sdk)
   }
 
   /// 🎯 Introduced in v2
-  pub fn get_android_download(&self, sdk: u32) -> Option<&Resource> {
+  pub fn get_android_download(&self) -> Option<&Resource> {
     let Some(android) = &self.install.android else {
       return None;
     };
 
-    if !self.install.is_supported_android(sdk) {
-      return None;
-    }
-
-    let url = self.resources.get(&match android.asset {
+    let url = self.resources.get(match android {
       AndroidAssetId::Universal { assetId } => Some(assetId),
       AndroidAssetId::AbiBased {
         aarch64,
@@ -393,19 +390,20 @@ impl AHQStoreApplication {
         "x86" => x86,
         "x86_64" => x86_64,
         _ => return None,
-      },
+      }
+      .as_ref(),
     }?)?;
 
     match &url.intent {
-      FileIntent::AndroidApkZip => Some(&url),
+      FileIntent::AndroidApkZip { .. } => Some(&url),
       _ => None,
     }
   }
 
   /// 🎯 Introduced in v2
-  pub fn get_android_extension<'a>(&'a self, sdk: u32) -> Option<&'a str> {
-    match self.get_android_download(sdk)?.intent {
-      FileIntent::AndroidApkZip => Some(".apk"),
+  pub fn get_android_extension<'a>(&'a self) -> Option<&'a str> {
+    match self.get_android_download()?.intent {
+      FileIntent::AndroidApkZip { .. } => Some(".apk"),
       _ => None,
     }
   }
