@@ -90,7 +90,17 @@ impl Display for FileIntent {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
 pub struct AppRepo {
-  /// author must be your GitHub username or username of an org where you're a "visible" member
+  pub provider: RepositoryProvider,
+
+  /// Your Author username
+  /// 
+  /// For GitHub, its username
   pub author: String,
   pub repo: String,
+}
+
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum RepositoryProvider {
+  GitHub
 }
