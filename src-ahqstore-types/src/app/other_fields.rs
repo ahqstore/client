@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
 pub struct Resource {
@@ -13,6 +14,7 @@ pub struct Resource {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 pub enum AssetData {
@@ -22,6 +24,7 @@ pub enum AssetData {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 pub enum FileIntent {
@@ -93,6 +96,7 @@ pub enum FileIntent {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
 pub enum WindowsInstallScope {
@@ -122,6 +126,7 @@ impl Display for FileIntent {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
 pub struct AppRepo {
@@ -135,6 +140,7 @@ pub struct AppRepo {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum RepositoryProvider {
   GitHub,

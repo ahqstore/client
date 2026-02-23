@@ -1,7 +1,7 @@
 [package]
 name = "ahqstore-types"
 description = "Standard types used by AHQ Store"
-version = "4.3.0"
+version = "4.4.0"
 edition = "2021"
 license-file = "../LICENSE.md"
 repository = "https://github.com/ahqstore/client"
@@ -24,6 +24,7 @@ anyhow = "1"
 tokio = { version = "1", features = ["rt", "sync"] }
 
 specta = { version = "1", features = ["export"], optional = true }
+schemars = { version = "1", optional = true }
 
 [features]
 default = ["internet", "apps_repo"]
@@ -31,3 +32,4 @@ internet = ["dep:reqwest"]
 apps_repo = []
 
 export = ["dep:specta"]
+schemars = ["dep:schemars"]

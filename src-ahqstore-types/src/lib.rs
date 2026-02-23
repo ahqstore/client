@@ -39,6 +39,7 @@ pub use data::*;
 pub mod winget;
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize)]
 pub struct StatusUpdateData {
   #[cfg(not(feature = "export"))]
@@ -52,6 +53,7 @@ pub struct StatusUpdateData {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Clone)]
 pub enum AppActionIntent {
   Install,
@@ -60,6 +62,7 @@ pub enum AppActionIntent {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Clone)]
 pub struct QueuedAppData {
   #[cfg(not(feature = "export"))]
@@ -103,6 +106,7 @@ pub struct QueuedApp {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Clone)]
 #[serde(tag = "status")]
 pub enum AppUpdateInstallStatus {

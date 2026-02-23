@@ -19,6 +19,7 @@ use crate::api::Commits;
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Use the official ahqstore (<https://crates.io/crates/ahqstore_cli_rs>) cli\n🎯 Introduced in v1
 ///

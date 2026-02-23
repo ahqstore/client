@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Installer {
   pub Architecture: String,
@@ -12,6 +13,7 @@ pub struct Installer {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct InstallerScheme {
   pub PackageIdentifier: String,
@@ -21,6 +23,7 @@ pub struct InstallerScheme {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WingetApplication {
   pub PackageIdentifier: String,

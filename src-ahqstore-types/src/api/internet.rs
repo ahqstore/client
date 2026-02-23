@@ -34,6 +34,7 @@ use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Commits {
   pub ahqstore: String,

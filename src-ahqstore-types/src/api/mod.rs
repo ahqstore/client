@@ -35,6 +35,7 @@ pub static CLIENT: LazyLock<Client> = LazyLock::new(|| {
 pub type MapData = Vec<String>;
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone)]
 
 /// This is exactly `Vec<(String, Vec<String>)>`
@@ -62,6 +63,7 @@ impl<'de> Deserialize<'de> for HomeMapData {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
 pub struct Home {
@@ -70,6 +72,7 @@ pub struct Home {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
 pub struct Splash {
@@ -80,6 +83,7 @@ pub struct Splash {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
 pub struct Hero {
@@ -92,6 +96,7 @@ pub struct Hero {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
 pub struct SubHero {
@@ -102,6 +107,7 @@ pub struct SubHero {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
 pub struct Semi {
@@ -112,6 +118,7 @@ pub struct Semi {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug)]
 
 pub struct SearchEntry {
@@ -121,6 +128,7 @@ pub struct SearchEntry {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug)]
 
 pub struct DevData {

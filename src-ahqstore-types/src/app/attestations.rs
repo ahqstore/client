@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Attestations {
   // What these will resemble will be defined later!
@@ -20,6 +21,7 @@ pub struct Attestations {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SecurityReports {
   pub windowsDefenderStatus: SecurityReportStatus,
@@ -36,6 +38,7 @@ pub struct SecurityReports {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// This uses an LLM to verify and attest that the building
 /// CI CD indeed builds the codebase on the fly of the exact repository
@@ -49,6 +52,7 @@ pub struct LLMCICDReport {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ClamAVReport {
   pub status: SecurityReportStatus,
@@ -59,6 +63,7 @@ pub struct ClamAVReport {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MobSFReport {
   pub status: SecurityReportStatus,
@@ -67,6 +72,7 @@ pub struct MobSFReport {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SecurityReportStatus {
   Passed,

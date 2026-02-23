@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DeveloperUser {
   /// The Name of the Developer
@@ -33,6 +34,7 @@ pub struct DeveloperUser {
 }
 
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AppSupport {
   /// We recommend you set a discord server

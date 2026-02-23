@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
 pub struct InstallerOptions {
@@ -31,6 +32,7 @@ pub struct InstallerOptions {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// 🔬 Under Development
 ///
@@ -83,6 +85,7 @@ pub fn current_platform() -> Platform {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "assetType")]
 pub enum AndroidAssetId {
@@ -107,6 +110,7 @@ macro_rules! push_install_arch {
 
 #[allow(non_snake_case)]
 #[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum Platform {
   WindowsX64,
