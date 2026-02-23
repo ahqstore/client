@@ -2,6 +2,8 @@
 
 Default permissions for the plugin
 
+#### This default permission set includes the following:
+
 - `allow-ping`
 
 ## Permission Table
@@ -22,6 +24,84 @@ Default permissions for the plugin
 <td>
 
 Enables all the commands
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ahqstore:allow-decrypt`
+
+</td>
+<td>
+
+Enables the decrypt command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ahqstore:deny-decrypt`
+
+</td>
+<td>
+
+Denies the decrypt command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ahqstore:allow-download`
+
+</td>
+<td>
+
+Enables the download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ahqstore:deny-download`
+
+</td>
+<td>
+
+Denies the download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ahqstore:allow-encrypt`
+
+</td>
+<td>
+
+Enables the encrypt command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ahqstore:deny-encrypt`
+
+</td>
+<td>
+
+Denies the encrypt command without any pre-configured scope.
 
 </td>
 </tr>
@@ -126,6 +206,32 @@ Enables the get_arch command without any pre-configured scope.
 <td>
 
 Denies the get_arch command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ahqstore:allow-get-commit`
+
+</td>
+<td>
+
+Enables the get_commit command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ahqstore:deny-get-commit`
+
+</td>
+<td>
+
+Denies the get_commit command without any pre-configured scope.
 
 </td>
 </tr>

@@ -1,0 +1,23 @@
+{
+  "name": "plugin-script",
+  "version": "1.0.1",
+  "description": "A script used by AHQ Store internal plugins",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/script.ts --format=iife --bundle --outfile=dist/bundle.js --minify --legal-comments=inline",
+    "dev": "esbuild src/script.ts --format=iife --bundle --outfile=dist/bundle.js --watch --legal-comments=inline",
+    "build:types": "tsc",
+    "dev:types": "tsc --watch"
+  },
+  "keywords": [],
+  "author": "A. Chakraborty (@ahqsoftwares) <ahqsecret@gmail.com>",
+  "license": "MIT",
+  "packageManager": "pnpm@10.17.0",
+  "devDependencies": {
+    "esbuild": "^0.25.10",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.8.0"
+  }
+}

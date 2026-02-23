@@ -1,0 +1,57 @@
+{
+  "name": "@ahqstore/plugin-api",
+  "version": "0.0.12",
+  "description": "A utility package to use AHQ Store Plugin API that doesn't break like the fragile internal low level ipc",
+  "keywords": [
+    "plugin",
+    "api",
+    "wrapper",
+    "abstraction"
+  ],
+  "homepage": "https://github.com/ahqstore/client#readme",
+  "bugs": {
+    "url": "https://github.com/ahqstore/client/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahqstore/client.git"
+  },
+  "license": "MIT",
+  "author": "A. Chakraborty <ahqsecret@gmail.com> (@ahqsoftwares)",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "./dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "build:docs:legacy": "typedoc --options typedoc-legacy.json --out legacy",
+    "build:docs": "typedoc",
+    "dev:docs": "typedoc --watch"
+  },
+  "devDependencies": {
+    "ahqstore-types": "^3",
+    "tsdown": "^0.15",
+    "typedoc": "^0.28",
+    "typedoc-plugin-markdown": "^4.9.0",
+    "typedoc-vitepress-theme": "^1.1.2",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

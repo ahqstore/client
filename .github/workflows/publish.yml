@@ -127,15 +127,19 @@ jobs:
         with:
           toolchain: nightly
 
+      - name: Authenticate with registry
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish types to cargo
         run: cargo publish
         working-directory: src-ahqstore-types
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         continue-on-error: true
 
   publish-types-npm:
-    name: Publish ahqstore-types to npmjs
+    name: Publish packages to npmjs
 
     runs-on: ubuntu-latest
 
@@ -156,20 +160,37 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install wasm-pack
-        run: npm i -g wasm-pack
+      - name: Install npm
+        run: |
+          npm i -g npm@latest
         working-directory: src-ahqstore-types
 
-      - name: Build NPM Binaries
-        run: wasm-pack build --release -- --features js
+      - name: Build & Publish NPM Binaries
+        shell: pwsh
+        run: ./publish.ps1
         working-directory: src-ahqstore-types
-
-      - name: Publish NPM Binaries
-        run: npm publish
-        working-directory: src-ahqstore-types/pkg
         continue-on-error: true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AHQSTORE_TYPES }}
+
+      - name: Publish plugin api
+        run: |
+          npm install
+          npm run build
+          npm publish --access public
+        working-directory: pkg-ahqstore
+        continue-on-error: true
+
+      - name: Publish environment types
+        run: |
+          npm install
+          npm run build
+          npm run build:types
+
+          cd types
+            npm install
+            npm publish --access public
+          cd ..
+        working-directory: src-tauri/plugin-script
+        continue-on-error: true
 
   make-setup:
     needs: create-release
@@ -181,15 +202,11 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            arch: amd64
+            arch: amd64,arm64
 
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             arch: amd64
-
-          - os: windows-latest
-            target: aarch64-pc-windows-msvc
-            arch: arm64
 
     runs-on: ${{ matrix.os }}
 
@@ -217,10 +234,27 @@ jobs:
           sudo apt-get update
           sudo apt-get install gcc-aarch64-linux-gnu
 
+      - name: Install Windows Certificate
+        if: runner.os == 'Windows'
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          New-Item -ItemType directory -Path certificate
+          Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_CERTIFICATE
+          certutil -decode certificate/tempCert.txt certificate/certificate.pfx
+          Remove-Item -path certificate -include tempCert.txt
+          Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText)
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
       - name: Build Windows GUI Setup
         if: matrix.os == 'windows-latest'
-        run: cargo build --release --target ${{ matrix.target }}
-        working-directory: src-setup
+        run: ./build.ps1
+        working-directory: dotnet-win32-setup
 
       - name: Build Linux CLI Setup
         if: matrix.os != 'windows-latest'
@@ -228,15 +262,26 @@ jobs:
         env:
           TAG: ${{ needs.create-release.outputs.tag_name }}
 
-      - name: Upload Windows Setup
+      - name: Upload Windows Setup (X64)
         if: matrix.os == 'windows-latest'
         uses: ahqstore/upload-release-assets@v60
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./src-setup/target/${{ matrix.target }}/release/ahqstore_setup_amd64.exe
-          asset_name: ahqstore_setup_win32_${{ matrix.arch }}.exe
+          asset_path: ./dotnet-win32-setup/outputs/ahqstore_setup_x64.exe
+          asset_name: ahqstore_setup_win32_amd64.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+
+      - name: Upload Windows Setup (Arm64)
+        if: matrix.os == 'windows-latest'
+        uses: ahqstore/upload-release-assets@v60
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./dotnet-win32-setup/outputs/ahqstore_setup_arm64.exe
+          asset_name: ahqstore_setup_win32_arm64.exe
           asset_content_type: application/vnd.microsoft.portable-executable
 
       - name: Upload Linux Setup
@@ -253,7 +298,34 @@ jobs:
   publish-android:
     needs: create-release
     runs-on: ubuntu-latest
-    name: Build Tauri App (universal-linux-android)
+    name: Build Tauri App (${{ matrix.target }})
+
+    strategy:
+      matrix:
+        include:
+          - target: universal-linux-android
+            suffix: universal
+            args: ""
+
+          - target: aarch64-linux-android
+            suffix: aarch64
+            args: -t aarch64
+
+          - target: armv7-linux-android
+            suffix: armv7
+            args: -t armv7
+
+          - target: i686-linux-android
+            suffix: i686
+            args: -t i686
+
+          - target: x86_64-linux-android
+            suffix: x86_64
+            args: -t x86_64
+
+          - target: arm-linux-android
+            suffix: universal
+            args: -t aarch64 armv7
 
     steps:
       - name: Checkout
@@ -282,19 +354,29 @@ jobs:
           echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
       - name: Build ahqstore-types locally
+        shell: pwsh
         run: |
-          npm i -g wasm-pack
-          wasm-pack build --release -- --features js
+          ./publish.ps1
 
           cd ../src-plugin
           npm i -g pnpm
           pnpm install
           pnpm build
-
-          cd ../src-tauri
-          rm Cargo.toml
-          cp ./Cargo.patch.toml ./Cargo.toml
         working-directory: src-ahqstore-types
+        env:
+          NO_PUBLISH: true
+
+      - name: Build plugin api
+        run: |
+          npm install
+          npm run build
+        working-directory: pkg-ahqstore
+
+      - name: Build plugin script
+        run: |
+          npm install
+          npm run build
+        working-directory: src-tauri/plugin-script
 
       - name: Build Tauri App
         run: |
@@ -302,9 +384,16 @@ jobs:
           export NDK_HOME="$ANDROID_NDK_HOME"
 
           pnpm install
-          pnpm tauri android build
+          pnpm tauri android build --apk true ${{ matrix.args }}
         env:
           CI: "false"
+
+      - name: Upload Apk
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          asset_path: ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
+          asset_name: ahqstore_${{ matrix.target }}.apk
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
 
   publish-tauri:
     needs: create-release
@@ -322,6 +411,7 @@ jobs:
             target: x86_64-unknown-linux-gnu
             arch: amd64
 
+          # Commented out due to instability rn
           - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
             arch: arm64
@@ -349,6 +439,18 @@ jobs:
           targets: ${{ matrix.target }}
           toolchain: nightly
 
+      - name: Install Windows Certificate
+        if: runner.os == 'Windows'
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          New-Item -ItemType directory -Path certificate
+          Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_CERTIFICATE
+          certutil -decode certificate/tempCert.txt certificate/certificate.pfx
+          Remove-Item -path certificate -include tempCert.txt
+          Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText)
+
       - name: install dependencies (ubuntu only)
         if: runner.os == 'Linux'
         run: |
@@ -363,15 +465,29 @@ jobs:
           sudo chmod -R 777 /usr
 
       - name: Build ahqstore-types locally
+        shell: pwsh
         run: |
-          npm i -g wasm-pack
-          wasm-pack build --release -- --features js
+          ./publish.ps1
 
           cd ../src-plugin
           npm i -g pnpm
           pnpm install
           pnpm build
         working-directory: src-ahqstore-types
+        env:
+          NO_PUBLISH: "true"
+
+      - name: Build plugin api
+        run: |
+          npm install
+          npm run build
+        working-directory: pkg-ahqstore
+
+      - name: Build plugin script
+        run: |
+          npm install
+          npm run build
+        working-directory: src-tauri/plugin-script
 
       - name: install Vite dependencies and Build React App
         run: pnpm install; pnpm build
@@ -380,7 +496,7 @@ jobs:
 
       - name: Build Tauri App
         id: tauri-app
-        uses: tauri-apps/tauri-action@dev
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI }}
@@ -389,7 +505,7 @@ jobs:
           args: --verbose --target ${{ matrix.target }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
           includeRelease: true
-          includeUpdaterJson: false
+          includeUpdaterJson: true
 
   undraft-release:
     needs: [create-release, publish-tauri, make-setup, publish-android]

@@ -1,15 +1,15 @@
 //! Declared URLS for:
 //! AHQ Store WinGet Repo Parsable Urls (microsoft/winget-pkgs mirror)
 //!
-//! Repository Mirror : <https://github.com/ahqstore/ahqstore-winget-pkgs>
+//! Repository Mirror : <https://github.com/ahqstore/repo_win32>
 //! Thanks to winget-pkgs@microsoft for providing the data
 
 use std::sync::LazyLock;
 
 pub static WINGET_COMMIT_URL: &'static str =
-  "https://api.github.com/repos/ahqstore/ahqstore-winget-pkgs/commits";
+  "https://api.github.com/repos/ahqstore/repo_win32/commits";
 pub static WINGET_BASE_URL: &'static str =
-  "https://rawcdn.githack.com/ahqstore/ahqstore-winget-pkgs/{COMMIT}";
+  "https://cdn.jsdelivr.net/gh/ahqstore/repo_win32@{COMMIT}";
 
 pub static WINGET_APP_URL: LazyLock<String> =
   LazyLock::new(|| format!("{WINGET_BASE_URL}/db/apps/{{APP_ID}}.json"));
@@ -17,6 +17,8 @@ pub static WINGET_APP_ASSET_URL: LazyLock<String> =
   LazyLock::new(|| format!("{WINGET_BASE_URL}/db/res/{{APP_ID}}/{{ASSET}}"));
 
 pub static WINGET_TOTAL: LazyLock<String> = LazyLock::new(|| format!("{WINGET_BASE_URL}/db/total"));
+pub static WINGET_HOME: LazyLock<String> =
+  LazyLock::new(|| format!("{WINGET_BASE_URL}/db/home.json"));
 
 pub static WINGET_SEARCH: LazyLock<String> =
   LazyLock::new(|| format!("{WINGET_BASE_URL}/db/search/{{ID}}.json"));

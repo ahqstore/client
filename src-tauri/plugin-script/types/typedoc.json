@@ -1,0 +1,20 @@
+{
+  "entryPoints": ["./exports.d.ts"],
+  "theme": "default",
+  "searchInComments": true,
+  "githubPages": true,
+  "gitRemote": "origin",
+  "favicon": "./icon.png",
+  "navigationLinks": {
+    "GitHub": "https://github.com/ahqstore"
+  },
+  "out": "./docs/@ahqstore/env-types",
+  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
+  "docsRoot": "./docs",
+  "sidebar": {
+    "autoConfiguration": true,
+    "format": "vitepress",
+    "pretty": false,
+    "collapsed": true
+  }
+}

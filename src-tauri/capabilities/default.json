@@ -3,5 +3,22 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "ahqstore:allow-all"]
+  "permissions": [
+    "core:default",
+    "ahqstore:allow-all",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://*"
+        },
+        {
+          "url": "https://**"
+        },
+        {
+          "url": "https://**/*"
+        }
+      ]
+    }
+  ]
 }

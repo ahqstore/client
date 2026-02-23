@@ -1,7 +1,7 @@
 [package]
 name = "ahqstore-types"
 description = "Standard types used by AHQ Store"
-version = "3.10.4"
+version = "4.4.0"
 edition = "2021"
 license-file = "../LICENSE.md"
 repository = "https://github.com/ahqstore/client"
@@ -12,31 +12,24 @@ readme = "README.md"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-reqwest = { version = "0.12", features = [
+reqwest = { version = "0.13", features = [
   "json",
-  "rustls-tls",
+  "rustls-no-provider",
+  "http2",
 ], default-features = false, optional = true }
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1", features = ["derive", "rc"] }
 serde-wasm-bindgen = { version = "0.6", optional = true }
 serde_json = "1"
-tsify = { version = "0.4", optional = true }
-wasm-bindgen = { version = "0.2", optional = true }
-wasm-bindgen-futures = { version = "0.4", optional = true }
-kfghdfghdfkgh_js_macros = { version = "1", optional = true }
-fuse-rust = { version = "0.4", features = ["async"], optional = true }
 anyhow = "1"
+tokio = { version = "1", features = ["rt", "sync"] }
+
+specta = { version = "1", features = ["export"], optional = true }
+schemars = { version = "1", optional = true }
 
 [features]
-default = ["internet", "search"]
+default = ["internet", "apps_repo"]
 internet = ["dep:reqwest"]
-# Implements search traits
-search = ["dep:fuse-rust"]
 apps_repo = []
-js = [
-  "dep:wasm-bindgen",
-  "dep:wasm-bindgen-futures",
-  "dep:serde-wasm-bindgen",
-  "dep:tsify",
-  "dep:kfghdfghdfkgh_js_macros",
-]
-all_platforms = []
+
+export = ["dep:specta"]
+schemars = ["dep:schemars"]

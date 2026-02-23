@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Alternate Installer Service for AHQStore</string>
+    <string name="launcher_name">Configure</string>
+    <string name="title_activity_setup_wireless_adb">SetupWirelessADB</string>
+</resources>

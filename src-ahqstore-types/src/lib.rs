@@ -1,26 +1,30 @@
-#![allow(dead_code, unused_imports, non_local_definitions, reason = "Conditional compilation")]
+#![allow(
+  dead_code,
+  unused_imports,
+  non_local_definitions,
+  reason = "Conditional compilation"
+)]
+
+//! **You should use cli**
+//! ```sh
+//! cargo install ahqstore_cli_rs
+//! ```
+//! or visit app / api sub module
+//!
+//! This Module:
+//! - This module lists the standard commands & types that AHQ Store sends to AHQ Store Service
+//! - Defines schemas for the AHQ Store File Formats
 
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, to_string, to_string_pretty};
-use std::fs::read;
+use std::{borrow::Cow, fs::read, sync::Arc};
+use tokio::task::JoinHandle;
 
-#[cfg(feature = "js")]
-use kfghdfghdfkgh_js_macros::TsifyAsync;
-#[cfg(feature = "js")]
-use tsify::*;
-#[cfg(feature = "js")]
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
-
-#[cfg_attr(feature = "js", declare)]
 pub type AppId = String;
-#[cfg_attr(feature = "js", declare)]
 pub type Str = String;
-#[cfg_attr(feature = "js", declare)]
 pub type AppData = (String, String);
-#[cfg_attr(feature = "js", declare)]
 pub type RefId = u64;
 
-#[cfg_attr(feature = "js", declare)]
 pub type Success = bool;
 
 pub mod app;
@@ -34,252 +38,140 @@ pub use data::*;
 
 pub mod winget;
 
-/// **You should use cli**
-/// ```sh
-/// cargo install ahqstore_cli_rs
-/// ```
-/// or visit app / api sub module
-///
-/// This Module:
-/// This module lists the standard commands & types that AHQ Store sends to AHQ Store Service
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
-pub struct Commit {
-  pub sha: String,
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize)]
+pub struct StatusUpdateData {
+  #[cfg(not(feature = "export"))]
+  pub queue: Box<[QueuedAppData]>,
+  #[cfg(feature = "export")]
+  pub queue: Vec<QueuedAppData>,
+  #[serde(rename = "supportsUpdate")]
+  pub disable_update: bool,
+  #[serde(rename = "queueOverflow")]
+  pub overflow: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", wasm_bindgen)]
-pub struct Prefs {
-  pub launch_app: bool,
-  pub install_apps: bool,
-  pub auto_update_apps: bool,
-}
-
-#[cfg_attr(feature = "js", wasm_bindgen)]
-impl Prefs {
-  pub fn get(path: &str) -> Option<Vec<u8>> {
-    read(&path).ok()
-  }
-
-  pub fn str_to(s: &str) -> Option<Prefs> {
-    from_str(s).ok()
-  }
-
-  pub fn convert(&self) -> Option<String> {
-    to_string(self).ok()
-  }
-
-  pub fn default() -> Prefs {
-    Prefs {
-      launch_app: true,
-      install_apps: true,
-      auto_update_apps: true,
-    }
-  }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum Package {
-  LeadLang,
-  DevCamp,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum Command {
-  GetSha(RefId),
-
-  GetApp(RefId, AppId),
-  InstallApp(RefId, AppId),
-  UninstallApp(RefId, AppId),
-
-  ListApps(RefId),
-  GetLibrary(RefId),
-
-  RunUpdate(RefId),
-  UpdateStatus(RefId),
-
-  GetPrefs(RefId),
-  SetPrefs(RefId, Prefs),
-
-  AddPkg(RefId, Package),
-
-  ExecutableRunStatus(RefId, Success)
-}
-
-impl Command {
-  pub fn try_from<T: AsRef<str>>(value: T) -> Option<Self> {
-    serde_json::from_str(value.as_ref()).ok()
-  }
-}
-
-#[cfg_attr(feature = "js", wasm_bindgen)]
-impl Command {
-  pub fn try_from_js(value: String) -> Option<Command> {
-    serde_json::from_str(&value).ok()
-  }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum Reason {
-  UnknownData(RefId),
-
-  Unauthenticated,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum ErrorType {
-  GetAppFailed(RefId, AppId),
-  AppPlatformNoSupport(RefId, AppId),
-  AVBlockedApp(RefId, AppId),
-  PrefsError(RefId),
-  PkgError(RefId),
-  GetSHAFailed(RefId),
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub struct Library {
-  pub app_id: String,
-  pub status: AppStatus,
-  pub is_update: bool,
-  pub to: ToDo,
-  pub progress: f64,
-  pub max: u64,
-  pub app: Option<AHQStoreApplication>,
-  pub user: String
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum ToDo {
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Clone)]
+pub enum AppActionIntent {
   Install,
   Uninstall,
+  Update,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum AppStatus {
-  Pending,
-  Downloading,
-  AVScanning,
-  Installing,
-  Uninstalling,
-  InstallSuccessful,
-  UninstallSuccessful,
-  NotSuccessful,
-  AVFlagged,
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Clone)]
+pub struct QueuedAppData {
+  #[cfg(not(feature = "export"))]
+  pub id: Arc<str>,
+  #[cfg(feature = "export")]
+  pub id: String,
+  #[cfg_attr(feature = "export", specta(type = u32))]
+  pub transaction: u64,
+  pub status: AppUpdateInstallStatus,
+  pub intent: AppActionIntent,
 }
 
-impl Serialize for AppStatus {
-  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-  where
-    S: serde::Serializer,
-  {
-    serializer.serialize_str(match self {
-      AppStatus::Pending => "Pending...",
-      AppStatus::Downloading => "Downloading...",
-      AppStatus::Installing => "Installing...",
-      AppStatus::Uninstalling => "Uninstalling...",
-      AppStatus::InstallSuccessful => "Installed",
-      AppStatus::UninstallSuccessful => "Uninstalled",
-      AppStatus::NotSuccessful => "Error!",
-      AppStatus::AVScanning => "Scanning for Viruses!",
-      AppStatus::AVFlagged => "Flagged as Malicious!",
-    })
-  }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum UpdateStatusReport {
-  Disabled,
-  UpToDate,
-  Checking,
-  Updating,
-}
-
-impl Clone for Commits {
-  fn clone(&self) -> Self {
+impl QueuedAppData {
+  pub fn from(data: &QueuedApp) -> Self {
     Self {
-      ahqstore: self.ahqstore.clone(),
-      winget: self.winget.clone(),
+      id: data.id.clone(),
+      transaction: data.transaction,
+      intent: data.intent.clone(),
+      status: data.status.clone(),
     }
   }
 }
 
-impl From<&Commits> for Commits {
-  fn from(value: &Commits) -> Self {
-      value.clone()
-  }
+#[derive(Debug, Serialize)]
+pub struct QueuedAppUpdate {
+  pub transaction: u64,
+  pub status: AppUpdateInstallStatus,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "js", derive(Tsify, TsifyAsync))]
-#[cfg_attr(feature = "js", tsify(into_wasm_abi, from_wasm_abi))]
-pub enum ResponseToSend {
-  Ready,
-
-  Error(ErrorType),
-
-  SHAId(RefId, Commits),
-
-  Disconnect(Reason),
-
-  AppData(RefId, AppId, AHQStoreApplication),
-  AppDataUrl(RefId, AppId, String),
-
-  ListApps(RefId, Vec<AppData>),
-  Library(RefId, Vec<Library>),
-
-  UpdateStatus(RefId, UpdateStatusReport),
-
-  Acknowledged(RefId),
-
-  Prefs(RefId, Prefs),
-  PrefsSet(RefId),
-
-  DownloadPkgProg(RefId, [u64; 2]),
-  InstallPkg(RefId),
-  InstalledPkg(RefId),
-
-  TerminateBlock(RefId),
-  RunExecutable(RefId, String)
+#[derive(Debug, Serialize)]
+pub struct QueuedApp {
+  #[cfg(not(feature = "export"))]
+  pub id: Arc<str>,
+  #[cfg(feature = "export")]
+  pub id: String,
+  pub transaction: u64,
+  pub status: AppUpdateInstallStatus,
+  pub intent: AppActionIntent,
+  #[serde(skip)]
+  pub task: Option<JoinHandle<()>>,
 }
 
-#[cfg_attr(feature = "js", wasm_bindgen)]
-impl ResponseToSend {
-  pub fn as_msg(msg: ResponseToSend) -> Vec<u8> {
-    to_string_pretty(&msg)
-      .unwrap_or("ERRR".to_string())
-      .into_bytes()
-  }
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Clone)]
+#[serde(tag = "status")]
+pub enum AppUpdateInstallStatus {
+  /// { "status": "Pending" }
+  Pending,
+  /// { "status": "PendingUserAction" }
+  PendingUserAction,
+  /// { "status": "Cancelled" }
+  Cancelled {
+    // Shows for 5seconds
+    #[serde(skip)]
+    time: u64,
+  },
+  /// { "status": "Downloading", "progress": 100.0 }
+  Downloading { progress: f64 },
+  /// { "status": "AVSCanning" }
+  AVScanning,
+  /// { "status": "PendingInstall" }
+  PendingInstall,
+  /// { "status": "Installing", "progress": null }
+  ///
+  /// OR
+  ///
+  /// { "status": "Installing", "progress": 30.0 }
+  Installing { progress: Option<f64> },
+  /// { "status": "MoreDwnlNeeded" }
+  MoreDwnlNeeded {
+    // Total progress
+    progress: f64,
+    current: usize,
+    items: usize,
+  },
+  /// { "status": "CopyingFiles", "percentage": 67, "total": 100 }
+  CopyingFiles { percentage: f64, total: usize },
+  /// { "status": "Finalizing" }
+  Finalizing,
+  /// { "status": "Updating" }
+  Updating,
+  /// { "status": "Uninstalling" }
+  Uninstalling,
+  /// { "status": "Successful" }
+  Successful {
+    // This is a time delta used by us to auto prune >2s entries
+    #[serde(skip)]
+    time: u64,
+  },
+  /// { "status": "Error", "err": "ERROR DESC" }
+  Error {
+    err: Cow<'static, str>,
+    // >10s time delta
+    #[serde(skip)]
+    time: u64,
+  },
 }
 
-pub type Response = ResponseToSend;
+#[cfg(test)]
+mod tests {
+  #[test]
+  #[cfg(feature = "export")]
+  fn export() {
+    // Since the `u64`s represent time deltas, and counters. We can safely treat as JS Number.
+    let export =
+      specta::ts::ExportConfiguration::new().bigint(specta::ts::BigIntExportBehavior::Number);
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AuthPing {
-  pub process: usize,
-}
-
-impl AuthPing {
-  pub fn from<T: AsRef<str>>(value: T) -> Option<Self> {
-    let string = value.as_ref();
-
-    serde_json::from_str(string).ok()
+    _ = specta::export::ts_with_cfg("./pkg/ahqstore.types.d.ts", &export).unwrap();
+    _ = specta::export::ts_with_cfg("./types/ahqstore.types.d.ts", &export).unwrap();
   }
 }

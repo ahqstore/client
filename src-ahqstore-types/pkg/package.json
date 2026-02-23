@@ -1,0 +1,16 @@
+{
+  "name": "ahqstore-types",
+  "type": "module",
+  "description": "Standard types used by AHQ Store",
+  "version": "3.20.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ahqstore/client"
+  },
+  "files": [
+    "ahqstore.types.d.ts"
+  ],
+  "homepage": "https://ahqstore.github.io/",
+  "types": "ahqstore.types.d.ts"
+}

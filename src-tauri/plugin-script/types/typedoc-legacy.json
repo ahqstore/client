@@ -1,0 +1,19 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "lang": "en",
+  "entryPoints": ["./exports.d.ts"],
+  "includeHierarchySummary": true,
+  "includeVersion": true,
+  "externalSymbolLinkMappings": {
+    "typescript": {
+      "fetch": "https://developer.mozilla.org/en-US/docs/Web/API/fetch"
+    }
+  },
+  "searchInComments": true,
+  "githubPages": true,
+  "gitRemote": "origin",
+  "favicon": "./icon.png",
+  "navigationLinks": {
+    "GitHub": "https://github.com/ahqstore"
+  }
+}

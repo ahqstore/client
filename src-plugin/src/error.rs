@@ -1,15 +1,32 @@
+use std::string::FromUtf8Error;
+
 use serde::{ser::Serializer, Serialize};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+  #[error("The platform is not supported")]
+  UnsupportedPlatform,
+
+  #[error("There was an error while performing search")]
+  SearchError,
+
+  #[error("You cannot safely update commits")]
+  CannotUpdate,
+
+  #[error(transparent)]
+  Tauri(#[from] tauri::Error),
+
   #[error(transparent)]
   Io(#[from] std::io::Error),
 
   #[error(transparent)]
+  String(#[from] FromUtf8Error),
+
+  #[error(transparent)]
   AHQStore(#[from] anyhow::Error),
-  
+
   #[cfg(mobile)]
   #[error(transparent)]
   PluginInvoke(#[from] tauri::plugin::mobile::PluginInvokeError),

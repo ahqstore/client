@@ -1,0 +1,15 @@
+<svg width="1600" height="667" viewBox="0 0 1600 667" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0.5" y="397.709" width="{WIDTH}" height="268.458" rx="83.5" fill="#3A0987"
+    stroke="#797979" />
+  <rect width="1600" height="641.975" rx="84" fill="#1F1F1E" />
+  <path
+    d="M313.146 181.577L292.638 146.289M292.638 146.289L278.183 121.414C275.484 116.771 268.777 116.771 266.079 121.414L112.11 386.356C111.506 387.396 110.647 388.265 109.558 388.772C105.076 390.856 92.038 395.617 79 387.941M292.638 146.289L425.946 377.444C428.638 382.111 425.27 387.941 419.882 387.941H231.921C228.055 387.941 224.921 391.071 224.921 394.937C224.921 400.051 224.921 407.548 224.921 416"
+    stroke="white" stroke-width="52" />
+  <text fill="white" xml:space="preserve" style="white-space: pre" font-family="Khula"
+    font-size="136" font-weight="bold" letter-spacing="0em"><tspan x="497" y="228.815">AHQ Softwares</tspan></text>
+  <text fill="white" xml:space="preserve" style="white-space: pre" font-family="Khula"
+    font-size="64" font-weight="300" letter-spacing="0em"><tspan x="497" y="317.119">Transparency. Security. Integrity</tspan></text>
+  <text fill="white" xml:space="preserve" style="white-space: pre" font-family="Khula"
+    text-anchor="end"
+    font-size="36" font-weight="300" letter-spacing="0em"><tspan x="1550" y="580">{TEXT}</tspan></text>
+</svg>

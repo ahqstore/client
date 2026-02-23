@@ -1,0 +1,23 @@
+[package]
+name = "ahqstore_setup"
+description = "AHQ Store Setup"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+windows = { version = "0.62", features = ["Win32_System_Console"] }
+
+softbuffer = "0.4"
+resvg = "0.45"
+winit = { version = "0.30", default-features = false, features = ["rwh_06"] }
+ureq = "3"
+
+[build-dependencies]
+winres = "0.1"
+
+[profile.release]
+strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"

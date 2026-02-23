@@ -2,6 +2,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct AndroidBuildOutput {
+  pub sdk: u32,
+  pub release: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ShowCodeRequest {
   pub value: String,
 }
@@ -14,20 +21,28 @@ pub struct ZoomRequest {
 
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase", tag = "event", content = "data")]
-enum DownloadEvent<'a> {
+pub enum DownloadEvent {
   #[serde(rename_all = "camelCase")]
-  Started {
-    url: &'a str,
-    download_id: usize,
-    content_length: usize,
-  },
+  Started { length: u64 },
   #[serde(rename_all = "camelCase")]
-  Progress {
-    download_id: usize,
-    chunk_length: usize,
-  },
+  Progress { progress: f64 },
   #[serde(rename_all = "camelCase")]
-  Finished {
-    download_id: usize,
-  },
+  Finished {},
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase", tag = "event", content = "data")]
+pub enum AppInstallStatus {
+  Downloading(DownloadEvent),
+  AVScanning,
+  Installing,
+  AppInstallStat(InstallStat),
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase", tag = "event", content = "data")]
+pub enum InstallStat {
+  AVFailed,
+  Installed,
+  InstallFailed,
 }

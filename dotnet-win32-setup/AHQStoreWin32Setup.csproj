@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+
+    <!-- <RuntimeIdentifier>win-x64,win-arm64</RuntimeIdentifier> -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+
+    <RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
+
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+
+    <Description>AHQ Store Setup</Description>
+    <Company>AHQ Store</Company>
+    <Product>AHQ Store Windows Setup</Product>
+    <Copyright>Copyright © 2026</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\**\*.png" />
+    <Resource Include="Assets\**\*.jpg" />
+    <Resource Include="Assets\**\*.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MdXaml" Version="1.27.0" />
+    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="5.0.2" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <SignToolExe Condition="'$(SIGNTOOL_PATH)' != ''">$(SIGNTOOL_PATH)</SignToolExe>
+    <SignToolExe Condition="'$(SIGNTOOL_PATH)' == ''">signtool.exe</SignToolExe>
+  </PropertyGroup>
+
+  <Target Name="SignOutput" AfterTargets="Publish">
+    <Exec
+      Command="$(SignToolExe) sign /sha1 &quot;8B85C3AE8D2243C2B62D53D14479A99D413F52A7&quot; /fd SHA256 /t http://timestamp.digicert.com &quot;$(TargetPath)&quot;" />
+  </Target>
+
+</Project>

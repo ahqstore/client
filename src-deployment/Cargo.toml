@@ -1,0 +1,10 @@
+[package]
+name = "src-deployment"
+version = "0.1.0"
+edition = "2024"
+
+[target.'cfg(windows)'.dependencies]
+lixploy = { git = "https://github.com/ahqstore/lixploy", version = "0.0.3" }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+windortortent = { git = "https://github.com/ahqstore/windortortent", version = "0.0.1" }

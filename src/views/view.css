@@ -1,0 +1,18 @@
+@layer utilities {
+  .nav_item {
+    @apply hover:bg-accent/10 hover:dark:bg-neutral-content/10 gap-1;
+  }
+
+  .nav_item svg {
+    @apply size-6;
+  }
+
+  .act_nav_item {
+    @apply shadow-lg;
+    background: color-mix(
+      in srgb,
+      var(--color-neutral-content) 10%,
+      var(--win32-accent) 5%
+    ) !important;
+  }
+}

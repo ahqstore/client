@@ -9,6 +9,8 @@ mod structs;
 
 mod commands;
 use commands::*;
+// Another set of commands
+use crate::structs::platform::*;
 
 mod error;
 mod models;
@@ -36,18 +38,20 @@ pub fn init() -> TauriPlugin<tauri::Wry> {
       get_windows,
       #[cfg(desktop)]
       get_linux_distro,
-      
       #[cfg(windows)]
       is_windows_11,
-      // to_hash_uid,
+      download,
+      encrypt,
+      decrypt,
       open,
       set_progress,
       is_development,
       show_code,
       rem_code,
       hash_username,
+      set_scale,
       refresh_commit,
-
+      get_commit,
       get_all_search,
       get_home,
       get_app,
@@ -58,9 +62,12 @@ pub fn init() -> TauriPlugin<tauri::Wry> {
     ])
     .setup(|app, api| {
       let ahqstore = structs::init(app, api)?;
-      
+
       app.manage(ahqstore);
-      
+
+      app.ahqstore()
+        .init(app.clone());
+
       Ok(())
     })
     .build()

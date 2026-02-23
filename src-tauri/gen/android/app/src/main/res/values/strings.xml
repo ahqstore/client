@@ -1,4 +1,13 @@
 <resources>
-    <string name="app_name">AHQ Store NEO</string>
-    <string name="main_activity_title">AHQ Store NEO</string>
+    <string name="app_name">AHQ Store</string>
+    <string name="main_activity_title">AHQ Store</string>
+
+    <string name="appwidget_text">Updates</string>
+
+    <string name="configure">Configure</string>
+
+    <string name="app_widget_description">Checks if updates are available</string>
+    <string name="app_logo">Logo</string>
+    <string name="up_to_date">You are up to date!</string>
+    <string name="add_widget">Add widget</string>
 </resources>

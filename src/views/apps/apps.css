@@ -1,0 +1,85 @@
+@reference "../../App.css";
+
+.home_apps {
+  @apply flex flex-col w-full;
+}
+
+.home_apps > div:nth-child(1) {
+  @apply w-full flex mt-2;
+  @apply text-xl font-semibold;
+
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.home_apps_override > div:nth-child(1) {
+  @apply w-full flex text-center mt-2;
+  @apply text-xl font-semibold;
+
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.home_apps > div:nth-child(1) > .arrow {
+  @apply hidden;
+}
+
+.home_apps > div:nth-child(1) .all {
+  @apply ml-auto p-1 bg-accent/5 dark:bg-neutral-content/5 rounded-full cursor-pointer;
+}
+
+.home_apps > div:nth-child(3) {
+  @apply grid gap-4 mt-2;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)) !important;
+}
+
+.home_apps > div:nth-child(3) > div {
+  @apply break-inside-avoid rounded-xl p-4 cursor-pointer transition-all;
+
+  @apply bg-accent/3 sm:bg-accent/15 dark:bg-neutral-content/3 dark:sm:bg-neutral-content/15 hover:dark:bg-neutral-content/10;
+  @apply h-24 sm:h-32;
+}
+
+@media (min-width: 50rem) {
+  .home_apps > div:nth-child(1) {
+    @apply transition-all w-fit rounded-lg cursor-pointer flex items-center;
+    @apply hover:pl-3 hover:pr-3 pr-6 py-2;
+
+    @apply text-xl font-semibold;
+
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .home_apps > div:nth-child(1) > .arrow {
+    @apply block;
+  }
+
+  .home_apps > div:nth-child(1) .all {
+    @apply hidden;
+  }
+
+  .home_apps:not(.home_apps_override) > div:nth-child(1):hover {
+    color: color-mix(
+      in srgb,
+      var(--color-neutral-content) 5%,
+      var(--win32-accent) 75%
+    ) !important;
+    background: color-mix(
+      in srgb,
+      var(--color-neutral-content) 10%,
+      var(--win32-accent) 5%
+    ) !important;
+  }
+
+  .home_apps > div:nth-child(3) > div {
+    @apply break-inside-avoid rounded-xl p-4 shadow-md cursor-pointer transition-all;
+  }
+
+  .home_apps_override > div:nth-child(1),
+  .home_apps_override > div:nth-child(1):hover {
+    @apply transition-all w-fit rounded-lg cursor-default flex gap-3 items-center;
+    @apply hover:pl-0! hover:pr-0! pr-6 py-2;
+
+    @apply text-xl font-semibold;
+
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
+}

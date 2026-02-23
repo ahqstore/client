@@ -6,29 +6,32 @@
 
 use std::collections::HashMap;
 
-#[cfg(feature = "js")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use serde::{Deserialize, Serialize};
 
 use crate::AHQStoreApplication;
 
-use super::{ahqstore::AHQSTORE_COMMIT_URL, winget::WINGET_COMMIT_URL, RepoHomeData, CLIENT};
+use super::{
+  ahqstore::AHQSTORE_COMMIT_URL, fdroid::FDROID_COMMIT_URL, linux::LINUX_COMMIT_URL,
+  winget::WINGET_COMMIT_URL, Home, CLIENT,
+};
 
+#[cfg_attr(feature = "export", derive(specta::Type))]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "js", wasm_bindgen(getter_with_clone))]
+
 pub struct GHRepoCommit {
   pub sha: String,
 }
 
 pub enum OfficialManifestSource {
+  /// Official Community repository
   AHQStore,
 
-  #[doc = "Third Party Manifest Repo Adapted for use"]
+  /// Third Party Manifest Repo Adapted for use
   WinGet,
-  #[doc = "Third Party API Used"]
-  FlatHub,
-  #[doc = "Third Party API Used"]
+  /// Third Party Manifest Repo Adapted for use
+  Linux,
+  /// Third Party Manifest Repo Adapted for use
   FDroid,
 }
 
@@ -36,10 +39,13 @@ pub type Store = OfficialManifestSource;
 
 pub type GHRepoCommits = Vec<GHRepoCommit>;
 
+#[allow(unreachable_patterns)]
 pub async fn get_commit(store: OfficialManifestSource, token: Option<&String>) -> Option<String> {
   let mut builder = CLIENT.get(match store {
     OfficialManifestSource::AHQStore => AHQSTORE_COMMIT_URL,
     OfficialManifestSource::WinGet => WINGET_COMMIT_URL,
+    OfficialManifestSource::FDroid => FDROID_COMMIT_URL,
+    OfficialManifestSource::Linux => LINUX_COMMIT_URL,
     _ => {
       return None;
     }
@@ -67,33 +73,15 @@ pub async fn get_total_maps(total: &str, commit: &str) -> Option<usize> {
     .ok()
 }
 
-pub async fn get_home(home: &str, commit: &str) -> Option<Vec<(String, Vec<String>)>> {
-  let home: RepoHomeData = CLIENT
+pub async fn get_home(home: &str, commit: &str) -> Option<Home> {
+  CLIENT
     .get(home.replace("{COMMIT}", commit))
     .send()
     .await
     .ok()?
     .json()
     .await
-    .ok()?;
-
-  let mut resp_home = vec![];
-
-  for (title, data) in home {
-    let mut resp_data = vec![];
-
-    for item in data {
-      let id = item.get_id();
-
-      if let Some(id) = id {
-        resp_data.push(id);
-      }
-    }
-
-    resp_home.push((title, resp_data));
-  }
-
-  Some(resp_home)
+    .ok()
 }
 
 pub async fn get_search(search: &str, commit: &str, id: &str) -> Option<Vec<super::SearchEntry>> {
@@ -112,15 +100,13 @@ pub async fn get_search(search: &str, commit: &str, id: &str) -> Option<Vec<supe
 pub async fn get_full_map(total: &str, map: &str, commit: &str) -> Option<super::MapData> {
   let total = get_total_maps(total, commit).await?;
 
-  let mut result = HashMap::new();
+  let mut result = vec![];
 
   let mut i = 1;
   while i <= total {
-    let map_result = get_map(map, commit, &i.to_string()).await?;
+    let map = get_map(map, commit, &i.to_string()).await?;
 
-    for (k, v) in map_result {
-      result.insert(k, v);
-    }
+    result.extend(map);
 
     i += 1;
   }
@@ -140,7 +126,7 @@ pub async fn get_full_search(
   let mut i = 1;
   while i <= total {
     let mut search_result = get_search(search, commit, &i.to_string()).await?;
-    
+
     result.append(&mut search_result);
     i += 1;
   }

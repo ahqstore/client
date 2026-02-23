@@ -1,0 +1,783 @@
+import { EventType, ResponseStatus, EventName, type CommunicationInterface } from "./communication.js";
+import type { AHQStoreApplication, RefId } from "ahqstore-types";
+
+/**
+ * This declares the maximum IPC version that this api is compatible with
+ * 
+ * This means that all the functions upto this api version is implemented
+ */
+export const PLUGIN_IPC_INTERFACE_VERSION = 1 as const;
+
+/**
+ * An enum that defines capabilities that 
+ * your plugin possesses
+ */
+export enum Capability {
+  /**
+   * This allows your app to get events related to
+   * lifecycle of your plugin.
+   * 
+   * The events are :-
+   *  - **CommonStateUpdated:** Emitted when the common state gets updated
+   *  - **ThemeUpdate:** Emitted when the theme updates
+   */
+  RequestsEvents = 0,
+  /**
+   * This defines that this plugin also acts as an external
+   * app installation source.
+   * 
+   * You are requried to register `search` and `appGet`
+   * 
+   * ### WARNING ⚠️
+   * Please note that apps installed from external sources will never
+   * be updated by AHQ Store
+   */
+  AppInstallationSource = 1,
+  /**
+   * This means that the application is allowed to use state data that
+   * is set by the `pluginUI.html` or `settings.html`
+   * 
+   * Generally Worker Plugins aren't allowed to access this state. But this
+   * capability allows them to
+   */
+  UsesState = 2,
+  /**
+   * This allows the app to inject custom css
+   * like theme updates
+   * 
+   * This allows you to style the UI
+   * 
+   * This also allows you to get the current **Theme** preference
+   * 
+   * like, if its dark mode or light mode, if vibrant visuals (transparency) is enabled etc
+   */
+  UsesTheming = 3,
+  /**
+   * This allows your application to request Client (i.e. Application)
+   * frontend restart.
+   * 
+   * This is useful for cases like CSS Theming, or CSS Injection
+   * You can restart the client and then request `CSS Injection`
+   */
+  RequestClientRestart = 4,
+  /**
+   * This gives access to the fetch api (no any other fancy api)
+   * 
+   * You can `HTTP` fetch any url, provided its https://
+   */
+  HTTP = 5,
+  /**
+   * Allows HTTP Request to set timeouts longer than `10_000`ms
+   * 
+   * @requires API v1 else its a NOOP
+   */
+  InfiniteTimeout = 6,
+  /**
+   * Allows to update the Plugin State.
+   * 
+   * @requires API v1 else its a NOOP
+   */
+  UpdatesState = 7
+}
+
+/**
+ * Application ID
+ * 
+ * In AHQ Store these are just `string`s
+ */
+export type AppId = string;
+
+/**
+ * Represents a version
+ * 
+ * In AHQ Store these are just `string`s
+ */
+export type Version = string;
+
+/**
+ * Application Interface
+ * 
+ * This is just a reexport from `ahqstore-types`
+ * 
+ * Feel free to omit the `free` functions from here
+ */
+export type App = AHQStoreApplication;
+
+/**
+ * The function takes the user's query as string and returns a list of AppId
+ */
+export type SearchFn = (term: String) => Promise<AppId[]>;
+
+/**
+ * The function takes an appId to return the versions that are available
+ */
+export type GetApplicationVersionsFn = (appId: AppId) => Promise<Version[]>;
+
+/**
+ * The function takes an appId to return the `Application` manifest that AHQ Store Uses
+ */
+export type GetApplicationFn = (appId: AppId, version: string) => Promise<App>;
+
+/**
+ * The function takes the user's query as string and returns a list of AppId
+ * 
+ * This should return an Uint8Array as directed in the function declaration
+ */
+export type GetApplicationAssetFn = (appId: AppId, assetId: string) => Promise<Uint8Array>;
+
+/**
+ * This is an internal function
+ */
+export type InternalCallback = (data: CommunicationInterface) => void;
+
+export type OnMessageCallback = ((data: MessageEvent<CommunicationInterface>) => void)
+  | ((data: MessageEvent<CommunicationInterface>) => Promise<void>);
+
+export interface ThemeData {
+  dark: boolean;
+  vibrant: boolean;
+}
+
+export interface FetchOptions {
+  url: string;
+  method: "GET" | "HEAD" | "OPTIONS" | "TRACE" | "PUT" | "DELETE" | "POST" | "PATCH" | "CONNECT";
+  /**
+   * # WARNING 🚨
+   * - We recommend a body smaller than `20MB`
+   * - Our wrapper will exclipitly deny a body longer than `50MB`
+   * 
+   * Both of them are a recommendation can is not enforced from the ahq store side
+   * 
+   * ## Why?
+   * The usecase of plugins should be thought of. They are to provide search and
+   * manifests. Which means from the request side you'll need to send minimal data.
+   * 
+   * If the server sends too much data, we'll 100% get it back to you.
+   */
+  body?: ArrayBuffer;
+  cache?: "default" | "no-store" | "reload" | "no-cache" | "force-cache";
+  headers?: Record<string, string>;
+  redirect?: "follow" | "error" | "manual";
+  /**
+   * The time (in milliseconds) to wait before timing out the whole request
+   * 
+   * If omitted, defaults to `5000`ms
+   * If set to `Infinity`, waits for the whole request to respond no matter how long it takes
+   * 
+   * Must have `InfiniteTimeout` capability to set this to a number greater than `10_000`ms
+   * 
+   * @requires API v1 or else its NOOP and ignored
+   */
+  timeout?: number;
+}
+
+export interface HTTPOutputData {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  body: ArrayBuffer;
+}
+
+export class HTTPOutput implements HTTPOutputData {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  body: ArrayBuffer;
+
+  constructor(data: HTTPOutputData) {
+    this.ok = data.ok;
+    this.status = data.status;
+    this.statusText = data.statusText;
+    this.headers = data.headers;
+    this.body = data.body;
+  }
+
+  /**
+   * Converts the data into string
+   * @param encoding The encoding of the string, default `utf-8`
+   * @returns string output of the data
+   */
+  text(encoding: string = "utf-8") {
+    const decoder = new TextDecoder(encoding);
+
+    return decoder.decode(this.body)
+  }
+
+  /**
+   * Converts the data into json
+   * @param encoding The encoding of the string, default `utf-8`
+   * @returns Type of data
+   */
+  json<T>(encoding: string = "utf-8"): T {
+    return JSON.parse(this.text(encoding))
+  }
+
+  /**
+   * Converts the data to object URL
+   * @returns Object URL of the data
+   */
+  toObjectURL(): string {
+    return URL.createObjectURL(
+      new Blob([this.body])
+    );
+  }
+}
+
+export interface Metadata {
+  capabilities: Set<Capability>,
+  newSourceName?: string;
+}
+
+/**
+ * This is the global instance of an `AHQStore` Plugin
+ * 
+ * ```ts
+ * import { Plugin } from "@ahqstore/plugin-api"
+ * 
+ * (async() => {
+ *  const api = new Plugin(
+ *   {
+ *     capabilities: []
+ *   }
+ *  );
+ *  
+ *  // Must call after creation
+ *  // AHQ Store has a timeout after which
+ *  // it'll otherwise terminate your plugin
+ *  await api.initialize();
+ * })()
+ * ```
+ */
+export class Plugin {
+  static #instance: Plugin;
+  static #constructed: boolean = false;
+  static #registered = false;
+  static #counter = 0;
+
+  private emitters: {
+    [key: string]: ((data: any) => void)[]
+  } = {};
+  private fetchSizeLimitInBytes = 50 * 1024 * 1024;
+
+  private capabilities: Set<Capability> = new Set();
+  private newSourceName?: string;
+  private onMessage?: OnMessageCallback;
+
+  private responseHandlingQueue: Map<RefId, InternalCallback> = new Map();
+
+  private search?: SearchFn;
+  private getAppVer?: GetApplicationVersionsFn;
+  private getApp?: GetApplicationFn;
+  private getAppAsset?: GetApplicationAssetFn;
+  private interfaceApi: number = -1;
+
+  /**
+   * This abstracts away the complexities of the AHQStore Plugin api
+   * 
+   * This constructor also handles the IPC communication and gives you a quick way to community
+   * via async wrappers
+   * 
+   * Use {@link registerSearchFn}, {@link registerAppFetchFn}, {@link registerAppAssetFetchFn}, {@link registerAppVersionFetchFn} to register
+   * handlers for the capability
+   * 
+   * ## You must call {@link initialize} afterwards
+   * 
+   * @param meta Defines the metadata for your plugin
+   */
+  constructor(
+    meta: Metadata
+  ) {
+    if (Plugin.#constructed) {
+      throw new Error("Cannot reconstruct the Plugin constructor multiple times.");
+    }
+
+    meta.capabilities.forEach((cap) =>
+      this.capabilities.add(cap)
+    );
+
+    meta.newSourceName && (this.newSourceName = meta.newSourceName);
+
+    if (this.capabilities.has(Capability.AppInstallationSource) && !this.newSourceName) {
+      throw new Error("Please provide the `newSourceName` of your plugin or remove `Capability.AppInstallationSource`");
+    }
+
+    Plugin.#constructed = true;
+
+    Plugin.#instance = this;
+
+    // Take ownership of message channel
+    self.onmessage = (data: MessageEvent<CommunicationInterface>) => {
+      this.onMessage && this.onMessage(data);
+
+      const payload = data.data;
+
+      if (payload.eventType == EventType.Response) {
+        const ref = this.responseHandlingQueue.get(payload.refId);
+
+        typeof (ref) == "function" && (
+          ref(payload)
+        )
+
+        this.responseHandlingQueue.delete(payload.refId);
+      } else if (payload.eventType == EventType.Event) {
+        const ev: EmittedEvent | null = (() => {
+          switch (payload.event) {
+            case EventName.CommonStateUpdated:
+              return "commonStateUpdate";
+            case EventName.OnThemeUpdate:
+              return "themeUpdate";
+            default:
+              console.warn(`Unknown event with id \`${payload.event}\``);
+              return null;
+          }
+        })();
+
+        if (ev !== null) {
+          this.emit(ev, payload.data);
+        }
+      } else {
+        const promise = (() => {
+          switch (payload.event) {
+            case EventName.Search:
+              return this.nonNullPromise(this.search)(payload.data as string)
+            case EventName.AppVerFetch:
+              return this.nonNullPromise(this.getAppVer)(payload.data as string);
+            case EventName.AppFetch:
+              const dataf: [string, string] = payload.data as any;
+
+              return this.nonNullPromise(this.getApp)(dataf[0] as string, dataf[1] as string);
+            case EventName.AppAssetFetch:
+              const data: [string, string] = payload.data as any;
+
+              return this.nonNullPromise(this.getAppAsset)(data[0] as string, data[1] as string)
+            default:
+              break;
+          }
+        })();
+
+
+        promise && promise.then((output) => {
+          this.sendResponse({
+            data: output,
+            eventType: EventType.Response,
+            refId: payload.refId,
+            status: ResponseStatus.Ok
+          });
+        })
+          .catch((e) => {
+            console.error(e);
+            this.sendResponse({
+              data: null,
+              eventType: EventType.Response,
+              refId: payload.refId,
+              status: ResponseStatus.Error_Terminate
+            });
+          });
+      }
+    }
+  }
+
+  private sendRequest(data: CommunicationInterface, callback: InternalCallback, transfer: Transferable[] = []) {
+    Plugin.#counter += 1;
+
+    const refId = Plugin.#counter;
+
+    self.postMessage({
+      ...data,
+      refId
+    } as CommunicationInterface, {
+      transfer
+    });
+
+    this.responseHandlingQueue.set(refId, callback);
+  }
+
+  private sendAsyncRequest<T = unknown>(data: CommunicationInterface, transfer: Transferable[] = []): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.sendRequest(data, (response) => {
+        if (response.eventType == EventType.Response) {
+          if (response.status == ResponseStatus.Ok) {
+            resolve(response.data as unknown as T);
+          } else {
+            reject(`Error: ${response.status}. Outputs: ${response.data}`);
+          }
+        } else {
+          reject("Unknown response");
+        }
+      }, transfer);
+    });
+  }
+
+  private sendResponse(data: CommunicationInterface) {
+    self.postMessage({
+      ...data,
+      eventType: EventType.Response,
+    } as CommunicationInterface);
+  }
+
+  /**
+   * Initializes the AHQ Store Plugin
+   * 
+   * If you don't call it, the plugin manager will kill your process
+   * 
+   * @throws If it failed to initialize
+   */
+  async initialize() {
+    const apiVer = await this.sendAsyncRequest<number>({
+      eventType: EventType.Request,
+      event: EventName.RequestInitialization,
+      refId: 0,
+      data: {
+        capabilities: this.capabilities,
+        newSourceName: this.newSourceName
+      }
+    });
+
+    if (typeof (apiVer) != "number") {
+      throw new Error("Unknown api version returned");
+    }
+
+    this.interfaceApi = apiVer;
+
+    Plugin.#registered = true;
+  }
+
+  /**
+   * Gets the capabilities that your worker plugin is registered with
+   * 
+   * This requires you to get the plugin initialized
+   * 
+   * @returns A list of capabilities
+   */
+  getCapabilities(): Set<Capability> {
+    this.ensure([]);
+
+    return this.capabilities;
+  }
+
+  /**
+   * Gets the api version that AHQ Store Supports
+   * 
+   * This requires you to get the plugin initialized
+   * 
+   * @returns API Version as number
+   */
+  getHostApi(): number {
+    this.ensure([]);
+
+    return this.interfaceApi;
+  }
+
+  /**
+   * Gets the target api that the plugin is **intended** to work with.
+   * @returns API Version as number
+   */
+  getTargetApi(): number {
+    return PLUGIN_IPC_INTERFACE_VERSION;
+  }
+
+
+  /**
+   * Injects the provided css into the client gui application
+   * 
+   * ## NOTE
+   * This modifies the already injected css to the new css data
+   *
+   * Please note the above
+   * 
+   * @param css The css string to inject
+   */
+  async injectCustomCss(css: string) {
+    this.needsApi(0);
+    this.ensure([Capability.UsesTheming]);
+
+    await this.sendAsyncRequest({
+      eventType: EventType.Request,
+      event: EventName.RequestInjectCSS,
+      data: css,
+      refId: 0
+    });
+  }
+
+  /**
+   * Gets the state under the stateId specified
+   * @param stateId ID (file of the state)
+   * @returns The string data of the state
+   */
+  async getState(stateId: string): Promise<string> {
+    this.needsApi(0);
+    this.ensure([Capability.UsesState]);
+
+    return await this.sendAsyncRequest<string>({
+      eventType: EventType.Request,
+      refId: 0,
+      event: EventName.RequestState,
+      data: stateId
+    });
+  }
+
+  /**
+   * Sets the state under the stateId specified
+   * @param stateId ID (file of the state)
+   * @param stateData Data of the state to update it with
+   * @returns The string data of the state
+   */
+  async setState(stateId: string, stateData: string): Promise<string> {
+    this.needsApi(1);
+    this.ensure([Capability.UpdatesState]);
+
+    return await this.sendAsyncRequest<string>({
+      eventType: EventType.Request,
+      refId: 0,
+      event: EventName.RequestUpdateState,
+      data: {
+        stateId,
+        stateData
+      }
+    });
+  }
+
+  /**
+   * Gets the AHQ Store Theme Data
+   * 
+   * ## NOTE
+   * The returned data does not automatically
+   * update with theme changes
+   * 
+   * @returns The theme data {@link ThemeData}
+   */
+  async getThemeData(): Promise<ThemeData> {
+    this.needsApi(0);
+
+    this.ensure([Capability.UsesTheming]);
+
+    return await this.sendAsyncRequest({
+      eventType: EventType.Request,
+      event: EventName.RequestThemeData,
+      data: null,
+      refId: 0
+    });
+  }
+
+  /**
+  * Requests the user to restart
+  * 
+  * ## NOTE
+  * This does not guarantee restart
+  * 
+  * @param desc Explain why you would like to restart (optional, a template is already provided)
+  */
+  async requestRestart(desc: string = "A restart is required to apply custom theme data. Are you ready?") {
+    this.needsApi(0);
+
+    this.ensure([Capability.RequestClientRestart]);
+
+    await this.sendAsyncRequest({
+      eventType: EventType.Request,
+      event: EventName.RequestRestart,
+      data: desc,
+      refId: 0
+    });
+  }
+
+
+  /**
+   * Performs an HTTP request like the `fetch` api
+   * 
+   * The maximum size of the body is 50MB
+   * 
+   * ## Note
+   * - This function consumes the body and you don't get the array buffer back
+   * 
+   * @param data Please read the information at {@link FetchOptions}
+   * @returns the {@link HTTPOutput} data type
+   */
+  async fetch(data: FetchOptions) {
+    this.needsApi(0);
+    this.ensure([Capability.HTTP]);
+
+    if (this.interfaceApi >= 1) {
+      if (!data.timeout) {
+        data.timeout = 5000;
+      }
+
+      if (data.timeout > 10_000) {
+        this.ensure([Capability.InfiniteTimeout]);
+      }
+    }
+
+    const tooBigErr = "The provided body is too big. The hard limit is 50MB";
+
+    if (data.body) {
+      const d = data.body;
+
+      if (d instanceof ArrayBuffer) {
+        if (d.byteLength > this.fetchSizeLimitInBytes) {
+          throw new Error(tooBigErr);
+        }
+      } else {
+        throw new Error("Invalid data type provided. Expected ArrayBuffer");
+      }
+    }
+
+    return new HTTPOutput(
+      await this.sendAsyncRequest({
+        eventType: EventType.Request,
+        event: EventName.RequestFetch,
+        data,
+        refId: 0
+      }, data.body ? [data.body] : [])
+    );
+  }
+
+  /**
+   * 
+   * Add your own custom handler to the OnMessage
+   * @deprecated This is unsafe and hence marked deprecated
+   * @experimental This is unsafe and hence marked so
+   */
+  unsafeAddCustomOnMessage(fn: OnMessageCallback) {
+    this.onMessage = fn;
+  }
+
+  private nonNullPromise<T>(c?: T): T {
+    if (!c) {
+      return ((..._data: any[]) => {
+        return new Promise((_resolve, reject) => {
+          reject("Runtime Exiting... Null data encountered");
+        });
+      }) as unknown as T;
+    }
+
+    return c!!;
+  }
+
+  private needsApi(api: number) {
+    if (api > this.interfaceApi) {
+      throw new Error(`This function requires a newer version of AHQStoreJS. Current version is ${this.interfaceApi} and at least AHQStoreJS ${api} is required`);
+    }
+  }
+
+  private ensure(c: Capability[]) {
+    if (!Plugin.#registered) {
+      throw new Error(`Plugin not registered. Did you forget to run \`await register()\`?`);
+    }
+
+    const unsatisfied = c
+      .filter((cap) => !this.capabilities.has(cap))
+      .map((cap) => Capability[cap])
+      .filter((cap): cap is string => cap !== undefined);
+
+    let errors: string[] = [];
+
+    unsatisfied.forEach((cap) => {
+      errors.push(`\`${cap}\``)
+    });
+
+    const error = errors.join(", ");
+
+    if (unsatisfied.length != 0) {
+      throw new Error(`${error} is not provided`)
+    }
+  }
+
+  /**
+   * 
+   * Returns the single instance of the Plugin.
+   * If the instance does not exist, it returns nothing.
+   *
+   * @returns The single Plugin instance.
+   */
+  static getInstance(): Plugin | undefined {
+    if (Plugin.#instance) {
+      return Plugin.#instance;
+    }
+  }
+
+  /**
+   * Register the search function and overrides the current search function if present
+   * 
+   * You can only register it if you have {@link Capability.AppInstallationSource}
+   * @param fn The search fn itself
+   */
+  registerSearchFn(fn: SearchFn) {
+    this.needsApi(0);
+    this.ensure([Capability.AppInstallationSource]);
+
+    this.search = fn;
+  }
+
+  /**
+   * Register a function and overrides the current function meant to provide application metadata
+   * @param fn The fn itself
+   */
+  registerAppFetchFn(fn: GetApplicationFn) {
+    this.needsApi(0);
+    this.ensure([Capability.AppInstallationSource]);
+
+    this.getApp = fn;
+  }
+
+  /**
+   * Register a function and overrides the current function meant to provide application versions
+   * @param fn The fn itself
+   */
+  registerAppVersionFetchFn(fn: GetApplicationVersionsFn) {
+    this.needsApi(0);
+    this.ensure([Capability.AppInstallationSource]);
+
+    this.getAppVer = fn;
+  }
+
+  /**
+   * Register a function and overrides the current function meant to provide application metadata
+   * @param fn The fn itself
+   */
+  registerAppAssetFetchFn(fn: GetApplicationAssetFn) {
+    this.needsApi(0);
+    this.ensure([Capability.AppInstallationSource]);
+
+    this.getAppAsset = fn;
+  }
+
+  /**
+   * 
+   * @param capability 
+   * @returns True is the capability is present
+   */
+  hasCapability(capability: Capability): boolean {
+    return this.capabilities.has(capability)
+  }
+
+  on(event: "themeUpdate", handler: (data: ThemeData) => void): UnregisterFn;
+  on(event: "commonStateUpdate", handler: (data: undefined) => void): UnregisterFn;
+
+  on<T>(event: EmittedEvent, handler: (data: T) => void): UnregisterFn {
+    this.ensure([Capability.RequestsEvents]);
+
+    if (!this.emitters[event]) {
+      this.emitters[event] = [];
+    }
+
+    this.emitters[event].push(handler);
+
+    return () => {
+      this.emitters[event] = this.emitters[event]!!.filter((d) => d != handler);
+    }
+  }
+
+  private emit<T>(event: EmittedEvent, data: T) {
+    if (!this.emitters[event]) {
+      this.emitters[event] = [];
+    }
+
+    this.emitters[event].forEach((f) => f(data));
+  }
+}
+
+export type EmittedEvent = "themeUpdate" | "commonStateUpdate";
+export type UnregisterFn = () => void;
+
+export { EventType, ResponseStatus, type CommunicationInterface, EventName }

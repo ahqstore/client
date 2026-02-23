@@ -15,6 +15,7 @@ commands.allow = [
   "rem_code",
   "hash_username",
   "refresh_commit",
+  "get_commit",
   "get_all_search",
   "get_home",
   "get_app",
@@ -23,4 +24,7 @@ commands.allow = [
   "get_devs_apps",
   "get_arch",
   "set_scale",
+  "encrypt",
+  "decrypt",
+  "download"
 ]

@@ -1,0 +1,7 @@
+.category:hover {
+  @apply bg-white dark:bg-neutral-content/10 rounded-lg;
+}
+
+.category[data-open="true"]:hover {
+  @apply rounded-t-lg rounded-b-none;
+}
